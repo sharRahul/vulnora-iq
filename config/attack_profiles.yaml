@@ -1,0 +1,41 @@
+profiles:
+  baseline:
+    description: Safe baseline checks across core OWASP LLM 2025 risks.
+    modules:
+      - owasp_llm01_prompt_injection
+      - owasp_llm02_sensitive_information_disclosure
+      - owasp_llm05_improper_output_handling
+      - owasp_llm06_excessive_agency
+      - owasp_llm07_system_prompt_leakage
+      - owasp_llm09_misinformation
+
+  rag:
+    description: RAG-specific checks for retrieval and embedding weaknesses.
+    modules:
+      - owasp_llm08_vector_embedding_weaknesses
+      - rag_poisoning
+      - retrieval_manipulation
+      - corpus_validation
+
+  agent:
+    description: Agent and orchestration testing.
+    modules:
+      - owasp_llm06_excessive_agency
+      - agent_chain_attack
+      - tool_execution_monitor
+      - memory_tampering
+      - multi_agent_abuse
+
+  full:
+    description: All safe starter checks.
+    modules:
+      - owasp_llm01_prompt_injection
+      - owasp_llm02_sensitive_information_disclosure
+      - owasp_llm03_supply_chain
+      - owasp_llm04_data_and_model_poisoning
+      - owasp_llm05_improper_output_handling
+      - owasp_llm06_excessive_agency
+      - owasp_llm07_system_prompt_leakage
+      - owasp_llm08_vector_embedding_weaknesses
+      - owasp_llm09_misinformation
+      - owasp_llm10_unbounded_consumption
