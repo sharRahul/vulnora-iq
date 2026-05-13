@@ -1,0 +1,19 @@
+framework:
+  name: llm-vapt-framework
+  version: 0.1.0
+  safe_mode: true
+
+execution:
+  max_payloads_per_module: 5
+  request_timeout_seconds: 30
+
+risk_model:
+  thresholds:
+    low: 2.0
+    medium: 4.0
+    high: 7.0
+    critical: 9.0
+
+reporting:
+  default_output: reports/output/scan-report.md
+  include_evidence: true
