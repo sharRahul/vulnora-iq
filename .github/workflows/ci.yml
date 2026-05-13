@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[dev]
+
+      - name: Run tests
+        run: pytest -q
+
+      - name: Run demo scan
+        run: python scripts/run_scan.py --target demo --profile baseline --output reports/output/ci-demo-report.md
+
+      - name: Upload demo report
+        uses: actions/upload-artifact@v4
+        with:
+          name: llm-vapt-demo-report
+          path: reports/output/ci-demo-report.md
