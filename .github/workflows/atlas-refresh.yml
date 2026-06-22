@@ -28,7 +28,7 @@ jobs:
       - name: Refresh ATLAS mapping into temporary file
         run: |
           python scripts/refresh_mitre_atlas.py \
-            --source config/mitre_atlas_mapping.yaml \
+            --source config/mitre_atlas_source_fixture.yaml \
             --existing config/mitre_atlas_mapping.yaml \
             --output reports/output/mitre_atlas_mapping.refresh-check.yaml
 
