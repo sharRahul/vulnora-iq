@@ -8,6 +8,7 @@ include_paths:
   - docs/module-authoring.md
   - docs/web-ui.md
   - docs/MITRE_ATLAS_AI_MATRIX.md
+  - docs/assets/vulnoraiq-dashboard-example.svg
   - docs/owasp/
   - config/default.yaml
   - config/targets.yaml
@@ -29,6 +30,7 @@ include_paths:
   - config/release_package.yaml
   - core/evaluators.py
   - scripts/generate_mitre_atlas_matrix.py
+  - scripts/run_functional_test.py
   - benchmarks/benchmark_suite.yaml
   - benchmarks/fixtures/owasp_starter_fixture.yaml
   - examples/local_demo_targets/README.md
@@ -41,5 +43,6 @@ include_paths:
 rules:
   - Include only local demo outputs and non-sensitive configuration files.
   - Include third-party notices whenever generated ATLAS-derived documentation is included.
+  - Include the dashboard example image whenever README references it.
   - Exclude private operational material and real client evidence.
   - Review generated reports before publishing a release package.
