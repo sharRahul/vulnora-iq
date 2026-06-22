@@ -2,7 +2,7 @@
 
 This document separates current working capability from roadmap items so users can understand what is ready today.
 
-> **Current maturity:** VulnoraIQ version `0.0.1.7` is an early development build. It is suitable for local demos, framework development, UI workflow validation, and report-pipeline testing. It is **not ready for real-world VAPT testing or production security assessment use**.
+> **Current maturity:** VulnoraIQ version `0.0.1.8` is an early development build. It is suitable for local demos, framework development, UI workflow validation, functional acceptance testing, and report-pipeline testing. It is **not ready for real-world VAPT testing or production security assessment use**.
 
 > **Important limitation:** OWASP LLM 2025 coverage now has implementation specs, safe starter oracle coverage, deterministic local evaluator primitives, and local good/bad fixtures for all 10 categories. MITRE ATLAS AI technique coverage now has a source-driven planning matrix and unmapped backlog preservation, but the matrix is not the same as active production-validated detection coverage. MITRE ATLAS-derived documentation is tracked in `THIRD_PARTY_NOTICES.md`. Treat output as development evidence, not validated security assurance.
 
@@ -15,14 +15,16 @@ This document separates current working capability from roadmap items so users c
 | Phase 3 — Stronger evaluators | Working-alpha starter | `core/evaluators.py` adds deterministic local evaluators for text checks, schema checks, source access, provenance, approval, citations, action boundaries, resource limits, and manual review. |
 | Phase 4 — Contract-tested adapters | Working starter | `config/target_contracts.yaml` and `integrations/contract_validation.py` validate configured target adapter shapes before authorised testing. |
 | Phase 5 — Web UI hardening foundations | Working starter | `webui/hosted_server.py`, `webui/auth.py`, and `webui/persistent_jobs.py` add hosted entry point, role-aware auth hooks, and persistent JSON job storage. |
-| Phase 6 — Report quality and presentation | Working starter | Report generation includes structured evidence; `reports/html_export_package.py` builds a branded export bundle. |
-| Phase 7 — Release gates | Working starter | `scripts/validate_package_metadata.py` checks package/version/CLI/docs/fixtures/evaluators; CI runs metadata, contract, fixture, scan, trend, export, and package gates. |
+| Phase 6 — Report quality and presentation | Working starter | Report generation includes structured evidence; `reports/html_export_package.py` builds a branded export bundle; `docs/assets/vulnoraiq-dashboard-example.svg` provides a README dashboard example image. |
+| Phase 7 — Release gates | Working starter | `scripts/validate_package_metadata.py` checks package/version/CLI/docs/fixtures/evaluators/functional assets; CI runs metadata, contract, fixture, functional acceptance, scan, trend, export, and package gates. |
 
 ## Current working capability
 
 | Area | Status | Notes |
 | --- | --- | --- |
-| Python package scaffold | Working starter | VulnoraIQ version `0.0.1.7` installs as a Python package with CLI entry points for assessment, Web UI, dashboard generation, report diffing, benchmark runs, trend outputs, ATLAS refresh, ATLAS matrix generation, HTML export, package metadata validation, and release package building. |
+| Python package scaffold | Working starter | VulnoraIQ version `0.0.1.8` installs as a Python package with CLI entry points for assessment, Web UI, dashboard generation, report diffing, benchmark runs, functional acceptance testing, trend outputs, ATLAS refresh, ATLAS matrix generation, HTML export, package metadata validation, and release package building. |
+| Functional acceptance runner | Working starter | `scripts/run_functional_test.py` runs a safe demo/baseline assessment, writes Markdown/JSON/SARIF/dashboard outputs, validates required fields, verifies the non-production validation marker, checks OWASP oracle category coverage, writes a JSON summary, and refreshes the dashboard example SVG. |
+| Dashboard example image | Working starter | `docs/assets/vulnoraiq-dashboard-example.svg` is referenced in `README.md` as a visual preview of the dashboard style generated from the functional test path. |
 | Modern Web UI | Working starter | `webui/hosted_server.py`, `webui/auth.py`, `webui/persistent_jobs.py`, and `webui/static/` provide a browser console for launching demo scans, realtime progress via Server-Sent Events, completed dashboard views, scan history, role-aware auth hooks, persistent JSON job storage, and artifact downloads. |
 | Demo target | Working | The default `demo` target uses an in-memory echo client and requires no external API keys. |
 | Local demo targets | Working-alpha starter | `examples/local_demo_targets/` contains safe HTTP JSON, control-gap, and OWASP good/bad fixture targets for local demonstration and tests. |
@@ -47,7 +49,7 @@ This document separates current working capability from roadmap items so users c
 | Diff trend dashboards | Working starter | `dashboards/diff_trend_dashboard.py` builds Markdown/HTML dashboards from report-diff files. |
 | Dashboard generation | Working starter | Markdown and HTML dashboards are generated from the structured JSON report. |
 | Branded HTML export packaging | Working starter | `config/report_branding.yaml` and `reports/html_export_package.py` package HTML dashboards and supporting JSON/Markdown/SARIF artifacts into a branded export ZIP. |
-| Release packaging | Working starter | `config/release_package.yaml` and `scripts/build_release_package.py` package safe demo outputs, third-party notices, and non-sensitive examples into a ZIP artifact. |
+| Release packaging | Working starter | `config/release_package.yaml` and `scripts/build_release_package.py` package safe demo outputs, third-party notices, dashboard example image, functional runner, and non-sensitive examples into a ZIP artifact. |
 | Benchmarks | Working starter | `benchmarks/benchmark_suite.yaml`, `benchmarks/fixtures/owasp_starter_fixture.yaml`, `benchmarks/fixture_validation.py`, and `benchmarks/run_benchmarks.py` provide repeatable local regression checks and fixture coverage for all 10 OWASP starter categories. |
 | HTTP JSON target adapter | Working starter | The original HTTP JSON adapter remains available, with target-contract validation required before production assessment. |
 | MITRE ATLAS mapping | Working starter | `config/mitre_atlas_mapping.yaml` and `core/mitre_atlas.py` validate a local ATLAS mapping catalog and populate starter findings with AML technique IDs. |
@@ -56,8 +58,8 @@ This document separates current working capability from roadmap items so users c
 | RAG retrieval testing | Working starter | `config/rag_retrieval_scenarios.yaml` and `rag_testing/retrieval_harness.py` validate expected retrieval, access boundaries, approved sources, and source-trust scoring. |
 | Agent runtime governance | Working starter | `config/agent_runtime.yaml` and `agent_testing/runtime_manifest.py` validate tool allowlists, high-impact approvals, memory integrity settings, and orchestration plan requirements. |
 | Agent execution testing | Working starter | `config/agent_execution_scenarios.yaml` and `agent_testing/execution_harness.py` validate simulated tool calls, approval points, memory writes, integrity references, and rollback-plan coverage. |
-| Package metadata validation | Working starter | `scripts/validate_package_metadata.py` verifies package name, framework display name, version consistency, CLI entry points, README maturity warnings, OWASP docs, MITRE ATLAS matrix doc, third-party notices, evaluator suite, and OWASP fixture target before release. |
-| CI | Working starter | GitHub Actions installs the package, runs tests across supported Python versions, validates Web UI wiring, package metadata, target contracts, benchmark fixtures, runs smoke assessments, generates report diffs, trend outputs, benchmarks, HTML export packages, release packages, and uploads artifacts. |
+| Package metadata validation | Working starter | `scripts/validate_package_metadata.py` verifies package name, framework display name, version consistency, CLI entry points, README maturity warnings, OWASP docs, MITRE ATLAS matrix doc, third-party notices, functional test assets, evaluator suite, and OWASP fixture target before release. |
+| CI | Working starter | GitHub Actions installs the package, runs tests across supported Python versions, validates Web UI wiring, package metadata, target contracts, benchmark fixtures, runs functional acceptance testing, runs smoke assessments, generates report diffs, trend outputs, benchmarks, HTML export packages, release packages, and uploads artifacts. |
 
 ## Current safe usage
 
@@ -71,6 +73,12 @@ Use the CLI demo mode:
 
 ```bash
 vulnoraiq --target demo --profile baseline
+```
+
+Run functional acceptance testing:
+
+```bash
+vulnoraiq-functional-test --output-dir reports/output/functional-test --screenshot docs/assets/vulnoraiq-dashboard-example.svg
 ```
 
 Run benchmarks and release gates:
@@ -99,9 +107,9 @@ For any configured target outside demo mode:
 
 ## Implementation roadmap status
 
-All seven phases requested for the previous pass have been completed as **working-alpha starter** or **working starter** capabilities.
+All seven phases requested for the previous pass have been completed as **working-alpha starter** or **working starter** capabilities. The current pass adds a functional acceptance path and README dashboard example so testing can move toward production-readiness evaluation.
 
-The next phase should go through the OWASP docs and MITRE ATLAS matrix category by category and decide what each check needs to become production-validated, including payload depth, evidence quality, false-positive handling, and operator report language.
+The next phase should turn the functional runner into a wider production-readiness test suite by adding OWASP scenario manifests, adapter evidence-contract tests, report schema assertions, and dashboard regression checks.
 
 ## Documentation rule
 
