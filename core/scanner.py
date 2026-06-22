@@ -9,6 +9,7 @@ import yaml
 from core.policy_engine import PolicyEngine
 from core.test_runner import TestRunner
 from core.types import ScanContext, ScanResult, TargetClient
+from integrations.adapters import ChatCompletionsTargetClient, OllamaGenerateTargetClient, WebhookJsonTargetClient
 from integrations.base import DemoEchoClient, HttpJsonTargetClient
 
 
@@ -80,12 +81,9 @@ class Scanner:
             raise ValueError(f"Unknown target: {target_name}")
 
         target_type = target_config.get("type")
-        if target_type in {"custom_agent", "custom_http_agent", "http"}:
-            endpoint = target_config.get("endpoint")
-            if not endpoint or str(endpoint).endswith("example.invalid/agent"):
-                raise ValueError(
-                    f"Target '{target_name}' is a placeholder. Configure a real authorised endpoint before assessment."
-                )
+        endpoint = target_config.get("endpoint")
+        if target_type in {"custom_agent", "custom_http_agent", "http", "http_json"}:
+            self._reject_placeholder(target_name, endpoint)
             timeout = int(config.get("default", {}).get("execution", {}).get("request_timeout_seconds", 30))
             return HttpJsonTargetClient(
                 name=target_name,
@@ -93,8 +91,38 @@ class Scanner:
                 token_env_var=target_config.get("token_env_var"),
                 timeout_seconds=timeout,
             )
+        if target_type in {"chat_completions", "chat_completions_compatible"}:
+            self._reject_placeholder(target_name, endpoint)
+            return ChatCompletionsTargetClient(
+                name=target_name,
+                endpoint=str(endpoint),
+                model=str(target_config.get("model", "local-model")),
+                token_env_var=target_config.get("token_env_var"),
+                timeout_seconds=int(config.get("default", {}).get("execution", {}).get("request_timeout_seconds", 30)),
+            )
+        if target_type == "ollama_generate":
+            self._reject_placeholder(target_name, endpoint)
+            return OllamaGenerateTargetClient(
+                name=target_name,
+                endpoint=str(endpoint),
+                model=str(target_config.get("model", "llama3")),
+                timeout_seconds=int(config.get("default", {}).get("execution", {}).get("request_timeout_seconds", 30)),
+            )
+        if target_type == "webhook_json":
+            self._reject_placeholder(target_name, endpoint)
+            return WebhookJsonTargetClient(
+                name=target_name,
+                endpoint=str(endpoint),
+                token_env_var=target_config.get("token_env_var"),
+                timeout_seconds=int(config.get("default", {}).get("execution", {}).get("request_timeout_seconds", 30)),
+            )
 
         raise ValueError(f"Unsupported target type for '{target_name}': {target_type}")
+
+    @staticmethod
+    def _reject_placeholder(target_name: str, endpoint: Any) -> None:
+        if not endpoint or "example.invalid" in str(endpoint):
+            raise ValueError(f"Target '{target_name}' is a placeholder. Configure a real authorised endpoint before assessment.")
 
     def _load_config(self) -> dict[str, Any]:
         def load_yaml(name: str) -> dict[str, Any]:
