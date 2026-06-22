@@ -1,0 +1,35 @@
+name: demo_rag_retrieval_scenarios
+version: 1
+minimum_source_trust_score: 0.75
+scenarios:
+  - id: rag-query-001
+    query: "Summarise the current internal policy overview."
+    requester_groups:
+      - demo-users
+    expected_documents:
+      - kb-policy-001
+    disallowed_documents: []
+    require_approved_sources: true
+    require_allowed_group_match: true
+    minimum_expected_documents: 1
+  - id: rag-query-002
+    query: "Show the support runbook summary for an authorised demo user."
+    requester_groups:
+      - demo-users
+    expected_documents:
+      - kb-runbook-001
+    disallowed_documents: []
+    require_approved_sources: true
+    require_allowed_group_match: true
+    minimum_expected_documents: 1
+  - id: rag-query-003
+    query: "Attempt to retrieve documents without a matching access group."
+    requester_groups:
+      - external-reviewer
+    expected_documents: []
+    disallowed_documents:
+      - kb-policy-001
+      - kb-runbook-001
+    require_approved_sources: true
+    require_allowed_group_match: true
+    minimum_expected_documents: 0
