@@ -5,8 +5,12 @@ from pathlib import Path
 from typing import Any
 
 from agent_testing.runtime_manifest import AgentRuntimeValidator
+from core.exception_registry import PolicyExceptionRegistry
 from core.types import Finding, PolicyResult, ScanResult
 from rag_testing.corpus_manifest import CorpusManifestValidator
+
+
+SEVERITY_ORDER = {"info": 0, "low": 1, "medium": 2, "high": 3, "critical": 4}
 
 
 class PolicyEngine:
@@ -17,12 +21,18 @@ class PolicyEngine:
     audit evidence.
     """
 
+    def __init__(self, exception_registry: PolicyExceptionRegistry | None = None) -> None:
+        self.exception_registry = exception_registry or PolicyExceptionRegistry()
+
     def evaluate(self, result: ScanResult, config: dict[str, Any]) -> list[PolicyResult]:
         policies = config.get("policies", {}).get("policies", {})
         evaluations: list[PolicyResult] = []
 
         if policies.get("no_secret_disclosure", {}).get("enabled", False):
             evaluations.append(self._evaluate_sensitive_marker_policy(result.findings, policies["no_secret_disclosure"]))
+
+        if policies.get("severity_threshold", {}).get("enabled", False):
+            evaluations.append(self._evaluate_severity_threshold(result, policies["severity_threshold"]))
 
         if policies.get("tool_execution_requires_allowlist", {}).get("enabled", False):
             evaluations.append(self._evaluate_tool_allowlist_policy(result, config, policies["tool_execution_requires_allowlist"]))
@@ -33,7 +43,7 @@ class PolicyEngine:
         if policies.get("critical_ai_action_requires_human_approval", {}).get("enabled", False):
             evaluations.append(self._evaluate_approval_policy(result, config, policies["critical_ai_action_requires_human_approval"]))
 
-        return evaluations
+        return self.exception_registry.apply(result, evaluations)
 
     def _evaluate_sensitive_marker_policy(self, findings: list[Finding], policy: dict[str, Any]) -> PolicyResult:
         markers = [str(item).lower() for item in policy.get("patterns", [])]
@@ -61,6 +71,25 @@ class PolicyEngine:
             decision=policy.get("decision", "fail_on_high"),
             message="No configured sensitive data markers were found in the report evidence.",
             evidence={"markers_checked": markers},
+        )
+
+    def _evaluate_severity_threshold(self, result: ScanResult, policy: dict[str, Any]) -> PolicyResult:
+        maximum = str(policy.get("maximum_allowed_severity", "high")).lower()
+        observed = result.highest_severity.lower()
+        if SEVERITY_ORDER.get(observed, 0) > SEVERITY_ORDER.get(maximum, 3):
+            return PolicyResult(
+                policy_id="severity_threshold",
+                status="fail",
+                decision=policy.get("decision", "fail_on_critical"),
+                message=f"Highest severity '{observed}' exceeds maximum allowed severity '{maximum}'.",
+                evidence={"highest_severity": observed, "maximum_allowed_severity": maximum},
+            )
+        return PolicyResult(
+            policy_id="severity_threshold",
+            status="pass",
+            decision=policy.get("decision", "fail_on_critical"),
+            message=f"Highest severity '{observed}' is within maximum allowed severity '{maximum}'.",
+            evidence={"highest_severity": observed, "maximum_allowed_severity": maximum},
         )
 
     def _evaluate_tool_allowlist_policy(self, result: ScanResult, config: dict[str, Any], policy: dict[str, Any]) -> PolicyResult:
