@@ -10,11 +10,53 @@ import yaml
 
 DEFAULT_SOURCE_URL = "https://raw.githubusercontent.com/mitre-atlas/atlas-data/main/dist/v6/ATLAS-2026.05.yaml"
 DEFAULT_OUTPUT = Path("docs/MITRE_ATLAS_AI_MATRIX.md")
+UNMAPPED_LABEL = "Unmapped / map later"
+
+OWASP_HINTS = {
+    "prompt": "LLM01 Prompt Injection / LLM07 System Prompt Leakage",
+    "jailbreak": "LLM01 Prompt Injection",
+    "system prompt": "LLM07 System Prompt Leakage",
+    "data leakage": "LLM02 Sensitive Information Disclosure",
+    "credential": "LLM02 Sensitive Information Disclosure",
+    "sensitive": "LLM02 Sensitive Information Disclosure",
+    "supply chain": "LLM03 Supply Chain",
+    "poison": "LLM04 Data and Model Poisoning / LLM08 Vector and Embedding Weaknesses",
+    "rag": "LLM08 Vector and Embedding Weaknesses / LLM04 Data and Model Poisoning",
+    "retrieval": "LLM08 Vector and Embedding Weaknesses",
+    "tool": "LLM06 Excessive Agency",
+    "agent": "LLM06 Excessive Agency",
+    "output": "LLM05 Improper Output Handling / LLM09 Misinformation",
+    "citation": "LLM09 Misinformation / LLM05 Improper Output Handling",
+    "hallucination": "LLM09 Misinformation",
+    "cost": "LLM10 Unbounded Consumption",
+    "denial": "LLM10 Unbounded Consumption",
+    "spam": "LLM10 Unbounded Consumption",
+}
+
+COVERAGE_HINTS = {
+    "prompt": "Prompt boundary and protected-instruction checks",
+    "jailbreak": "Prompt boundary and refusal-quality checks",
+    "system prompt": "Protected instruction disclosure checks",
+    "data leakage": "Restricted information disclosure checks",
+    "credential": "Restricted information handling checks",
+    "supply chain": "AI artifact provenance and supply-chain checks",
+    "poison": "Corpus/model integrity and provenance checks",
+    "rag": "RAG corpus, source trust, and retrieval-boundary checks",
+    "retrieval": "Retrieval source trust and access-boundary checks",
+    "tool": "Agent tool allowlist and approval checks",
+    "agent": "Agent runtime, memory, tool, and approval governance checks",
+    "output": "Output validation and downstream handoff checks",
+    "citation": "Citation and source-to-claim traceability checks",
+    "hallucination": "Claim support and uncertainty checks",
+    "cost": "Budget, token, retry, and resource-bound checks",
+    "denial": "Availability and resource-bound checks",
+    "spam": "Event-volume and resource-bound checks",
+}
 
 
 def load_atlas(source: str) -> dict[str, Any]:
     if source.startswith("http://") or source.startswith("https://"):
-        with urlopen(source, timeout=60) as response:  # noqa: S310 - public MITRE ATLAS data fetch
+        with urlopen(source, timeout=60) as response:  # public MITRE ATLAS data fetch
             return yaml.safe_load(response.read().decode("utf-8")) or {}
     return yaml.safe_load(Path(source).read_text(encoding="utf-8")) or {}
 
@@ -42,18 +84,34 @@ def _technique_tactics(data: dict[str, Any]) -> dict[str, list[str]]:
     return mapped
 
 
+def _mapping_hint(name: str, table: dict[str, str]) -> str:
+    lowered = name.lower()
+    for keyword, mapping in table.items():
+        if keyword in lowered:
+            return mapping
+    return UNMAPPED_LABEL
+
+
+def _status_for(owasp_mapping: str, coverage_area: str) -> str:
+    if owasp_mapping == UNMAPPED_LABEL and coverage_area == UNMAPPED_LABEL:
+        return UNMAPPED_LABEL
+    return "Candidate mapping / needs validation"
+
+
 def render_matrix(data: dict[str, Any], source: str) -> str:
     collection = data.get("collection", {}) or {}
     tactics = data.get("tactics", {}) or {}
     techniques = data.get("techniques", {}) or {}
     technique_tactics = _technique_tactics(data)
+    unmapped_tactics: list[str] = []
+    unmapped_techniques: list[str] = []
 
     lines: list[str] = []
     lines.append("# MITRE ATLAS Matrix for AI Systems")
     lines.append("")
-    lines.append("This file is the VulnoraIQ implementation planning register for MITRE ATLAS tactics and techniques. It is generated from the official MITRE ATLAS data source so future VulnoraIQ configuration, payload, and documentation changes can be checked for drift.")
+    lines.append("This file is the VulnoraIQ implementation planning register for MITRE ATLAS tactics and techniques. It is generated from the official MITRE ATLAS data source so future VulnoraIQ configuration, test assets, and documentation changes can be checked for drift.")
     lines.append("")
-    lines.append("> **Current status:** source-of-truth planning register. Entries in this file are not automatically active VulnoraIQ checks. Use the implementation columns to plan payloads, fixtures, evaluators, reports, and dashboard coverage.")
+    lines.append("> **Current status:** source-of-truth planning register. Entries in this file are not automatically active VulnoraIQ checks. If a tactic or technique cannot be confidently mapped to OWASP or a VulnoraIQ coverage area, it is still listed and marked `Unmapped / map later`.")
     lines.append("")
     lines.append("## Source")
     lines.append("")
@@ -68,38 +126,57 @@ def render_matrix(data: dict[str, Any], source: str) -> str:
     lines.append("## How VulnoraIQ should use this matrix")
     lines.append("")
     lines.append("1. Keep this file generated from `mitre-atlas/atlas-data`.")
-    lines.append("2. Add VulnoraIQ module mappings in `config/mitre_atlas_mapping.yaml`.")
-    lines.append("3. Add safe payloads and fixtures for each selected technique.")
-    lines.append("4. Add deterministic evaluators and report fields.")
-    lines.append("5. Mark implementation status only after CI validates the payload/evaluator path.")
+    lines.append("2. Use the OWASP and VulnoraIQ coverage columns as planning aids, not final security claims.")
+    lines.append("3. Items marked `Unmapped / map later` must remain visible until manually mapped or deliberately excluded with rationale.")
+    lines.append("4. Add VulnoraIQ module mappings in `config/mitre_atlas_mapping.yaml` only after review.")
+    lines.append("5. Add safe test assets, fixtures, deterministic evaluators, evidence fields, and report/dashboard mapping before marking coverage active.")
     lines.append("")
     lines.append("## Tactics")
     lines.append("")
-    lines.append("| Tactic ID | Tactic | ATT&CK reference | VulnoraIQ implementation status | Payload/evaluator planning notes |")
-    lines.append("| --- | --- | --- | --- | --- |")
+    lines.append("| Tactic ID | Tactic | Related framework ref | OWASP mapping | VulnoraIQ coverage area | Implementation status | Planning notes |")
+    lines.append("| --- | --- | --- | --- | --- | --- | --- |")
     for tactic_id in sorted(tactics):
         tactic = tactics[tactic_id]
-        attack_ref = tactic.get("attack-reference") or {}
-        attack = attack_ref.get("id", "")
-        lines.append(f"| {tactic_id} | {_clean(tactic.get('name'))} | {_clean(attack)} | Backlog/planning | Add VulnoraIQ coverage once related techniques are selected for implementation. |")
+        name = _clean(tactic.get("name"))
+        related = (tactic.get("attack-reference") or {}).get("id", "")
+        owasp_mapping = _mapping_hint(name, OWASP_HINTS)
+        coverage_area = _mapping_hint(name, COVERAGE_HINTS)
+        status = _status_for(owasp_mapping, coverage_area)
+        if status == UNMAPPED_LABEL:
+            unmapped_tactics.append(f"{tactic_id} — {name}")
+        lines.append(f"| {tactic_id} | {name} | {_clean(related)} | {owasp_mapping} | {coverage_area} | {status} | Review this tactic and map related techniques to VulnoraIQ coverage work. |")
     lines.append("")
     lines.append("## Techniques and sub-techniques")
     lines.append("")
-    lines.append("| Technique ID | Technique | Tactic(s) | Maturity | Platform(s) | VulnoraIQ implementation status | Payload/evaluator planning notes |")
-    lines.append("| --- | --- | --- | --- | --- | --- | --- |")
+    lines.append("| Technique ID | Technique | Tactic(s) | Maturity | Platform(s) | OWASP mapping | VulnoraIQ coverage area | Implementation status | Planning notes |")
+    lines.append("| --- | --- | --- | --- | --- | --- | --- | --- | --- |")
     for technique_id in sorted(techniques):
         technique = techniques[technique_id]
+        name = _clean(technique.get("name"))
         tactics_text = "<br>".join(technique_tactics.get(technique_id, [])) or "Unmapped in ATLAS relationships"
         platforms = ", ".join(technique.get("platforms", []) or [])
-        status = "Backlog/planning"
-        notes = "Add safe payloads, local fixtures, evaluator logic, evidence fields, and report/dashboard mapping before marking active."
-        lines.append(
-            f"| {technique_id} | {_clean(technique.get('name'))} | {_clean(tactics_text)} | {_clean(technique.get('maturity'))} | {_clean(platforms)} | {status} | {notes} |"
-        )
+        owasp_mapping = _mapping_hint(name, OWASP_HINTS)
+        coverage_area = _mapping_hint(name, COVERAGE_HINTS)
+        status = _status_for(owasp_mapping, coverage_area)
+        if status == UNMAPPED_LABEL:
+            unmapped_techniques.append(f"{technique_id} — {name}")
+        lines.append(f"| {technique_id} | {name} | {_clean(tactics_text)} | {_clean(technique.get('maturity'))} | {_clean(platforms)} | {owasp_mapping} | {coverage_area} | {status} | Add safe test assets, fixtures, evaluator logic, evidence fields, and report/dashboard mapping before marking active. |")
+    lines.append("")
+    lines.append("## Unmapped / map later backlog")
+    lines.append("")
+    lines.append("These entries are intentionally preserved so future VulnoraIQ work can map them later rather than losing them during generation.")
+    lines.append("")
+    lines.append("### Tactics needing mapping review")
+    lines.append("")
+    lines.extend([f"- {item}" for item in unmapped_tactics] or ["- None"])
+    lines.append("")
+    lines.append("### Techniques needing mapping review")
+    lines.append("")
+    lines.extend([f"- {item}" for item in unmapped_techniques] or ["- None"])
     lines.append("")
     lines.append("## Drift-control rule")
     lines.append("")
-    lines.append("Future changes must not manually edit the generated tactic/technique tables. Update the official source version or generator, regenerate this file, then update VulnoraIQ payloads/configuration against the regenerated IDs.")
+    lines.append("Future changes must not manually remove generated tactic/technique rows. Update the official source version or generator, regenerate this file, then update VulnoraIQ configuration against the regenerated IDs. Unmapped entries must stay visible until deliberately mapped or excluded with documented rationale.")
     return "\n".join(lines) + "\n"
 
 
