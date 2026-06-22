@@ -20,7 +20,9 @@ The current implementation provides:
 - Safe YAML payload libraries mapped to module names
 - Scanner, scoring, result model, policy evaluation, and scoped policy exceptions
 - RAG corpus manifest validation
+- RAG retrieval scenario validation and source-trust scoring
 - Agent runtime governance validation
+- Agent execution scenario validation for tools, memory, approvals, and rollback planning
 - Markdown, JSON, and SARIF-style reports with evidence details
 - Markdown and HTML dashboard generation
 - JSON/Markdown report diffing between assessment runs
@@ -28,7 +30,7 @@ The current implementation provides:
 - Minimal HTTP JSON target adapter for approved targets
 - Python CI across supported versions with demo report artifacts
 
-The roadmap includes deeper RAG retrieval harnesses, simulated agent execution, richer target adapters, packaged example outputs, trend tracking, and benchmark datasets.
+The roadmap includes richer target adapters, packaged example outputs, trend tracking, benchmark datasets, signed approval evidence validation, and report-diff regression gates.
 
 ## OWASP LLM 2025 coverage
 
@@ -58,7 +60,7 @@ Module Layer: AssessmentModule protocol | ModuleRegistry | starter modules
         ↓
 Payload Layer: safe YAML payload libraries
         ↓
-Governance Layer: policy rules | exceptions | RAG manifest | agent runtime manifest | ATLAS mapping
+Governance Layer: policy rules | exceptions | RAG manifest | RAG retrieval scenarios | agent runtime manifest | agent execution scenarios | ATLAS mapping
         ↓
 Assessment Profiles: baseline | rag | agent | full
         ↓
@@ -70,12 +72,12 @@ Outputs: Markdown | JSON | SARIF-style | Markdown dashboard | HTML dashboard | r
 ```text
 llm-vapt-framework/
 ├── .github/workflows/       # Python CI
-├── config/                  # Targets, profiles, policies, manifests, mappings
+├── config/                  # Targets, profiles, policies, manifests, mappings, scenarios
 ├── core/                    # Scanner, runner, scoring, policy, exceptions, mapping, results model
 ├── integrations/            # Demo and HTTP JSON adapters
 ├── modules/                 # Module protocol, registry, and starter modules
-├── rag_testing/             # RAG corpus manifest validation
-├── agent_testing/           # Agent runtime manifest validation
+├── rag_testing/             # RAG corpus and retrieval validation
+├── agent_testing/           # Agent runtime and execution validation
 ├── payloads/                # Safe payload schema and libraries
 ├── reports/                 # Markdown, JSON, SARIF-style, and diff generation
 ├── dashboards/              # Markdown and HTML dashboard generation
@@ -172,7 +174,7 @@ Read [`docs/module-authoring.md`](docs/module-authoring.md) before adding module
 
 ## Configuration
 
-- `config/default.yaml`: engine defaults, payload libraries, report outputs, approval gates, RAG corpus metadata, agent runtime metadata, and ATLAS mapping path
+- `config/default.yaml`: engine defaults, payload libraries, report outputs, approval gates, RAG corpus metadata, RAG retrieval scenarios, agent runtime metadata, agent execution scenarios, and ATLAS mapping path
 - `config/targets.yaml`: target definitions
 - `config/attack_profiles.yaml`: selective module execution
 - `config/policies.yaml`: governance thresholds and blocking conditions
@@ -180,7 +182,9 @@ Read [`docs/module-authoring.md`](docs/module-authoring.md) before adding module
 - `config/owasp_llm_2025_mapping.yaml`: audit-friendly OWASP mapping
 - `config/mitre_atlas_mapping.yaml`: MITRE ATLAS mapping catalog
 - `config/rag_corpus_manifest.yaml`: RAG corpus metadata manifest
+- `config/rag_retrieval_scenarios.yaml`: RAG retrieval scenario manifest
 - `config/agent_runtime.yaml`: agent tool, memory, and orchestration governance manifest
+- `config/agent_execution_scenarios.yaml`: agent execution scenario manifest
 - `payloads/schema.yaml`: payload library schema and safety rules
 
 ## Design principles
