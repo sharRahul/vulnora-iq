@@ -21,6 +21,7 @@ EXPECTED_OWASP_DOCS = [
     "LLM10_UNBOUNDED_CONSUMPTION.md",
 ]
 EXPECTED_MITRE_ATLAS_DOC = Path("docs/MITRE_ATLAS_AI_MATRIX.md")
+EXPECTED_THIRD_PARTY_NOTICES = Path("THIRD_PARTY_NOTICES.md")
 
 
 @dataclass(slots=True)
@@ -73,6 +74,17 @@ class PackageMetadataValidator:
                 errors.append(f"Missing OWASP implementation doc: {expected_doc}")
         if not EXPECTED_MITRE_ATLAS_DOC.exists():
             errors.append(f"Missing MITRE ATLAS AI matrix doc: {EXPECTED_MITRE_ATLAS_DOC}")
+        if not EXPECTED_THIRD_PARTY_NOTICES.exists():
+            errors.append(f"Missing third-party notices file: {EXPECTED_THIRD_PARTY_NOTICES}")
+        else:
+            notice = EXPECTED_THIRD_PARTY_NOTICES.read_text(encoding="utf-8")
+            for required_text in ("MITRE ATLAS", "Apache License, Version 2.0", "Copyright 2021-2026 MITRE"):
+                if required_text not in notice:
+                    errors.append(f"Third-party notices missing required attribution text: {required_text}")
+        if EXPECTED_MITRE_ATLAS_DOC.exists():
+            matrix = EXPECTED_MITRE_ATLAS_DOC.read_text(encoding="utf-8")
+            if "THIRD_PARTY_NOTICES.md" not in matrix:
+                errors.append("MITRE ATLAS matrix must link to THIRD_PARTY_NOTICES.md")
         if not Path("scripts/generate_mitre_atlas_matrix.py").exists():
             errors.append("Missing MITRE ATLAS matrix generator")
         if not Path("examples/local_demo_targets/owasp_fixture_targets.py").exists():
