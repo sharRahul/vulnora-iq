@@ -63,8 +63,13 @@ jobs:
             --json-output reports/output/baseline-vs-rag-diff.json \
             --markdown-output reports/output/baseline-vs-rag-diff.md
 
-      - name: Upload demo reports
+      - name: Build release package smoke test
+        run: python scripts/build_release_package.py --manifest config/release_package.yaml
+
+      - name: Upload demo reports and release package
         uses: actions/upload-artifact@v4
         with:
           name: llm-vapt-demo-reports-${{ matrix.python-version }}
-          path: reports/output/
+          path: |
+            reports/output/
+            dist/llm-vapt-example-package.zip
