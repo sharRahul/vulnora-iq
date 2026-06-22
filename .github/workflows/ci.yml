@@ -9,6 +9,10 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -16,7 +20,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: ${{ matrix.python-version }}
 
       - name: Install
         run: |
@@ -26,11 +30,40 @@ jobs:
       - name: Run tests
         run: pytest -q
 
-      - name: Run demo scan
-        run: python scripts/run_scan.py --target demo --profile baseline --output reports/output/ci-demo-report.md
+      - name: Validate package metadata
+        run: python scripts/validate_package_metadata.py
 
-      - name: Upload demo report
+      - name: Run production-testing readiness gate
+        run: python scripts/validate_production_testing_readiness.py --output-dir reports/output/production-readiness
+
+      - name: Run demo scan
+        run: |
+          python scripts/run_scan.py \
+            --target demo \
+            --profile baseline \
+            --output reports/output/ci-demo-report.md \
+            --json-output reports/output/ci-demo-report.json \
+            --sarif-output reports/output/ci-demo-report.sarif \
+            --dashboard-output reports/output/ci-demo-dashboard.md \
+            --html-dashboard-output reports/output/ci-demo-dashboard.html
+
+      - name: Run functional acceptance readiness path
+        if: matrix.python-version == '3.12'
+        run: |
+          python scripts/validate_production_testing_readiness.py \
+            --run-functional \
+            --output-dir reports/output/production-readiness \
+            --screenshot docs/assets/vulnoraiq-dashboard-example.svg
+
+      - name: Upload readiness artifacts
+        if: matrix.python-version == '3.12'
         uses: actions/upload-artifact@v4
         with:
-          name: llm-vapt-demo-report
-          path: reports/output/ci-demo-report.md
+          name: vulnoraiq-production-testing-readiness
+          path: |
+            reports/output/production-readiness/**
+            reports/output/ci-demo-report.md
+            reports/output/ci-demo-report.json
+            reports/output/ci-demo-report.sarif
+            reports/output/ci-demo-dashboard.md
+            reports/output/ci-demo-dashboard.html
