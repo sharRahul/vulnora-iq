@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vulnoraiq"
-version = "0.0.1.5"
+version = "0.0.1.6"
 description = "VulnoraIQ: early-stage AI-native VAPT and security assessment platform for LLM applications, RAG systems, agents, and orchestration layers."
 readme = "README.md"
 requires-python = ">=3.10"
