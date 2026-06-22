@@ -1,6 +1,6 @@
 framework:
   name: llm-vapt-framework
-  version: 0.11.0
+  version: 1.0.0
   safe_mode: true
 
 execution:
@@ -27,11 +27,16 @@ reporting:
   html_dashboard_output: reports/output/dashboard.html
   diff_json_output: reports/output/report-diff.json
   diff_markdown_output: reports/output/report-diff.md
+  policy_trend_json_output: reports/output/policy-trend.json
+  policy_trend_markdown_output: reports/output/policy-trend.md
+  diff_trend_markdown_output: reports/output/diff-trend-dashboard.md
+  diff_trend_html_output: reports/output/diff-trend-dashboard.html
   include_evidence: true
 
 approval_gates:
   high_impact_actions_require_approval: true
   approval_record_required: true
+  approval_evidence_path: config/approval_evidence.yaml
 
 rag_corpus:
   manifest_path: config/rag_corpus_manifest.yaml
@@ -45,6 +50,11 @@ agent_runtime:
 
 mitre_atlas:
   mapping_path: config/mitre_atlas_mapping.yaml
+  refresh_config_path: config/atlas_refresh.yaml
+
+benchmarks:
+  manifest_path: benchmarks/benchmark_suite.yaml
+  output_dir: reports/output/benchmarks
 
 release_package:
   manifest_path: config/release_package.yaml
