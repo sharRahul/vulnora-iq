@@ -2,7 +2,7 @@
 
 This document separates current working capability from roadmap items so users can understand what is ready today.
 
-> **Current maturity:** VulnoraIQ version `0.0.1.5` is an early development build. It is suitable for local demos, framework development, UI workflow validation, and report-pipeline testing. It is **not ready for real-world VAPT testing or production security assessment use**.
+> **Current maturity:** VulnoraIQ version `0.0.1.6` is an early development build. It is suitable for local demos, framework development, UI workflow validation, and report-pipeline testing. It is **not ready for real-world VAPT testing or production security assessment use**.
 
 > **Important limitation:** OWASP LLM 2025 coverage now has implementation specs, safe starter oracle coverage, deterministic local evaluator primitives, and local good/bad fixtures for all 10 categories. MITRE ATLAS AI technique coverage now has a source-driven planning matrix and unmapped backlog preservation, but the matrix is not the same as active production-validated detection coverage. Treat output as development evidence, not validated security assurance.
 
@@ -22,7 +22,7 @@ This document separates current working capability from roadmap items so users c
 
 | Area | Status | Notes |
 | --- | --- | --- |
-| Python package scaffold | Working starter | VulnoraIQ version `0.0.1.5` installs as a Python package with CLI entry points for assessment, Web UI, dashboard generation, report diffing, benchmark runs, trend outputs, ATLAS refresh, ATLAS matrix generation, HTML export, package metadata validation, and release package building. |
+| Python package scaffold | Working starter | VulnoraIQ version `0.0.1.6` installs as a Python package with CLI entry points for assessment, Web UI, dashboard generation, report diffing, benchmark runs, trend outputs, ATLAS refresh, ATLAS matrix generation, HTML export, package metadata validation, and release package building. |
 | Modern Web UI | Working starter | `webui/hosted_server.py`, `webui/auth.py`, `webui/persistent_jobs.py`, and `webui/static/` provide a browser console for launching demo scans, realtime progress via Server-Sent Events, completed dashboard views, scan history, role-aware auth hooks, persistent JSON job storage, and artifact downloads. |
 | Demo target | Working | The default `demo` target uses an in-memory echo client and requires no external API keys. |
 | Local demo targets | Working-alpha starter | `examples/local_demo_targets/` contains safe HTTP JSON, control-gap, and OWASP good/bad fixture targets for local demonstration and tests. |
