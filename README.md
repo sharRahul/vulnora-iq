@@ -1,12 +1,18 @@
 # VulnoraIQ
 
-**VulnoraIQ** is an early-stage AI security assessment and VAPT platform for **LLM applications, RAG pipelines, AI agents, and orchestration layers**.
+**VulnoraIQ** is an early-stage AI security assessment platform for **LLM applications, RAG pipelines, AI agents, and orchestration layers**.
 
-> **Current maturity:** version `0.0.1.7` is an early development build. It is useful for local demos, UI workflow validation, report-pipeline development, and safe framework testing. It is **not ready for real-world VAPT testing or production assessment use** yet.
+> **Current maturity:** version `0.0.1.8` is an early development build. It is useful for local demos, UI workflow validation, report-pipeline development, and safe framework testing. It is **not ready for real-world VAPT testing or production assessment use** yet.
 
 > **Important limitation:** OWASP LLM 2025 coverage now has safe starter oracle coverage, implementation specs, evaluator primitives, and local good/bad fixtures for all 10 categories. MITRE ATLAS AI technique coverage has a source-driven documentation matrix, but not every listed technique is implemented as an active check yet. Unmapped tactics and techniques must still be listed as `Unmapped / map later`. Treat all scan output as framework-development evidence, not validated security assurance.
 
 > **Responsible use only:** run this platform only against systems you own or are explicitly authorised to assess. The default demo target is safe and local. Configured non-demo targets require an explicit authorisation flag.
+
+## Dashboard example
+
+The image below is generated from the safe local functional test path and shows the intended dashboard style for demo/report workflow testing.
+
+![VulnoraIQ dashboard example](docs/assets/vulnoraiq-dashboard-example.svg)
 
 ## Why this exists
 
@@ -15,6 +21,7 @@ AI application security needs more than prompt-level checks. VulnoraIQ provides 
 The current implementation provides:
 
 - Modern hosted Web UI with realtime progress, role-aware auth hooks, persistent JSON job storage, executive dashboards, scan history, and artifact download
+- Functional acceptance runner that generates demo reports, validates required output fields, and refreshes the README dashboard example image
 - OWASP LLM 2025 implementation specs in `docs/owasp/` for all 10 categories
 - MITRE ATLAS Matrix for AI planning register in `docs/MITRE_ATLAS_AI_MATRIX.md`
 - Source-driven ATLAS matrix generator with explicit `Unmapped / map later` backlog preservation
@@ -35,9 +42,9 @@ The current implementation provides:
 - Markdown, JSON, SARIF-style, Markdown dashboard, HTML dashboard, trend, diff, and branded HTML export outputs
 - Benchmark regression suite and OWASP starter fixture corpus
 - Safe release-package builder for demo outputs and non-sensitive examples
-- Package metadata release gate that checks OWASP docs, MITRE ATLAS matrix docs, third-party notices, evaluators, fixtures, version alignment, and CLI entries
+- Package metadata release gate that checks OWASP docs, MITRE ATLAS matrix docs, third-party notices, functional test assets, evaluators, fixtures, version alignment, and CLI entries
 - Explicit non-demo authorisation gate
-- Python CI across supported versions with tests, metadata gates, target contract validation, benchmark fixture validation, scan smoke tests, trends, exports, and release artifacts
+- Python CI across supported versions with tests, metadata gates, target contract validation, benchmark fixture validation, functional acceptance testing, scan smoke tests, trends, exports, and release artifacts
 
 The next phase should go through `docs/owasp/` and `docs/MITRE_ATLAS_AI_MATRIX.md` category by category and decide the deeper check logic, evaluator thresholds, fixture realism, and report language needed before any real-world VAPT readiness claim.
 
@@ -101,6 +108,7 @@ vulnoraiq/
 ├── config/                  # Targets, profiles, policies, manifests, mappings, scenarios, auth, branding
 ├── core/                    # Scanner, runner, scoring, policy, exceptions, approvals, mapping, evidence, evaluators, results model
 ├── docs/MITRE_ATLAS_AI_MATRIX.md # MITRE ATLAS AI planning matrix
+├── docs/assets/             # README dashboard example image
 ├── docs/owasp/              # OWASP LLM 2025 implementation specs
 ├── examples/                # Safe local demo targets and OWASP fixtures
 ├── integrations/            # Demo, HTTP JSON, chat, Ollama-style, webhook adapters, and contract validation
@@ -113,7 +121,7 @@ vulnoraiq/
 ├── webui/                   # Hosted Web UI server, auth, persistent jobs, and static frontend
 ├── tests/                   # Unit tests
 ├── THIRD_PARTY_NOTICES.md   # Third-party attribution and license notices
-└── scripts/                 # CLI entry points, package validation, release package builder, ATLAS refresh
+└── scripts/                 # CLI entry points, package validation, release package builder, ATLAS refresh, functional test runner
 ```
 
 ## Quick start
@@ -138,6 +146,18 @@ Open:
 ```text
 http://127.0.0.1:8787
 ```
+
+## Functional acceptance test
+
+Run the safe local functional test and refresh the dashboard example asset:
+
+```bash
+vulnoraiq-functional-test \
+  --output-dir reports/output/functional-test \
+  --screenshot docs/assets/vulnoraiq-dashboard-example.svg
+```
+
+This runs the demo/baseline workflow, writes Markdown/JSON/SARIF/dashboard outputs, validates required fields and safety metadata, writes a functional test summary, and refreshes the README dashboard SVG.
 
 ## Run tests
 
@@ -200,6 +220,8 @@ The package path defaults to `dist/vulnoraiq-example-package.zip`.
 
 - `docs/MITRE_ATLAS_AI_MATRIX.md`: MITRE ATLAS AI planning matrix and technique implementation register
 - `scripts/generate_mitre_atlas_matrix.py`: source-driven matrix generator with unmapped backlog preservation
+- `scripts/run_functional_test.py`: functional acceptance runner and dashboard example generator
+- `docs/assets/vulnoraiq-dashboard-example.svg`: README dashboard example image
 - `THIRD_PARTY_NOTICES.md`: third-party attribution and license notices, including MITRE ATLAS
 - `docs/owasp/`: OWASP LLM 2025 implementation specs
 - `config/owasp_oracles.yaml`: safe OWASP starter oracle definitions
