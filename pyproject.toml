@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vulnoraiq"
-version = "0.0.1.7"
-description = "VulnoraIQ: early-stage AI-native VAPT and security assessment platform for LLM applications, RAG systems, agents, and orchestration layers."
+version = "0.0.1.8"
+description = "VulnoraIQ early-stage AI security assessment framework for LLM applications, RAG systems, agents, and orchestration layers."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
@@ -26,6 +26,7 @@ vulnoraiq-dashboard = "dashboards.generate_dashboard:main"
 vulnoraiq-diff = "reports.report_diff:main"
 vulnoraiq-package = "scripts.build_release_package:main"
 vulnoraiq-benchmark = "benchmarks.run_benchmarks:main"
+vulnoraiq-functional-test = "scripts.run_functional_test:main"
 vulnoraiq-policy-trend = "reports.policy_trends:main"
 vulnoraiq-diff-trend = "dashboards.diff_trend_dashboard:main"
 vulnoraiq-refresh-atlas = "scripts.refresh_mitre_atlas:main"
