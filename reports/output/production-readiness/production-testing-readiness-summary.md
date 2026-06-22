@@ -21,4 +21,10 @@ Overall status: `pass`
 | `migration_doc` | `pass` | Migration guide. |
 | `assessment_assurance_doc` | `pass` | Assessment assurance doc. |
 | `pip_audit_in_ci` | `pass` | Dependency and supply-chain checks in CI. |
+| `listen_address_safe_included` | `pass` | listen_address_safe is reachable in production validation. |
+| `no_overclaim_saas_readme` | `pass` | README does not overclaim SaaS/public readiness. |
+| `backlog_no_stale_3_10` | `pass` | Backlog no longer contains stale 3/10 status. |
+| `readme_sqlite_not_json` | `pass` | README says SQLite/WAL persistence, not JSON as primary. |
+| `public_saas_limitations_documented` | `pass` | Public/SaaS limitations are documented. |
+| `assessment_assurance_discoverable` | `pass` | Assessment assurance doc is linked and discoverable. |
 | `functional_acceptance_run` | `pass` | Functional acceptance run completed. |

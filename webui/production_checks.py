@@ -213,6 +213,7 @@ _ALL_CHECKS: list[tuple[str, Any, bool]] = [
     ("csrf_ttl_sane", check_csrf_ttl_sane, False),
     ("audit_logging_configured", check_audit_logging_configured, False),
     ("no_dev_config_active", check_no_dev_config_active, False),
+    ("listen_address_safe", check_listen_address_safe, False),
 ]
 
 

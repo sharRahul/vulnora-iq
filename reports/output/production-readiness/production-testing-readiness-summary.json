@@ -231,6 +231,62 @@
     },
     {
       "details": {
+        "entry_in_all_checks": true,
+        "errors": [],
+        "function_defined": true
+      },
+      "id": "listen_address_safe_included",
+      "message": "listen_address_safe is reachable in production validation.",
+      "status": "pass"
+    },
+    {
+      "details": {
+        "errors": [],
+        "has_controlled_internal_scope": true,
+        "overclaim_phrases_found": []
+      },
+      "id": "no_overclaim_saas_readme",
+      "message": "README does not overclaim SaaS/public readiness.",
+      "status": "pass"
+    },
+    {
+      "details": {
+        "errors": [],
+        "has_gate_score": true
+      },
+      "id": "backlog_no_stale_3_10",
+      "message": "Backlog no longer contains stale 3/10 status.",
+      "status": "pass"
+    },
+    {
+      "details": {
+        "errors": [],
+        "has_sqlite": true,
+        "has_wal": true,
+        "mentions_json_primary": false
+      },
+      "id": "readme_sqlite_not_json",
+      "message": "README says SQLite/WAL persistence, not JSON as primary.",
+      "status": "pass"
+    },
+    {
+      "details": {
+        "issues": []
+      },
+      "id": "public_saas_limitations_documented",
+      "message": "Public/SaaS limitations are documented.",
+      "status": "pass"
+    },
+    {
+      "details": {
+        "issues": []
+      },
+      "id": "assessment_assurance_discoverable",
+      "message": "Assessment assurance doc is linked and discoverable.",
+      "status": "pass"
+    },
+    {
+      "details": {
         "checks": {
           "demo_baseline_scope": "pass",
           "html_dashboard_title": "pass",

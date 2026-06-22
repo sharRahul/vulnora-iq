@@ -2,7 +2,7 @@
 
 **Assessment date:** 2026-06-22
 **Scope:** VulnoraIQ web UI (`webui/hosted_server.py`) and supporting stack
-**Rating scale:** 0–10 (10 = fully production-hardened)
+**Rating scale:** 0–10 (10 = fully hardened for controlled internal deployment)
 
 ---
 
@@ -10,7 +10,7 @@
 
 | Dimension | Score | Evidence | Remaining Gap | Owner/Action | Blocking |
 | --- | --- | --- | --- | --- | --- |
-| Controlled internal | 9/10 | `webui/auth.py` — env-driven token auth with `hmac.compare_digest` constant-time comparison; role-based permissions (viewer/analyst/admin); production-mode validation rejects short tokens, disabled auth, file-based demo users, and internal dev tokens (`webui/auth.py:87-106`); `webui/production_checks.py:30-71` — runtime checks for auth enabled, admin token set, token length, no demo tokens, internal admin disabled; `tests/test_webui_auth_and_persistence.py:56-95` — production mode validation tests; `tests/test_production_hardening_status.py` — hardening backlog attestation | Proxy-header auth mode (`trusted_proxy`) has no automated test coverage; no token revocation mechanism | Engineering — add trusted_proxy mode integration test and document token rotation | No |
+| Controlled internal | 9/10 | `webui/auth.py` — env-driven token auth with `hmac.compare_digest` constant-time comparison; role-based permissions (viewer/analyst/admin); production-mode validation rejects short tokens, disabled auth, file-based demo users, and internal dev tokens (`webui/auth.py:87-106`); `webui/production_checks.py:30-71` — runtime checks for auth enabled, admin token set, token length, no demo tokens, internal admin disabled; `tests/test_webui_auth_and_persistence.py:56-95` — production mode validation tests; `tests/test_webui_auth_production.py:57-125` — trusted proxy identity mode tests; `tests/test_production_hardening_status.py` — hardening backlog attestation | No token revocation mechanism | Engineering — document token rotation | No |
 | Public internet / SaaS | 3/10 | Same codebase foundation | No OIDC/SSO integration; no multi-tenant isolation; no per-tenant API keys or JWT support; passwordless token auth only; no brute-force lockout per account | Product — OIDC provider integration; Architecture — multi-tenant identity separation | Yes |
 
 **Evidence references:** `webui/auth.py`, `webui/production_checks.py`, `tests/test_webui_auth_and_persistence.py`, `tests/test_production_hardening_status.py`, `docs/DEPLOYMENT.md:52-81`

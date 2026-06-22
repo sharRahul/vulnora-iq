@@ -16,6 +16,8 @@ All notable changes to this project will be documented in this file.
 - Container smoke test script
 - Production readiness scorecard, runbook, incident response, release checklist, migration guide, assessment assurance docs
 - Dependency checks (pip-audit, pip check) in CI
+- Regression tests for trusted proxy identity mode (spoofed headers, CIDR enforcement, role mapping, permissions)
+- Validator checks: listen_address_safe reachability, no SaaS overclaim in README, SQLite/WAL persistence claim, public/SaaS limitations documented, assessment assurance doc discoverable
 
 ### Changed
 
@@ -31,6 +33,13 @@ All notable changes to this project will be documented in this file.
 - Artifact download hardened against path traversal
 - Metrics counters for auth, CSRF, rate limit, scan, artifact events
 - Deployment guide with production checklist, runbook, incident response docs
+- **listen_address_safe** added to `_ALL_CHECKS` (was unreachable); 4 new `validate_all` tests for 127.0.0.1/0.0.0.0+proxy/0.0.0.0+no-proxy/invalid-CIDR scenarios
+- Production readiness scorecard updated: rating scale scoped to controlled internal; stale "no trusted_proxy test coverage" claim removed
+- PRODUCTION_HARDENING_BACKLOG.md: added "Notes on scoring" clarifying 10/10 gate vs 8.4/10 scorecard average; remaining gaps section updated
+- RUNBOOK.md: added disclaimer that it is a template requiring adaptation
+- RELEASE_CHECKLIST.md: version/date updated
+- README.md: added ASSESSMENT_ASSURANCE.md link to maturity banner
+- **`_ALL_CHECKS` in `production_checks.py`**: `listen_address_safe` entry added so the check is actually reachable
 
 ### Fixed
 
@@ -39,6 +48,8 @@ All notable changes to this project will be documented in this file.
 - README, IMPLEMENTATION_STATUS, PRODUCTION_HARDENING_BACKLOG maturity claims updated
 - HTTP error responses now include security headers and request IDs
 - Scanner exceptions no longer leak internals
+- `listen_address_safe` was defined but never added to `_ALL_CHECKS` — now reachable via `validate_all()`
+- `.env.production.example` excluded by `.gitignore` `.env.*` pattern — added negation rule
 
 ### Security
 
@@ -52,6 +63,7 @@ All notable changes to this project will be documented in this file.
 - SQLite path validated against ephemeral locations
 - Rate limit, request body, CSRF TTL validated as sane/positive
 - Audit logs never include tokens, CSRF tokens, request bodies, or secrets
+- **listen_address_safe**: listening on 0.0.0.0/:: without proxy trust fails production checks
 
 ### Breaking
 

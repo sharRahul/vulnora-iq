@@ -1,8 +1,8 @@
 # VulnoraIQ Release Checklist
 
-> **Version:** 1.0
+> **Version:** 0.2.0
 > **Owner:** Release Manager
-> **Last Updated:** YYYY-MM-DD
+> **Last Updated:** 2026-06-22
 
 ---
 

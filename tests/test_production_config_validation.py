@@ -181,3 +181,54 @@ def test_validate_all_fails_with_bad_config(monkeypatch) -> None:
     result = validate_all(host="0.0.0.0")
     failed = [r for r in result if r["status"] != "pass"]
     assert len(failed) > 0
+
+
+def test_validate_all_listen_address_safe_127_0_0_1(monkeypatch) -> None:
+    monkeypatch.setenv("VULNORAIQ_ENV", "production")
+    monkeypatch.setenv("VULNORAIQ_ADMIN_TOKEN", "this-is-a-long-enough-admin-token-12345")
+    result = validate_all(host="127.0.0.1")
+    listen = [r for r in result if r["check"] == "listen_address_safe"]
+    assert len(listen) == 1
+    assert listen[0]["status"] == "pass"
+
+
+def test_validate_all_listen_address_fails_0_0_0_0_no_proxy(monkeypatch) -> None:
+    monkeypatch.setenv("VULNORAIQ_ENV", "production")
+    monkeypatch.setenv("VULNORAIQ_ADMIN_TOKEN", "this-is-a-long-enough-admin-token-12345")
+    monkeypatch.setenv("VULNORAIQ_TRUST_PROXY_HEADERS", "false")
+    result = validate_all(host="0.0.0.0")
+    listen = [r for r in result if r["check"] == "listen_address_safe"]
+    assert len(listen) == 1
+    assert listen[0]["status"] == "fail"
+    assert "without proxy trust" in listen[0].get("error", "")
+
+
+def test_validate_all_listen_address_passes_0_0_0_0_with_proxy(monkeypatch) -> None:
+    monkeypatch.setenv("VULNORAIQ_ENV", "production")
+    monkeypatch.setenv("VULNORAIQ_ADMIN_TOKEN", "this-is-a-long-enough-admin-token-12345")
+    monkeypatch.setenv("VULNORAIQ_TRUST_PROXY_HEADERS", "true")
+    monkeypatch.setenv("VULNORAIQ_TRUSTED_PROXY_CIDRS", "10.0.0.0/8")
+    result = validate_all(host="0.0.0.0")
+    listen = [r for r in result if r["check"] == "listen_address_safe"]
+    assert len(listen) == 1
+    assert listen[0]["status"] == "pass"
+
+
+def test_validate_all_listen_address_fails_0_0_0_0_invalid_cidr(monkeypatch) -> None:
+    monkeypatch.setenv("VULNORAIQ_ENV", "production")
+    monkeypatch.setenv("VULNORAIQ_ADMIN_TOKEN", "this-is-a-long-enough-admin-token-12345")
+    monkeypatch.setenv("VULNORAIQ_TRUST_PROXY_HEADERS", "true")
+    monkeypatch.setenv("VULNORAIQ_TRUSTED_PROXY_CIDRS", "not-a-cidr")
+    result = validate_all(host="0.0.0.0")
+    listen = [r for r in result if r["check"] == "listen_address_safe"]
+    cidr_check = [r for r in result if r["check"] == "proxy_cidrs_configured"]
+    # listen_address_safe should fail because proxy_cidrs_configured will also fail
+    # But listen_address_safe itself passes since TRUST_PROXY_HEADERS is true
+    # (the CIDR validation is a separate check)
+    # Actually, listen_address_safe only checks TRUST_PROXY_HEADERS, not CIDR validity
+    # So with TRUST_PROXY_HEADERS=true, it passes even with bad CIDRs.
+    # The CIDR validation is done by proxy_cidrs_configured.
+    assert len(listen) == 1
+    assert listen[0]["status"] == "pass"
+    assert len(cidr_check) == 1
+    assert cidr_check[0]["status"] == "fail"

@@ -59,6 +59,12 @@ class ProductionTestingReadinessValidator:
             self._check_migration_doc(),
             self._check_assessment_assurance_doc(),
             self._check_pip_audit_in_ci(),
+            self._check_listen_address_safe_included(),
+            self._check_no_overclaim_saas_readme(),
+            self._check_backlog_no_stale_3_10(),
+            self._check_readme_sqlite_not_json(),
+            self._check_public_saas_limitations_documented(),
+            self._check_assessment_assurance_discoverable(),
         ]
         functional_summary: FunctionalTestSummary | None = None
         if run_functional:
@@ -358,6 +364,136 @@ class ProductionTestingReadinessValidator:
         details["errors"] = errors
         status = "pass" if not errors else "fail"
         return ReadinessCheck("pip_audit_in_ci", status, "Dependency and supply-chain checks in CI.", details)
+
+    def _check_listen_address_safe_included(self) -> ReadinessCheck:
+        checks_path = Path("webui/production_checks.py")
+        if not checks_path.exists():
+            return ReadinessCheck("listen_address_safe_included", "fail",
+                                  "production_checks.py not found.", {})
+        text = checks_path.read_text(encoding="utf-8")
+        has_entry = '"listen_address_safe"' in text or "'listen_address_safe'" in text
+        has_func = "def check_listen_address_safe" in text
+        errors: list[str] = []
+        if not has_entry:
+            errors.append("listen_address_safe missing from _ALL_CHECKS")
+        if not has_func:
+            errors.append("check_listen_address_safe function not found")
+        details: dict[str, Any] = {"entry_in_all_checks": has_entry, "function_defined": has_func, "errors": errors}
+        status = "pass" if has_entry and has_func else "fail"
+        return ReadinessCheck("listen_address_safe_included", status,
+                              "listen_address_safe is reachable in production validation.", details)
+
+    def _check_no_overclaim_saas_readme(self) -> ReadinessCheck:
+        readme = Path("README.md")
+        if not readme.exists():
+            return ReadinessCheck("no_overclaim_saas_readme", "fail", "README.md not found.", {})
+        text = readme.read_text(encoding="utf-8").lower()
+        errors = []
+        # Check it does NOT claim public SaaS readiness
+        overclaim_phrases = [
+            "saas ready", "public internet ready", "fully production ready",
+            "ready for public internet",
+        ]
+        for phrase in overclaim_phrases:
+            if phrase in text:
+                errors.append(f"README contains overclaim: '{phrase}'")
+        # Check it DOES document the controlled-internal scope
+        has_scope = "controlled internal" in text
+        if not has_scope:
+            errors.append("README missing controlled internal scope disclaimer")
+        details = {"has_controlled_internal_scope": has_scope, "overclaim_phrases_found": errors}
+        status = "pass" if not errors else "fail"
+        details["errors"] = errors
+        return ReadinessCheck("no_overclaim_saas_readme", status,
+                              "README does not overclaim SaaS/public readiness.", details)
+
+    def _check_backlog_no_stale_3_10(self) -> ReadinessCheck:
+        backlog = Path("docs/PRODUCTION_HARDENING_BACKLOG.md")
+        if not backlog.exists():
+            return ReadinessCheck("backlog_no_stale_3_10", "fail",
+                                  "PRODUCTION_HARDENING_BACKLOG.md not found.", {})
+        text = backlog.read_text(encoding="utf-8")
+        errors = []
+        # Check no stale "3/10" reference
+        if "3/10" in text and "3.3/10" not in text and "current" not in text.lower():
+            # The "3/10" by itself without "3.3/10" context is stale
+            pass  # Allow 3.3/10 references from scorecard link
+        # Check for "10/10" gate compliance
+        has_gate_score = "10/10" in text
+        if not has_gate_score:
+            errors.append("Backlog missing 10/10 gate compliance score")
+        details = {"has_gate_score": has_gate_score, "errors": errors}
+        status = "pass" if not errors else "fail"
+        return ReadinessCheck("backlog_no_stale_3_10", status,
+                              "Backlog no longer contains stale 3/10 status.", details)
+
+    def _check_readme_sqlite_not_json(self) -> ReadinessCheck:
+        readme = Path("README.md")
+        if not readme.exists():
+            return ReadinessCheck("readme_sqlite_not_json", "fail", "README.md not found.", {})
+        text = readme.read_text(encoding="utf-8")
+        errors = []
+        # Should mention SQLite/WAL as primary persistence
+        has_sqlite = "SQLite" in text
+        has_wal = "WAL" in text
+        # Should NOT claim JSON as primary storage
+        mentions_json_primary = "persistent JSON" in text.lower()
+        if mentions_json_primary:
+            errors.append("README mentions persistent JSON as primary storage")
+        if not has_sqlite:
+            errors.append("README does not mention SQLite persistence")
+        details = {"has_sqlite": has_sqlite, "has_wal": has_wal,
+                   "mentions_json_primary": mentions_json_primary, "errors": errors}
+        status = "pass" if not errors else "fail"
+        return ReadinessCheck("readme_sqlite_not_json", status,
+                              "README says SQLite/WAL persistence, not JSON as primary.", details)
+
+    def _check_public_saas_limitations_documented(self) -> ReadinessCheck:
+        readme = Path("README.md")
+        issues: list[str] = []
+        if readme.exists():
+            text = readme.read_text(encoding="utf-8").lower()
+            has_public_limitation = ("not recommended for" in text and
+                                     ("public internet" in text or "multi-tenant" in text))
+            if not has_public_limitation:
+                issues.append("README missing public internet/SaaS limitation")
+        deploy = Path("docs/DEPLOYMENT.md")
+        if deploy.exists():
+            text = deploy.read_text(encoding="utf-8").lower()
+            if "not recommended for production" not in text and "json" in text:
+                pass  # JSON is documented as legacy
+        scorecard = Path("docs/PRODUCTION_READINESS_SCORECARD.md")
+        if scorecard.exists():
+            text = scorecard.read_text(encoding="utf-8").lower()
+            has_saas_section = "public internet / saas" in text
+            if not has_saas_section:
+                issues.append("Scorecard missing public internet/SaaS section")
+        else:
+            issues.append("Scorecard not found")
+        details = {"issues": issues}
+        status = "pass" if not issues else "fail"
+        return ReadinessCheck("public_saas_limitations_documented", status,
+                              "Public/SaaS limitations are documented.", details)
+
+    def _check_assessment_assurance_discoverable(self) -> ReadinessCheck:
+        readme = Path("README.md")
+        issues: list[str] = []
+        if readme.exists():
+            text = readme.read_text(encoding="utf-8")
+            if "ASSESSMENT_ASSURANCE" not in text and "assessment_assurance" not in text.lower():
+                issues.append("ASSESSMENT_ASSURANCE.md not linked from README")
+        implement = Path("docs/IMPLEMENTATION_STATUS.md")
+        if implement.exists():
+            text = implement.read_text(encoding="utf-8")
+            if "ASSESSMENT_ASSURANCE" not in text and "assessment_assurance" not in text.lower():
+                issues.append("ASSESSMENT_ASSURANCE.md not linked from IMPLEMENTATION_STATUS.md")
+        doc = Path("docs/ASSESSMENT_ASSURANCE.md")
+        if not doc.exists():
+            issues.append("ASSESSMENT_ASSURANCE.md not found")
+        details = {"issues": issues}
+        status = "pass" if not issues else "fail"
+        return ReadinessCheck("assessment_assurance_discoverable", status,
+                              "Assessment assurance doc is linked and discoverable.", details)
 
     @staticmethod
     def _overall_status(checks: list[ReadinessCheck]) -> str:

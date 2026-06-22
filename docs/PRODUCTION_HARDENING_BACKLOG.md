@@ -41,6 +41,10 @@ All blockers PRD-001 through PRD-010 are **Closed**. See [`PRODUCTION_READINESS_
 | Rate limiting per-user | IP-based only; not per-authenticated-user | Medium |
 | Secrets rotation | Documented but no automated rotation tool | Medium |
 
+### Notes on scoring
+
+The 10/10 gate-compliance score means all PRD-001 through PRD-010 blockers are closed. The actual scorecard average for controlled internal deployment is **8.4/10** (see [`PRODUCTION_READINESS_SCORECARD.md`](PRODUCTION_READINESS_SCORECARD.md)), reflecting remaining non-blocking improvements in runbooks, incident response, and release management.
+
 ## Production claim rule
 
 Do not describe VulnoraIQ as public-internet or multi-tenant SaaS ready until the remaining gaps above are addressed. Controlled internal deployment readiness is attested by this register, the scorecard, and the production-readiness validation gate.

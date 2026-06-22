@@ -1,5 +1,7 @@
 # VulnoraIQ Production Runbook
 
+> **Note:** This runbook is a template that must be adapted to your specific deployment environment (container orchestrator, reverse proxy, backup destination paths, monitoring stack, etc.). The commands and paths shown are illustrative; replace placeholders like `/path/to/vulnoraiq`, `/var/log/vulnoraiq/`, and example hostnames with your actual values. See [`DEPLOYMENT.md`](DEPLOYMENT.md) for the production checklist and [`INCIDENT_RESPONSE.md`](INCIDENT_RESPONSE.md) for security incident procedures.
+
 ## 1. Service Management
 
 ### Start service
