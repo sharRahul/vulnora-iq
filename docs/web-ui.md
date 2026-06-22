@@ -11,7 +11,7 @@ vulnoraiq-web --host 127.0.0.1 --port 8787
 Or run directly from source:
 
 ```bash
-python -m webui.server --host 127.0.0.1 --port 8787
+python -m webui.hosted_server --host 127.0.0.1 --port 8787
 ```
 
 Open:
@@ -30,6 +30,18 @@ http://127.0.0.1:8787
 6. Review the completed executive dashboard.
 7. Download presentation-ready outputs.
 
+## Hosted-mode foundations
+
+The hosted server uses:
+
+- `webui/hosted_server.py` for the active `vulnoraiq-web` entry point.
+- `webui/auth.py` for local role and permission checks.
+- `config/web_users.yaml` for viewer, analyst, and admin role configuration.
+- `webui/persistent_jobs.py` for JSON-backed scan job storage.
+- `reports/output/webui/jobs.json` as the default persistent job history file.
+
+Authentication is disabled by default for local development, but the role model is implemented so hosted deployments can enable token-based access in `config/web_users.yaml`.
+
 ## Dashboard sections
 
 The completed scan dashboard shows:
@@ -42,7 +54,7 @@ The completed scan dashboard shows:
 - policy evaluation results
 - finding summaries
 - report download links
-- scan history
+- persistent scan history
 
 ## Realtime progress
 
@@ -87,8 +99,10 @@ Generated artifacts:
 - The default `demo` target is local and safe.
 - Configured targets still pass through the scanner authorisation gate.
 - Placeholder endpoints are rejected by the scanner.
+- Target contract validation is available before configured target testing.
 - The Web UI does not bypass policy, approval, RAG, agent, or target validation.
 - The UI reuses existing report generators rather than creating a separate evidence path.
+- Results are experimental until OWASP checks are validated beyond the starter oracle layer.
 
 ## Operator notes
 
