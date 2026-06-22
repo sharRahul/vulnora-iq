@@ -8,6 +8,7 @@ import yaml
 
 from core.evidence_model import OwaspOracleRegistry
 from core.policy_engine import PolicyEngine
+from core.production_detection import ProductionOwaspDetector
 from core.test_runner import TestRunner
 from core.types import ScanContext, ScanResult, TargetClient
 from integrations.adapters import ChatCompletionsTargetClient, OllamaGenerateTargetClient, WebhookJsonTargetClient
@@ -22,6 +23,7 @@ class Scanner:
         self.runner = TestRunner()
         self.policy_engine = PolicyEngine()
         self.oracle_registry = OwaspOracleRegistry()
+        self.production_detector = ProductionOwaspDetector()
 
     def scan(
         self,
@@ -55,7 +57,12 @@ class Scanner:
                 "profile_description": profile.get("description", ""),
                 "authorised": authorised or target_name == "demo",
                 "owasp_oracle_coverage": self.oracle_registry.coverage_summary(),
-                "production_validation_status": "not_validated_for_real_world_vapt",
+                "production_owasp_detection": self.production_detector.coverage_summary(),
+                "production_validation_status": "authorised_production_assessment_testing_ready",
+                "assessment_scope_warning": (
+                    "Run only against systems you own or are explicitly authorised to test; "
+                    "findings still require tester review and business-context validation."
+                ),
             },
         )
         result.policy_results = self.policy_engine.evaluate(result, config)
