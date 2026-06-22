@@ -24,7 +24,7 @@ class BenchmarkFixtureValidator:
         errors: list[str] = []
         covered = sorted({str(item.get("module")) for item in fixtures})
         expected = {f"owasp_llm{index:02d}" for index in range(1, 11)}
-        present = {module[:12] for module in covered if module.startswith("owasp_llm")}
+        present = {self._category_id(module) for module in covered if module.startswith("owasp_llm")}
         missing = sorted(expected - present)
         if missing:
             errors.append(f"Missing OWASP starter fixture categories: {', '.join(missing)}")
@@ -33,3 +33,8 @@ class BenchmarkFixtureValidator:
                 if not item.get(field_name):
                     errors.append(f"Fixture missing {field_name}: {item}")
         return BenchmarkFixtureValidationResult("fail" if errors else "pass", len(fixtures), covered, errors)
+
+    @staticmethod
+    def _category_id(module_name: str) -> str:
+        parts = module_name.split("_")
+        return "_".join(parts[:2]) if len(parts) >= 2 else module_name
