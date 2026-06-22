@@ -20,10 +20,27 @@ EXPECTED_OWASP_DOCS = [
     "LLM09_MISINFORMATION.md",
     "LLM10_UNBOUNDED_CONSUMPTION.md",
 ]
+EXPECTED_CLI_ENTRY_POINTS = [
+    "vulnoraiq",
+    "vulnoraiq-web",
+    "vulnoraiq-dashboard",
+    "vulnoraiq-diff",
+    "vulnoraiq-package",
+    "vulnoraiq-benchmark",
+    "vulnoraiq-functional-test",
+    "vulnoraiq-production-readiness",
+    "vulnoraiq-policy-trend",
+    "vulnoraiq-diff-trend",
+    "vulnoraiq-refresh-atlas",
+    "vulnoraiq-generate-atlas-matrix",
+    "vulnoraiq-html-export",
+    "vulnoraiq-validate-package",
+]
 EXPECTED_MITRE_ATLAS_DOC = Path("docs/MITRE_ATLAS_AI_MATRIX.md")
 EXPECTED_THIRD_PARTY_NOTICES = Path("THIRD_PARTY_NOTICES.md")
 EXPECTED_DASHBOARD_EXAMPLE = Path("docs/assets/vulnoraiq-dashboard-example.svg")
 EXPECTED_FUNCTIONAL_RUNNER = Path("scripts/run_functional_test.py")
+EXPECTED_PRODUCTION_READINESS_RUNNER = Path("scripts/validate_production_testing_readiness.py")
 
 
 @dataclass(slots=True)
@@ -54,18 +71,7 @@ class PackageMetadataValidator:
             errors.append(f"pyproject version {package_version} does not match framework version {framework.get('version')}")
         if framework.get("display_name") != "VulnoraIQ":
             errors.append("framework.display_name must be VulnoraIQ")
-        for command in (
-            "vulnoraiq",
-            "vulnoraiq-web",
-            "vulnoraiq-dashboard",
-            "vulnoraiq-diff",
-            "vulnoraiq-package",
-            "vulnoraiq-benchmark",
-            "vulnoraiq-functional-test",
-            "vulnoraiq-generate-atlas-matrix",
-            "vulnoraiq-html-export",
-            "vulnoraiq-validate-package",
-        ):
+        for command in EXPECTED_CLI_ENTRY_POINTS:
             if command not in pyproject:
                 errors.append(f"Missing CLI entry point: {command}")
         readme = Path("README.md").read_text(encoding="utf-8")
@@ -94,6 +100,8 @@ class PackageMetadataValidator:
             errors.append("Missing MITRE ATLAS matrix generator")
         if not EXPECTED_FUNCTIONAL_RUNNER.exists():
             errors.append(f"Missing functional acceptance runner: {EXPECTED_FUNCTIONAL_RUNNER}")
+        if not EXPECTED_PRODUCTION_READINESS_RUNNER.exists():
+            errors.append(f"Missing production-testing readiness runner: {EXPECTED_PRODUCTION_READINESS_RUNNER}")
         if not EXPECTED_DASHBOARD_EXAMPLE.exists():
             errors.append(f"Missing dashboard example image: {EXPECTED_DASHBOARD_EXAMPLE}")
         else:
