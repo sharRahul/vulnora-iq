@@ -26,11 +26,12 @@ The current implementation provides:
 - Markdown, JSON, and SARIF-style reports with evidence details
 - Markdown and HTML dashboard generation
 - JSON/Markdown report diffing between assessment runs
+- Safe release-package builder for demo outputs and non-sensitive examples
 - Explicit non-demo authorisation gate
 - Minimal HTTP JSON target adapter for approved targets
-- Python CI across supported versions with demo report artifacts
+- Python CI across supported versions with baseline, RAG, agent, diff, and release-package artifacts
 
-The roadmap includes richer target adapters, packaged example outputs, trend tracking, benchmark datasets, signed approval evidence validation, and report-diff regression gates.
+The roadmap includes richer target adapters, trend tracking, benchmark datasets, signed approval evidence validation, report-diff regression gates, and package metadata validation.
 
 ## OWASP LLM 2025 coverage
 
@@ -64,7 +65,7 @@ Governance Layer: policy rules | exceptions | RAG manifest | RAG retrieval scena
         ↓
 Assessment Profiles: baseline | rag | agent | full
         ↓
-Outputs: Markdown | JSON | SARIF-style | Markdown dashboard | HTML dashboard | report diff
+Outputs: Markdown | JSON | SARIF-style | Markdown dashboard | HTML dashboard | report diff | release package
 ```
 
 ## Repository structure
@@ -82,7 +83,7 @@ llm-vapt-framework/
 ├── reports/                 # Markdown, JSON, SARIF-style, and diff generation
 ├── dashboards/              # Markdown and HTML dashboard generation
 ├── tests/                   # Unit tests
-├── scripts/                 # CLI entry points
+├── scripts/                 # CLI entry points and release package builder
 └── docs/                    # Architecture, status, mapping, governance docs
 ```
 
@@ -156,6 +157,16 @@ python -m reports.report_diff \
 
 Use `--fail-on-regression` in CI when added or changed findings or policy status changes should fail the job.
 
+## Release package command
+
+Build a ZIP package with safe demo outputs and non-sensitive examples after generating demo reports:
+
+```bash
+python scripts/build_release_package.py --manifest config/release_package.yaml
+```
+
+The package path defaults to `dist/llm-vapt-example-package.zip`.
+
 ## Dashboard command
 
 Generate a Markdown dashboard from an existing JSON report:
@@ -174,7 +185,7 @@ Read [`docs/module-authoring.md`](docs/module-authoring.md) before adding module
 
 ## Configuration
 
-- `config/default.yaml`: engine defaults, payload libraries, report outputs, approval gates, RAG corpus metadata, RAG retrieval scenarios, agent runtime metadata, agent execution scenarios, and ATLAS mapping path
+- `config/default.yaml`: engine defaults, payload libraries, report outputs, approval gates, RAG corpus metadata, RAG retrieval scenarios, agent runtime metadata, agent execution scenarios, ATLAS mapping path, and release package manifest
 - `config/targets.yaml`: target definitions
 - `config/attack_profiles.yaml`: selective module execution
 - `config/policies.yaml`: governance thresholds and blocking conditions
@@ -185,6 +196,7 @@ Read [`docs/module-authoring.md`](docs/module-authoring.md) before adding module
 - `config/rag_retrieval_scenarios.yaml`: RAG retrieval scenario manifest
 - `config/agent_runtime.yaml`: agent tool, memory, and orchestration governance manifest
 - `config/agent_execution_scenarios.yaml`: agent execution scenario manifest
+- `config/release_package.yaml`: release package manifest
 - `payloads/schema.yaml`: payload library schema and safety rules
 
 ## Design principles
