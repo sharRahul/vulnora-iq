@@ -8,18 +8,24 @@ include_paths:
   - docs/web-ui.md
   - config/default.yaml
   - config/targets.yaml
+  - config/target_contracts.yaml
+  - config/web_users.yaml
+  - config/report_branding.yaml
   - config/attack_profiles.yaml
   - config/policies.yaml
   - config/policy_exceptions.yaml
   - config/approval_evidence.yaml
+  - config/owasp_oracles.yaml
   - config/mitre_atlas_mapping.yaml
   - config/atlas_refresh.yaml
+  - config/mitre_atlas_source_fixture.yaml
   - config/rag_corpus_manifest.yaml
   - config/rag_retrieval_scenarios.yaml
   - config/agent_runtime.yaml
   - config/agent_execution_scenarios.yaml
   - config/release_package.yaml
   - benchmarks/benchmark_suite.yaml
+  - benchmarks/fixtures/owasp_starter_fixture.yaml
   - examples/local_demo_targets/README.md
   - payloads/schema.yaml
   - payloads/safe_baseline.yaml
