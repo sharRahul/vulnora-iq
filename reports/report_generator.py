@@ -18,7 +18,7 @@ class MarkdownReportGenerator:
         output.parent.mkdir(parents=True, exist_ok=True)
         normalised = self.results_engine.normalise(result)
         lines = [
-            f"# LLM VAPT Report - {normalised['target']}",
+            f"# VulnoraIQ Report - {normalised['target']}",
             "",
             "## Executive Summary",
             "",
