@@ -4,7 +4,7 @@ import json
 import logging
 
 from webui.auth import AuthPrincipal
-from webui.hosted_server import _audit_structured, AUDIT_LOG
+from webui.hosted_server import AUDIT_LOG, _audit_structured
 
 
 def _setup_caplog(caplog) -> None:
