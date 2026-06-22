@@ -1,0 +1,204 @@
+from __future__ import annotations
+
+import argparse
+import html
+import json
+from dataclasses import asdict, dataclass, field
+from pathlib import Path
+from typing import Any
+
+from core.scanner import Scanner
+from dashboards.generate_dashboard import DashboardGenerator
+from dashboards.html_dashboard import HtmlDashboardGenerator
+from reports.json_report_generator import JsonReportGenerator
+from reports.report_generator import MarkdownReportGenerator
+from reports.sarif_report_generator import SarifReportGenerator
+
+
+@dataclass(slots=True)
+class FunctionalTestSummary:
+    status: str
+    target: str
+    profile: str
+    output_dir: str
+    screenshot_path: str
+    generated_files: list[str]
+    checks: dict[str, str] = field(default_factory=dict)
+    errors: list[str] = field(default_factory=list)
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+class DashboardExampleSvgGenerator:
+    """Creates a deterministic README-friendly dashboard example from a report."""
+
+    def generate(self, report: dict[str, Any], output_path: str | Path) -> Path:
+        output = Path(output_path)
+        output.parent.mkdir(parents=True, exist_ok=True)
+        findings = report.get("findings", [])
+        severity_counts = report.get("severity_counts", {})
+        policy_status = str(report.get("policy_status", "unknown")).upper()
+        highest = str(report.get("highest_severity", "info")).upper()
+        target = html.escape(str(report.get("target", "demo")))
+        profile = html.escape(str(report.get("profile", "baseline")))
+        finding_count = int(report.get("finding_count", len(findings)) or 0)
+        severity_text = ", ".join(f"{key}: {value}" for key, value in sorted(severity_counts.items())) or "none"
+        top_findings = findings[:4]
+        rows = []
+        y = 400
+        for finding in top_findings:
+            title = html.escape(str(finding.get("title", "Untitled finding"))[:72])
+            severity = html.escape(str(finding.get("severity", "info")).upper())
+            owasp = html.escape(str(finding.get("owasp_id", "UNMAPPED")))
+            rows.append(f'<text x="72" y="{y}" class="row">{severity} · {owasp} · {title}</text>')
+            y += 34
+        if not rows:
+            rows.append('<text x="72" y="400" class="row">INFO · No findings generated in this demo run</text>')
+        svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-label="VulnoraIQ dashboard example">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#111827"/>
+      <stop offset="1" stop-color="#1f2937"/>
+    </linearGradient>
+    <style>
+      .title {{ fill: #f9fafb; font: 700 42px system-ui, -apple-system, Segoe UI, sans-serif; }}
+      .subtitle {{ fill: #cbd5e1; font: 500 18px system-ui, -apple-system, Segoe UI, sans-serif; }}
+      .card-title {{ fill: #94a3b8; font: 600 15px system-ui, -apple-system, Segoe UI, sans-serif; text-transform: uppercase; }}
+      .card-value {{ fill: #f8fafc; font: 800 34px system-ui, -apple-system, Segoe UI, sans-serif; }}
+      .section {{ fill: #e5e7eb; font: 700 24px system-ui, -apple-system, Segoe UI, sans-serif; }}
+      .row {{ fill: #d1d5db; font: 500 17px system-ui, -apple-system, Segoe UI, sans-serif; }}
+      .muted {{ fill: #9ca3af; font: 500 15px system-ui, -apple-system, Segoe UI, sans-serif; }}
+    </style>
+  </defs>
+  <rect width="1280" height="720" fill="url(#bg)"/>
+  <rect x="40" y="36" width="1200" height="648" rx="28" fill="#0f172a" stroke="#334155"/>
+  <text x="72" y="96" class="title">VulnoraIQ Assessment Dashboard</text>
+  <text x="72" y="132" class="subtitle">Functional demo run · target {target} · profile {profile}</text>
+
+  <rect x="72" y="170" width="210" height="120" rx="18" fill="#111827" stroke="#374151"/>
+  <text x="96" y="212" class="card-title">Findings</text>
+  <text x="96" y="258" class="card-value">{finding_count}</text>
+
+  <rect x="304" y="170" width="250" height="120" rx="18" fill="#111827" stroke="#374151"/>
+  <text x="328" y="212" class="card-title">Highest severity</text>
+  <text x="328" y="258" class="card-value">{highest}</text>
+
+  <rect x="576" y="170" width="250" height="120" rx="18" fill="#111827" stroke="#374151"/>
+  <text x="600" y="212" class="card-title">Policy status</text>
+  <text x="600" y="258" class="card-value">{policy_status}</text>
+
+  <rect x="848" y="170" width="320" height="120" rx="18" fill="#111827" stroke="#374151"/>
+  <text x="872" y="212" class="card-title">Severity distribution</text>
+  <text x="872" y="254" class="subtitle">{html.escape(severity_text[:38])}</text>
+
+  <text x="72" y="350" class="section">Top findings</text>
+  {''.join(rows)}
+
+  <rect x="72" y="560" width="1096" height="72" rx="16" fill="#111827" stroke="#374151"/>
+  <text x="96" y="592" class="muted">Example generated by scripts/run_functional_test.py from a safe local demo assessment.</text>
+  <text x="96" y="618" class="muted">Not production-validated security evidence; use for dashboard preview and workflow testing only.</text>
+</svg>
+'''
+        output.write_text(svg, encoding="utf-8")
+        return output
+
+
+def run_functional_test(
+    output_dir: str | Path = "reports/output/functional-test",
+    screenshot_path: str | Path = "docs/assets/vulnoraiq-dashboard-example.svg",
+) -> FunctionalTestSummary:
+    output_root = Path(output_dir)
+    output_root.mkdir(parents=True, exist_ok=True)
+    markdown_path = output_root / "functional-report.md"
+    json_path = output_root / "functional-report.json"
+    sarif_path = output_root / "functional-report.sarif"
+    dashboard_path = output_root / "functional-dashboard.md"
+    html_dashboard_path = output_root / "functional-dashboard.html"
+    summary_path = output_root / "functional-test-summary.json"
+
+    scanner = Scanner(config_dir=Path("config"))
+    result = scanner.scan(target_name="demo", profile_name="baseline", authorised=False)
+    markdown_output = MarkdownReportGenerator().generate(result, markdown_path)
+    json_output = JsonReportGenerator().generate(result, json_path)
+    sarif_output = SarifReportGenerator().generate(result, sarif_path)
+    report_data = json.loads(Path(json_output).read_text(encoding="utf-8"))
+    dashboard_output = DashboardGenerator().generate_from_report(report_data, dashboard_path)
+    html_output = HtmlDashboardGenerator().generate_from_report(report_data, html_dashboard_path)
+    screenshot_output = DashboardExampleSvgGenerator().generate(report_data, screenshot_path)
+
+    generated = [
+        str(markdown_output),
+        str(json_output),
+        str(sarif_output),
+        str(dashboard_output),
+        str(html_output),
+        str(screenshot_output),
+        str(summary_path),
+    ]
+    checks: dict[str, str] = {}
+    errors: list[str] = []
+
+    for path in generated[:-1]:
+        file_path = Path(path)
+        if file_path.exists() and file_path.stat().st_size > 0:
+            checks[f"non_empty:{file_path.name}"] = "pass"
+        else:
+            checks[f"non_empty:{file_path.name}"] = "fail"
+            errors.append(f"Missing or empty output: {file_path}")
+
+    expected_fields = ["target", "profile", "finding_count", "policy_status", "metadata", "findings", "policy_results"]
+    missing_fields = [field for field in expected_fields if field not in report_data]
+    checks["json_required_fields"] = "pass" if not missing_fields else "fail"
+    if missing_fields:
+        errors.append(f"Functional JSON report missing fields: {', '.join(missing_fields)}")
+
+    if report_data.get("target") == "demo" and report_data.get("profile") == "baseline":
+        checks["demo_baseline_scope"] = "pass"
+    else:
+        checks["demo_baseline_scope"] = "fail"
+        errors.append("Functional run did not execute demo/baseline scope.")
+
+    metadata = report_data.get("metadata", {})
+    oracle_coverage = metadata.get("owasp_oracle_coverage", {})
+    checks["owasp_category_count"] = "pass" if oracle_coverage.get("owasp_category_count") == 10 else "fail"
+    if checks["owasp_category_count"] == "fail":
+        errors.append("OWASP oracle coverage does not report all 10 categories.")
+
+    checks["production_validation_marker"] = "pass" if metadata.get("production_validation_status") == "not_validated_for_real_world_vapt" else "fail"
+    if checks["production_validation_marker"] == "fail":
+        errors.append("Production validation marker is missing or incorrect.")
+
+    html_text = Path(html_output).read_text(encoding="utf-8")
+    checks["html_dashboard_title"] = "pass" if "VulnoraIQ Assessment Dashboard" in html_text else "fail"
+    if checks["html_dashboard_title"] == "fail":
+        errors.append("HTML dashboard title was not found.")
+
+    status = "pass" if not errors else "fail"
+    summary = FunctionalTestSummary(
+        status=status,
+        target="demo",
+        profile="baseline",
+        output_dir=str(output_root),
+        screenshot_path=str(screenshot_output),
+        generated_files=generated,
+        checks=checks,
+        errors=errors,
+    )
+    summary_path.write_text(json.dumps(summary.to_dict(), indent=2, sort_keys=True), encoding="utf-8")
+    return summary
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Run VulnoraIQ functional acceptance test and generate dashboard example assets.")
+    parser.add_argument("--output-dir", default="reports/output/functional-test")
+    parser.add_argument("--screenshot", default="docs/assets/vulnoraiq-dashboard-example.svg")
+    args = parser.parse_args()
+    summary = run_functional_test(args.output_dir, args.screenshot)
+    print(json.dumps(summary.to_dict(), indent=2, sort_keys=True))
+    if summary.status != "pass":
+        raise SystemExit(1)
+
+
+if __name__ == "__main__":
+    main()
