@@ -35,7 +35,7 @@ def build_package(manifest_path: str | Path = DEFAULT_MANIFEST) -> Path:
     files = iter_paths(include_paths)
     with zipfile.ZipFile(output, mode="w", compression=zipfile.ZIP_DEFLATED) as archive:
         for file_path in files:
-            archive.write(file_path, arcname=str(file_path))
+            archive.writestr(str(file_path), file_path.read_bytes())
     return output
 
 
