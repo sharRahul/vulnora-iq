@@ -2,9 +2,9 @@
 
 **VulnoraIQ** is an early-stage AI security assessment and VAPT platform for **LLM applications, RAG pipelines, AI agents, and orchestration layers**.
 
-> **Current maturity:** version `0.0.1.2` is an early development build. It is useful for local demos, UI workflow validation, report-pipeline development, and safe framework testing. It is **not ready for real-world VAPT testing or production assessment use** yet.
+> **Current maturity:** version `0.0.1.3` is an early development build. It is useful for local demos, UI workflow validation, report-pipeline development, and safe framework testing. It is **not ready for real-world VAPT testing or production assessment use** yet.
 
-> **Important limitation:** OWASP LLM 2025 coverage now has safe starter oracle coverage for all 10 categories, but the checks are not production-validated. Treat all scan output as framework-development evidence, not validated security assurance.
+> **Important limitation:** OWASP LLM 2025 coverage now has safe starter oracle coverage, implementation specs, evaluator primitives, and local good/bad fixtures for all 10 categories, but the checks are not production-validated. Treat all scan output as framework-development evidence, not validated security assurance.
 
 > **Responsible use only:** run this platform only against systems you own or are explicitly authorised to assess. The default demo target is safe and local. Configured non-demo targets require an explicit authorisation flag.
 
@@ -15,7 +15,9 @@ AI application security needs more than prompt-level checks. VulnoraIQ provides 
 The current implementation provides:
 
 - Modern hosted Web UI with realtime progress, role-aware auth hooks, persistent JSON job storage, executive dashboards, scan history, and artifact download
+- OWASP LLM 2025 implementation specs in `docs/owasp/` for all 10 categories
 - OWASP LLM 2025 safe starter oracle coverage for all 10 categories
+- Deterministic local evaluator primitives and local good/bad OWASP fixture targets
 - Structured evidence records and oracle results for module interactions
 - MITRE ATLAS mapping catalog with AML technique IDs, local source fixture, and scheduled refresh validation workflow
 - Safe demo target with no external API keys
@@ -30,26 +32,26 @@ The current implementation provides:
 - Markdown, JSON, SARIF-style, Markdown dashboard, HTML dashboard, trend, diff, and branded HTML export outputs
 - Benchmark regression suite and OWASP starter fixture corpus
 - Safe release-package builder for demo outputs and non-sensitive examples
-- Package metadata release gate
+- Package metadata release gate that checks OWASP docs, evaluators, fixtures, version alignment, and CLI entries
 - Explicit non-demo authorisation gate
 - Python CI across supported versions with tests, metadata gates, target contract validation, benchmark fixture validation, scan smoke tests, trends, exports, and release artifacts
 
-The next phase should focus on the OWASP documentation and check-depth plan before any claim of real-world VAPT readiness.
+The next phase should go through `docs/owasp/` category by category and decide the deeper check logic, evaluator thresholds, fixture realism, and report language needed before any real-world VAPT readiness claim.
 
 ## OWASP LLM 2025 coverage
 
 | OWASP ID | Risk | Module status |
 |---|---|---|
-| LLM01:2025 | Prompt Injection | Safe starter oracle with ATLAS mapping |
-| LLM02:2025 | Sensitive Information Disclosure | Safe starter oracle with ATLAS mapping |
-| LLM03:2025 | Supply Chain | Safe starter oracle with ATLAS mapping |
-| LLM04:2025 | Data and Model Poisoning | Safe starter oracle with ATLAS mapping |
-| LLM05:2025 | Improper Output Handling | Safe starter oracle with ATLAS mapping |
-| LLM06:2025 | Excessive Agency | Safe starter oracle with ATLAS mapping |
-| LLM07:2025 | System Prompt Leakage | Safe starter oracle with ATLAS mapping |
-| LLM08:2025 | Vector and Embedding Weaknesses | Safe starter oracle with ATLAS mapping |
-| LLM09:2025 | Misinformation | Safe starter oracle with ATLAS mapping |
-| LLM10:2025 | Unbounded Consumption | Safe starter oracle with ATLAS mapping |
+| LLM01:2025 | Prompt Injection | Working-alpha spec + safe oracle + local fixture |
+| LLM02:2025 | Sensitive Information Disclosure | Working-alpha spec + safe oracle + local fixture |
+| LLM03:2025 | Supply Chain | Working-alpha spec + safe oracle + local fixture |
+| LLM04:2025 | Data and Model Poisoning | Working-alpha spec + safe oracle + local fixture |
+| LLM05:2025 | Improper Output Handling | Working-alpha spec + safe oracle + local fixture |
+| LLM06:2025 | Excessive Agency | Working-alpha spec + safe oracle + local fixture |
+| LLM07:2025 | System Prompt Leakage | Working-alpha spec + safe oracle + local fixture |
+| LLM08:2025 | Vector and Embedding Weaknesses | Working-alpha spec + safe oracle + local fixture |
+| LLM09:2025 | Misinformation | Working-alpha spec + safe oracle + local fixture |
+| LLM10:2025 | Unbounded Consumption | Working-alpha spec + safe oracle + local fixture |
 
 ## Architecture
 
@@ -62,7 +64,7 @@ Target AI Systems: demo echo target | local demo app | configured HTTP/Chat/Olla
         ↓
 Integration Layer: DemoEchoClient | HttpJsonTargetClient | ChatCompletionsTargetClient | OllamaGenerateTargetClient | WebhookJsonTargetClient | TargetContractValidator
         ↓
-Core Engine: Scanner | Test Runner | Results Engine | Risk Scoring | Policy Engine | OWASP Oracle Registry
+Core Engine: Scanner | Test Runner | Results Engine | Risk Scoring | Policy Engine | OWASP Oracle Registry | Local Evaluator Suite
         ↓
 Module Layer: AssessmentModule protocol | ModuleRegistry | starter modules | structured evidence model
         ↓
@@ -82,8 +84,9 @@ vulnoraiq/
 ├── .github/workflows/       # Python CI and ATLAS refresh validation
 ├── benchmarks/              # Regression benchmark suite, fixtures, and runner
 ├── config/                  # Targets, profiles, policies, manifests, mappings, scenarios, auth, branding
-├── core/                    # Scanner, runner, scoring, policy, exceptions, approvals, mapping, evidence, results model
-├── examples/                # Safe local demo targets and fixtures
+├── core/                    # Scanner, runner, scoring, policy, exceptions, approvals, mapping, evidence, evaluators, results model
+├── docs/owasp/              # OWASP LLM 2025 implementation specs
+├── examples/                # Safe local demo targets and OWASP fixtures
 ├── integrations/            # Demo, HTTP JSON, chat, Ollama-style, webhook adapters, and contract validation
 ├── modules/                 # Module protocol, registry, and starter modules
 ├── rag_testing/             # RAG corpus and retrieval validation
@@ -93,8 +96,7 @@ vulnoraiq/
 ├── dashboards/              # Markdown, HTML, and diff-trend dashboard generation
 ├── webui/                   # Hosted Web UI server, auth, persistent jobs, and static frontend
 ├── tests/                   # Unit tests
-├── scripts/                 # CLI entry points, package validation, release package builder, ATLAS refresh
-└── docs/                    # Architecture, status, mapping, governance docs
+└── scripts/                 # CLI entry points, package validation, release package builder, ATLAS refresh
 ```
 
 ## Quick start
@@ -110,8 +112,6 @@ The demo target uses an in-memory echo client, so the platform can be explored w
 
 ## Web UI command
 
-Run the hosted Web UI:
-
 ```bash
 vulnoraiq-web --host 127.0.0.1 --port 8787
 ```
@@ -121,8 +121,6 @@ Open:
 ```text
 http://127.0.0.1:8787
 ```
-
-The Web UI supports scan launch, realtime progress via Server-Sent Events, completed dashboard views, persistent scan history, role-aware auth hooks, and downloadable Markdown/JSON/SARIF/dashboard artifacts. See [`docs/web-ui.md`](docs/web-ui.md).
 
 ## Run tests
 
@@ -151,12 +149,7 @@ Only use this for systems you own or are explicitly authorised to assess:
 vulnoraiq \
   --target custom_http_agent \
   --profile baseline \
-  --authorised \
-  --output reports/output/authorised-target-report.md \
-  --json-output reports/output/authorised-target-report.json \
-  --sarif-output reports/output/authorised-target-report.sarif \
-  --dashboard-output reports/output/authorised-target-dashboard.md \
-  --html-dashboard-output reports/output/authorised-target-dashboard.html
+  --authorised
 ```
 
 Before running against a configured target, replace the placeholder endpoint in `config/targets.yaml`, validate the target contract, and set any required token environment variable.
@@ -174,15 +167,11 @@ vulnoraiq-validate-package
 
 ## ATLAS refresh command
 
-Use local fixture mode in CI and review generated mappings before committing refreshed data:
-
 ```bash
 vulnoraiq-refresh-atlas --source config/mitre_atlas_source_fixture.yaml --output reports/output/mitre_atlas_mapping.refresh-check.yaml
 ```
 
 ## Release package command
-
-Build a ZIP package with safe demo outputs and non-sensitive examples after generating demo reports:
 
 ```bash
 vulnoraiq-package --manifest config/release_package.yaml
@@ -190,46 +179,16 @@ vulnoraiq-package --manifest config/release_package.yaml
 
 The package path defaults to `dist/vulnoraiq-example-package.zip`.
 
-## Dashboard command
+## Configuration highlights
 
-Generate a Markdown dashboard from an existing JSON report:
-
-```bash
-vulnoraiq-dashboard \
-  --report reports/output/scan-report.json \
-  --output reports/output/dashboard.md
-```
-
-The standard scan command also writes an HTML dashboard.
-
-## Module and payload authoring
-
-Read [`docs/module-authoring.md`](docs/module-authoring.md) before adding modules or payload libraries.
-
-## Configuration
-
-- `config/default.yaml`: engine defaults and paths for reports, Web UI, approvals, RAG, agent, ATLAS, benchmarks, and release packaging
-- `config/targets.yaml`: target definitions and adapter examples
+- `docs/owasp/`: OWASP LLM 2025 implementation specs
+- `config/owasp_oracles.yaml`: safe OWASP starter oracle definitions
+- `core/evaluators.py`: deterministic local evaluator primitives
+- `examples/local_demo_targets/owasp_fixture_targets.py`: local good/bad OWASP fixture target behaviours
 - `config/target_contracts.yaml`: target adapter contract definitions
 - `config/web_users.yaml`: local Web UI auth and role configuration
 - `config/report_branding.yaml`: report/export branding
-- `config/attack_profiles.yaml`: selective module execution
-- `config/policies.yaml`: governance thresholds and blocking conditions
-- `config/policy_exceptions.yaml`: scoped exception register
-- `config/approval_evidence.yaml`: signed approval evidence register
-- `config/owasp_oracles.yaml`: safe OWASP starter oracle definitions
-- `config/owasp_llm_2025_mapping.yaml`: audit-friendly OWASP mapping
-- `config/mitre_atlas_mapping.yaml`: MITRE ATLAS mapping catalog
-- `config/atlas_refresh.yaml`: ATLAS refresh settings
-- `config/mitre_atlas_source_fixture.yaml`: local ATLAS refresh fixture
-- `config/rag_corpus_manifest.yaml`: RAG corpus metadata manifest
-- `config/rag_retrieval_scenarios.yaml`: RAG retrieval scenario manifest
-- `config/agent_runtime.yaml`: agent tool, memory, and orchestration governance manifest
-- `config/agent_execution_scenarios.yaml`: agent execution scenario manifest
-- `config/release_package.yaml`: release package manifest
-- `benchmarks/benchmark_suite.yaml`: regression benchmark suite
 - `benchmarks/fixtures/owasp_starter_fixture.yaml`: OWASP starter fixture corpus
-- `payloads/schema.yaml`: payload library schema and safety rules
 
 ## Design principles
 
