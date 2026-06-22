@@ -1,14 +1,16 @@
-# VulnoraIQ
+# Vulnora-IQ
 
-**VulnoraIQ** is an AI security assessment and VAPT platform for **LLM applications, RAG pipelines, AI agents, and orchestration layers**.
+**Vulnora-IQ** is an early-stage AI security assessment and VAPT platform for **LLM applications, RAG pipelines, AI agents, and orchestration layers**.
 
-> **Current maturity:** version `1.2.0` provides a working local/demo-safe enterprise starter platform with a modern Web UI. Start with [`docs/IMPLEMENTATION_STATUS.md`](docs/IMPLEMENTATION_STATUS.md) to see what is implemented, partial, or planned.
+> **Current maturity:** version `0.0.1.2` is an early development build. It is useful for local demos, UI workflow validation, report-pipeline development, and safe framework testing. It is **not ready for real-world VAPT testing or production assessment use** yet.
+
+> **Important limitation:** OWASP LLM 2025 coverage is only partially mapped and currently implemented as starter checks. Treat all scan output as framework-development evidence, not as validated security assurance.
 
 > **Responsible use only:** run this platform only against systems you own or are explicitly authorised to assess. The default demo target is safe and local. Configured non-demo targets require an explicit authorisation flag.
 
 ## Why this exists
 
-AI application security needs more than prompt-level checks. VulnoraIQ provides a practical structure for assessing model endpoints, retrieval layers, tools, memory, orchestration, governance controls, and reporting.
+AI application security needs more than prompt-level checks. Vulnora-IQ provides a practical structure for assessing model endpoints, retrieval layers, tools, memory, orchestration, governance controls, and reporting.
 
 The current implementation provides:
 
@@ -37,7 +39,7 @@ The current implementation provides:
 - Explicit non-demo authorisation gate
 - Python CI across supported versions with baseline, RAG, agent, diff, benchmark, trend, and release-package artifacts
 
-The roadmap now focuses on deeper production adapters, larger benchmark corpora, richer report branding, and automated release governance.
+The roadmap now focuses on completing OWASP LLM 2025 coverage, validating checks, deeper production adapters, larger benchmark corpora, richer report branding, and automated release governance.
 
 ## OWASP LLM 2025 coverage
 
@@ -79,7 +81,7 @@ Outputs: Web dashboard | Markdown | JSON | SARIF-style | dashboards | report dif
 ## Repository structure
 
 ```text
-vulnoraiq/
+Vulnora-IQ/
 ├── .github/workflows/       # Python CI
 ├── benchmarks/              # Regression benchmark suite and runner
 ├── config/                  # Targets, profiles, policies, manifests, mappings, scenarios
