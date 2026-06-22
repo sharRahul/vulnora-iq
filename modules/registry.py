@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections.abc import Iterable
 
 from modules.base import AssessmentModule
+from modules.production_wrapper import wrap_production_modules
 from modules.starter import build_starter_modules
 
 
@@ -11,7 +12,7 @@ class ModuleRegistry:
 
     def __init__(self) -> None:
         self._modules: dict[str, AssessmentModule] = {}
-        for name, module in build_starter_modules().items():
+        for name, module in wrap_production_modules(build_starter_modules()).items():
             self.register(name, module)
 
     def register(self, name: str, module: AssessmentModule) -> None:
