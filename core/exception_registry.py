@@ -7,6 +7,7 @@ from typing import Any
 
 import yaml
 
+from core.approval_evidence import ApprovalEvidenceRegistry
 from core.types import PolicyResult, ScanResult
 
 
@@ -32,8 +33,13 @@ class PolicyException:
 class PolicyExceptionRegistry:
     """Loads and applies scoped policy exceptions."""
 
-    def __init__(self, path: str | Path = "config/policy_exceptions.yaml") -> None:
+    def __init__(
+        self,
+        path: str | Path = "config/policy_exceptions.yaml",
+        approval_registry: ApprovalEvidenceRegistry | None = None,
+    ) -> None:
         self.path = Path(path)
+        self.approval_registry = approval_registry or ApprovalEvidenceRegistry()
 
     def load(self) -> list[PolicyException]:
         if not self.path.exists():
@@ -49,19 +55,42 @@ class PolicyExceptionRegistry:
             matching = [exc for exc in exceptions if self._matches(exc, result, policy_result)]
             if matching and policy_result.status in {"fail", "warn"}:
                 active = [exc for exc in matching if exc.is_active]
-                if active:
-                    ids = [exc.id for exc in active]
+                approved = [exc for exc in active if self.approval_registry.validate_reference(exc.approval_reference).status == "pass"]
+                if approved:
+                    ids = [exc.id for exc in approved]
+                    approvals = [str(exc.approval_reference) for exc in approved]
                     updated.append(
                         PolicyResult(
                             policy_id=policy_result.policy_id,
                             status="warn",
                             decision=policy_result.decision,
-                            message=f"Policy result suppressed by active exception(s): {', '.join(ids)}.",
+                            message=f"Policy result suppressed by active approved exception(s): {', '.join(ids)}.",
                             evidence={
                                 **policy_result.evidence,
                                 "original_status": policy_result.status,
                                 "active_exceptions": ids,
+                                "approval_references": approvals,
                             },
+                        )
+                    )
+                    continue
+                if active:
+                    validation = [
+                        {
+                            "exception_id": exc.id,
+                            "approval_reference": exc.approval_reference,
+                            "approval_status": self.approval_registry.validate_reference(exc.approval_reference).status,
+                            "approval_errors": self.approval_registry.validate_reference(exc.approval_reference).errors,
+                        }
+                        for exc in active
+                    ]
+                    updated.append(
+                        PolicyResult(
+                            policy_id=policy_result.policy_id,
+                            status=policy_result.status,
+                            decision=policy_result.decision,
+                            message="Matching exception exists but lacks valid approval evidence.",
+                            evidence={**policy_result.evidence, "exception_validation": validation},
                         )
                     )
                     continue
