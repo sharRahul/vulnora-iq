@@ -6,7 +6,8 @@ This document separates current working capability from roadmap items so users c
 
 | Area | Status | Notes |
 | --- | --- | --- |
-| Python package scaffold | Working | Version `1.0.0` installs as a Python package with CLI entry points for assessment, dashboard generation, report diffing, benchmark runs, trend outputs, ATLAS refresh, and release package building. |
+| Python package scaffold | Working | Version `1.1.0` installs as a Python package with CLI entry points for assessment, Web UI, dashboard generation, report diffing, benchmark runs, trend outputs, ATLAS refresh, and release package building. |
+| Modern Web UI | Working starter | `webui/server.py` and `webui/static/` provide a browser console for launching scans, realtime progress via Server-Sent Events, completed dashboard views, scan history, and artifact downloads. |
 | Demo target | Working | The default `demo` target uses an in-memory echo client and requires no external API keys. |
 | Local demo targets | Working starter | `examples/local_demo_targets/` contains a safe HTTP JSON target and a control-gap fixture for local demonstration and tests. |
 | Configured target adapters | Working starter | `integrations/adapters.py` supports chat-completions-compatible, Ollama-style generate, webhook JSON, and HTTP JSON endpoints, all gated by explicit authorisation. |
@@ -37,7 +38,13 @@ This document separates current working capability from roadmap items so users c
 
 ## Current safe usage
 
-Use the demo mode first:
+Run the Web UI:
+
+```bash
+llm-vapt-web --host 127.0.0.1 --port 8787
+```
+
+Use the CLI demo mode:
 
 ```bash
 python scripts/run_scan.py --target demo --profile baseline
@@ -73,16 +80,18 @@ For any configured target outside demo mode:
 1. Confirm the target is owned by you or explicitly approved for assessment.
 2. Replace the placeholder endpoint in `config/targets.yaml`.
 3. Set any required token environment variable.
-4. Run with the CLI authorisation flag.
+4. Run with the CLI authorisation flag or tick the Web UI authorisation confirmation.
 5. Store reports securely and review evidence before sharing.
 
 ## Remaining roadmap
 
-1. Add deeper production-specific adapters once real authorised target contracts are known.
-2. Expand benchmark corpora with more local safe fixtures.
-3. Add richer HTML branding and export packaging.
-4. Add package metadata validation before release.
-5. Add scheduled ATLAS refresh workflows if maintainers want automated external data updates.
+1. Add authentication and role separation for hosted multi-user Web UI deployments.
+2. Add persistent job storage instead of in-memory Web UI scan history.
+3. Add deeper production-specific adapters once real authorised target contracts are known.
+4. Expand benchmark corpora with more local safe fixtures.
+5. Add richer HTML branding and export packaging.
+6. Add package metadata validation before release.
+7. Add scheduled ATLAS refresh workflows if maintainers want automated external data updates.
 
 ## Documentation rule
 
