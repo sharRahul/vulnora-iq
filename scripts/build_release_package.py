@@ -9,6 +9,7 @@ import yaml
 
 
 DEFAULT_MANIFEST = "config/release_package.yaml"
+DEFAULT_OUTPUT = "dist/vulnoraiq-example-package.zip"
 
 
 def load_manifest(path: str | Path) -> dict[str, Any]:
@@ -28,7 +29,7 @@ def iter_paths(include_paths: list[str]) -> list[Path]:
 
 def build_package(manifest_path: str | Path = DEFAULT_MANIFEST) -> Path:
     manifest = load_manifest(manifest_path)
-    output = Path(manifest.get("output_path", "dist/llm-vapt-example-package.zip"))
+    output = Path(manifest.get("output_path", DEFAULT_OUTPUT))
     output.parent.mkdir(parents=True, exist_ok=True)
     include_paths = list(manifest.get("include_paths", []))
     files = iter_paths(include_paths)
@@ -39,11 +40,11 @@ def build_package(manifest_path: str | Path = DEFAULT_MANIFEST) -> Path:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Build a safe example-output release package.")
+    parser = argparse.ArgumentParser(description="Build a safe VulnoraIQ example-output release package.")
     parser.add_argument("--manifest", default=DEFAULT_MANIFEST, help="Release package manifest path.")
     args = parser.parse_args()
     output = build_package(args.manifest)
-    print(f"Release package written to {output}")
+    print(f"VulnoraIQ release package written to {output}")
 
 
 if __name__ == "__main__":
