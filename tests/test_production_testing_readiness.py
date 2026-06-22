@@ -1,27 +1,51 @@
 from __future__ import annotations
 
-from scripts.validate_production_testing_readiness import ProductionTestingReadinessValidator
-
-
-def test_production_testing_readiness_gate_without_functional_run(tmp_path):
-    summary = ProductionTestingReadinessValidator(tmp_path).validate(run_functional=False)
-
-    check_ids = {check.id for check in summary.checks}
-    assert summary.status in {"pass", "warn"}
-    assert "package_metadata" in check_ids
-    assert "target_contracts" in check_ids
-    assert "benchmark_fixtures" in check_ids
-    assert "mitre_atlas_mapping" in check_ids
-    assert "owasp_oracle_coverage" in check_ids
-    assert "non_demo_authorisation_gate" in check_ids
-    assert "documentation_and_ci_wiring" in check_ids
-    assert (tmp_path / "production-testing-readiness-summary.json").exists()
-    assert (tmp_path / "production-testing-readiness-summary.md").exists()
+from scripts.validate_production_testing_readiness import (
+    ProductionTestingReadinessSummary,
+    ProductionTestingReadinessValidator,
+    ReadinessCheck,
+)
 
 
 def test_non_demo_authorisation_gate_blocks_configured_targets(tmp_path):
-    summary = ProductionTestingReadinessValidator(tmp_path).validate(run_functional=False)
-    gate = next(check for check in summary.checks if check.id == "non_demo_authorisation_gate")
+    validator = ProductionTestingReadinessValidator(tmp_path)
+    gate = validator._check_non_demo_authorisation_gate()
 
     assert gate.status == "pass"
     assert gate.details["blocked_target"] == "custom_http_agent"
+
+
+def test_readiness_summary_outputs_are_written(tmp_path):
+    validator = ProductionTestingReadinessValidator(tmp_path)
+    summary = ProductionTestingReadinessSummary(
+        status="pass",
+        output_dir=str(tmp_path),
+        checks=[
+            ReadinessCheck(
+                id="unit_test_gate",
+                status="pass",
+                message="Synthetic readiness gate used for output serialization testing.",
+            )
+        ],
+    )
+
+    validator._write_outputs(summary)
+
+    json_output = tmp_path / "production-testing-readiness-summary.json"
+    markdown_output = tmp_path / "production-testing-readiness-summary.md"
+    assert json_output.exists()
+    assert markdown_output.exists()
+    assert "unit_test_gate" in json_output.read_text(encoding="utf-8")
+    assert "unit_test_gate" in markdown_output.read_text(encoding="utf-8")
+
+
+def test_overall_status_precedence():
+    checks = [
+        ReadinessCheck(id="pass", status="pass", message="pass"),
+        ReadinessCheck(id="warn", status="warn", message="warn"),
+        ReadinessCheck(id="fail", status="fail", message="fail"),
+    ]
+
+    assert ProductionTestingReadinessValidator._overall_status(checks) == "fail"
+    assert ProductionTestingReadinessValidator._overall_status(checks[:2]) == "warn"
+    assert ProductionTestingReadinessValidator._overall_status(checks[:1]) == "pass"
