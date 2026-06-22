@@ -58,6 +58,7 @@ class PackageMetadataValidator:
             "vulnoraiq-diff",
             "vulnoraiq-package",
             "vulnoraiq-benchmark",
+            "vulnoraiq-generate-atlas-matrix",
             "vulnoraiq-html-export",
             "vulnoraiq-validate-package",
         ):
@@ -72,6 +73,8 @@ class PackageMetadataValidator:
                 errors.append(f"Missing OWASP implementation doc: {expected_doc}")
         if not EXPECTED_MITRE_ATLAS_DOC.exists():
             errors.append(f"Missing MITRE ATLAS AI matrix doc: {EXPECTED_MITRE_ATLAS_DOC}")
+        if not Path("scripts/generate_mitre_atlas_matrix.py").exists():
+            errors.append("Missing MITRE ATLAS matrix generator")
         if not Path("examples/local_demo_targets/owasp_fixture_targets.py").exists():
             errors.append("Missing OWASP fixture target file")
         if not Path("core/evaluators.py").exists():
