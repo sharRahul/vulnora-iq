@@ -31,8 +31,8 @@ class SarifReportGenerator:
                 {
                     "tool": {
                         "driver": {
-                            "name": "llm-vapt-framework",
-                            "informationUri": "https://github.com/sharRahul/llm-vapt-framework",
+                            "name": "VulnoraIQ",
+                            "informationUri": "https://github.com/sharRahul/vulnoraiq",
                             "rules": list(rules.values()),
                         }
                     },
@@ -67,7 +67,7 @@ class SarifReportGenerator:
         return rules
 
     def _finding_to_result(self, finding: dict[str, Any]) -> dict[str, Any]:
-        title = str(finding.get("title", "LLM assessment finding"))
+        title = str(finding.get("title", "VulnoraIQ assessment finding"))
         severity = str(finding.get("severity", "info")).lower()
         return {
             "ruleId": str(finding.get("owasp_id", "UNMAPPED")),
@@ -76,7 +76,7 @@ class SarifReportGenerator:
             "locations": [
                 {
                     "physicalLocation": {
-                        "artifactLocation": {"uri": "llm-vapt-framework://assessment"},
+                        "artifactLocation": {"uri": "vulnoraiq://assessment"},
                         "region": {"startLine": 1},
                     }
                 }
