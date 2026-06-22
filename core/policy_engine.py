@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 from typing import Any
 
 from core.types import Finding, PolicyResult, ScanResult
+from rag_testing.corpus_manifest import CorpusManifestValidator
 
 
 class PolicyEngine:
@@ -100,23 +102,28 @@ class PolicyEngine:
             )
 
         corpus = config.get("default", {}).get("rag_corpus", {})
-        required_keys = ["manifest_path", "hash_algorithm", "approval_required"]
-        missing = [key for key in required_keys if key not in corpus]
-        if missing:
+        manifest_path = corpus.get("manifest_path")
+        if not manifest_path:
             return PolicyResult(
                 policy_id="rag_corpus_integrity_required",
                 status="warn",
                 decision=policy.get("decision", "warn"),
-                message="RAG profile selected but corpus integrity metadata is incomplete.",
-                evidence={"missing": missing},
+                message="RAG profile selected but no corpus manifest is configured.",
+                evidence={"configured": corpus},
             )
 
+        validation = CorpusManifestValidator().validate(Path(manifest_path))
         return PolicyResult(
             policy_id="rag_corpus_integrity_required",
-            status="pass",
+            status=validation.status,
             decision=policy.get("decision", "warn"),
-            message="RAG corpus integrity metadata is configured.",
-            evidence={"required_keys": required_keys},
+            message=f"RAG corpus manifest validation completed with status: {validation.status}.",
+            evidence={
+                "manifest_path": validation.manifest_path,
+                "document_count": validation.document_count,
+                "errors": validation.errors,
+                "warnings": validation.warnings,
+            },
         )
 
     def _evaluate_approval_policy(self, config: dict[str, Any], policy: dict[str, Any]) -> PolicyResult:
