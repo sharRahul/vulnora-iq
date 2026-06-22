@@ -15,6 +15,8 @@ class AgentExecutionScenarioResult:
     status: str
     tool_call_count: int
     memory_write_count: int
+    observed_status: str = "pass"
+    expected_status: str = "pass"
     errors: list[str] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
 
@@ -48,6 +50,8 @@ class AgentExecutionHarness:
                 status="fail",
                 tool_call_count=0,
                 memory_write_count=0,
+                observed_status="fail",
+                expected_status="pass",
                 errors=runtime_validation.errors,
                 warnings=runtime_validation.warnings,
             )
@@ -85,16 +89,18 @@ class AgentExecutionHarness:
         self._validate_memory_writes(scenario, memory_stores, errors)
 
         expected_status = str(scenario.get("expected_status", "pass"))
-        actual_status = "fail" if errors else "warn" if warnings else "pass"
-        if expected_status != actual_status:
-            errors.append(f"Expected scenario status {expected_status}, observed {actual_status}")
-            actual_status = "fail"
+        observed_status = "fail" if errors else "warn" if warnings else "pass"
+        scenario_status = "pass" if expected_status == observed_status else "fail"
+        if scenario_status == "fail":
+            errors.append(f"Expected scenario status {expected_status}, observed {observed_status}")
 
         return AgentExecutionScenarioResult(
             scenario_id=scenario_id,
-            status=actual_status,
+            status=scenario_status,
             tool_call_count=len(scenario.get("requested_tool_calls", [])),
             memory_write_count=len(scenario.get("memory_writes", [])),
+            observed_status=observed_status,
+            expected_status=expected_status,
             errors=errors,
             warnings=warnings,
         )
