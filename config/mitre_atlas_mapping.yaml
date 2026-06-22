@@ -1,0 +1,175 @@
+source:
+  name: MITRE ATLAS
+  data_repository: Straitcode/mitre-atlas-data
+  atlas_version: 5.6.0
+  data_file: dist/ATLAS.yaml
+  validation_date: 2026-06-22
+
+techniques:
+  AML.T0010:
+    name: AI Supply Chain Compromise
+    rationale: Supply-chain compromise of AI hardware, data, software, or model components.
+  AML.T0010.001:
+    name: AI Software
+    rationale: Compromise or abuse of AI software packages, frameworks, inference engines, or AI DevOps tools.
+  AML.T0010.002:
+    name: Data
+    rationale: Compromise of data sources used in AI development and operation.
+  AML.T0019:
+    name: Publish Poisoned Datasets
+    rationale: Publishing poisoned datasets that can later enter victim AI pipelines.
+  AML.T0020:
+    name: Poison Training Data
+    rationale: Poisoning training data or labels to embed vulnerabilities.
+  AML.T0029:
+    name: Denial of AI Service
+    rationale: Degrading or shutting down AI services using excessive or costly requests.
+  AML.T0031:
+    name: Erode AI Model Integrity
+    rationale: Degrading model performance and confidence over time.
+  AML.T0034:
+    name: Cost Harvesting
+    rationale: Driving AI services beyond normal capacity to increase cost.
+  AML.T0046:
+    name: Spamming AI System with Chaff Data
+    rationale: Creating excessive low-value events or agentic actions that waste review capacity.
+  AML.T0048:
+    name: External Harms
+    rationale: Using an AI system to cause harm external to the system.
+  AML.T0051:
+    name: LLM Prompt Injection
+    rationale: Inputs crafted to cause LLMs to act in unintended ways.
+  AML.T0051.000:
+    name: Direct
+    rationale: Direct prompt injection by a user of the LLM.
+  AML.T0051.001:
+    name: Indirect
+    rationale: Prompt injection through separate data channels ingested by the LLM.
+  AML.T0053:
+    name: AI Agent Tool Invocation
+    rationale: Abusing an AI agent to invoke connected tools and services.
+  AML.T0054:
+    name: LLM Jailbreak
+    rationale: Inducing LLMs to circumvent or override safety and alignment behaviours.
+  AML.T0056:
+    name: Extract LLM System Prompt
+    rationale: Attempting to extract protected system instructions.
+  AML.T0057:
+    name: LLM Data Leakage
+    rationale: Prompts that induce leakage of private or proprietary information.
+  AML.T0058:
+    name: Publish Poisoned Models
+    rationale: Publishing poisoned model artifacts for later supply-chain introduction.
+  AML.T0059:
+    name: Erode Dataset Integrity
+    rationale: Poisoning or manipulating datasets to reduce their trust and usefulness.
+  AML.T0060:
+    name: Publish Hallucinated Entities
+    rationale: Creating entities controlled by an adversary to exploit hallucinated references.
+  AML.T0062:
+    name: Discover LLM Hallucinations
+    rationale: Identifying hallucinated packages, URLs, organizations, or entities.
+  AML.T0064:
+    name: Gather RAG-Indexed Targets
+    rationale: Identifying data sources used by RAG systems.
+  AML.T0065:
+    name: LLM Prompt Crafting
+    rationale: Using system knowledge to craft prompts that bypass defenses.
+  AML.T0066:
+    name: Retrieval Content Crafting
+    rationale: Creating content intended to be retrieved by user queries and influence users or systems.
+  AML.T0067:
+    name: LLM Trusted Output Components Manipulation
+    rationale: Manipulating response components that make output appear trustworthy.
+  AML.T0067.000:
+    name: Citations
+    rationale: Manipulating citations in generated responses.
+  AML.T0068:
+    name: LLM Prompt Obfuscation
+    rationale: Obfuscating prompt injections or retrieval content to avoid detection.
+  AML.T0069:
+    name: Discover LLM System Information
+    rationale: Discovering LLM system information or instruction structure.
+  AML.T0069.002:
+    name: System Prompt
+    rationale: Discovering or extracting system prompt content.
+  AML.T0070:
+    name: RAG Poisoning
+    rationale: Injecting malicious or misleading content into data indexed by RAG systems.
+  AML.T0071:
+    name: False RAG Entry Injection
+    rationale: Introducing false entries into RAG databases.
+
+module_mappings:
+  owasp_llm01_prompt_injection:
+    - AML.T0051
+    - AML.T0051.000
+    - AML.T0051.001
+    - AML.T0065
+    - AML.T0068
+  owasp_llm02_sensitive_information_disclosure:
+    - AML.T0057
+    - AML.T0056
+    - AML.T0069
+    - AML.T0069.002
+  owasp_llm03_supply_chain:
+    - AML.T0010
+    - AML.T0010.001
+    - AML.T0010.002
+    - AML.T0058
+  owasp_llm04_data_and_model_poisoning:
+    - AML.T0019
+    - AML.T0020
+    - AML.T0059
+    - AML.T0070
+  owasp_llm05_improper_output_handling:
+    - AML.T0067
+    - AML.T0067.000
+    - AML.T0048
+  owasp_llm06_excessive_agency:
+    - AML.T0053
+    - AML.T0054
+  owasp_llm07_system_prompt_leakage:
+    - AML.T0056
+    - AML.T0069
+    - AML.T0069.002
+  owasp_llm08_vector_embedding_weaknesses:
+    - AML.T0064
+    - AML.T0066
+    - AML.T0070
+    - AML.T0071
+  owasp_llm09_misinformation:
+    - AML.T0060
+    - AML.T0062
+    - AML.T0067
+  owasp_llm10_unbounded_consumption:
+    - AML.T0029
+    - AML.T0034
+    - AML.T0046
+  rag_poisoning:
+    - AML.T0064
+    - AML.T0066
+    - AML.T0070
+    - AML.T0071
+  retrieval_manipulation:
+    - AML.T0064
+    - AML.T0066
+    - AML.T0067
+  corpus_validation:
+    - AML.T0019
+    - AML.T0020
+    - AML.T0059
+    - AML.T0070
+  agent_chain_attack:
+    - AML.T0051
+    - AML.T0053
+    - AML.T0054
+  tool_execution_monitor:
+    - AML.T0053
+  memory_tampering:
+    - AML.T0053
+    - AML.T0057
+  multi_agent_abuse:
+    - AML.T0053
+    - AML.T0054
+    - AML.T0048
