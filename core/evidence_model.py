@@ -55,7 +55,7 @@ class OwaspOracleRegistry:
     def coverage_summary(self) -> dict[str, Any]:
         oracles = self.load().get("oracles", {})
         expected_ids = {f"owasp_llm{index:02d}" for index in range(1, 11)}
-        present_ids = {key[:12] for key in oracles if key.startswith("owasp_llm")}
+        present_ids = {self._category_id(key) for key in oracles if key.startswith("owasp_llm")}
         return {
             "coverage_status": self.coverage_status(),
             "oracle_count": len(oracles),
@@ -89,3 +89,8 @@ class OwaspOracleRegistry:
             missing_evidence=[str(item) for item in missing_evidence],
             notes=notes,
         )
+
+    @staticmethod
+    def _category_id(module_name: str) -> str:
+        parts = module_name.split("_")
+        return "_".join(parts[:2]) if len(parts) >= 2 else module_name
