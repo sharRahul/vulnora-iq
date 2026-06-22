@@ -1,11 +1,11 @@
-# Modern Web UI
+# VulnoraIQ Modern Web UI
 
-The Web UI provides a user-friendly console for VAPT specialists to run local/demo-safe LLM assessments, monitor scan progress in real time, and present completed outputs.
+The VulnoraIQ Web UI provides a user-friendly console for VAPT specialists to run local/demo-safe AI security assessments, monitor scan progress in real time, and present completed outputs.
 
 ## Start the UI
 
 ```bash
-llm-vapt-web --host 127.0.0.1 --port 8787
+vulnoraiq-web --host 127.0.0.1 --port 8787
 ```
 
 Or run directly from source:
@@ -92,4 +92,4 @@ Generated artifacts:
 
 ## Operator notes
 
-Use the Web UI for demonstrations, tabletop reviews, internal VAPT reporting, and presenting completed evidence packs. For CI/CD usage, prefer the command-line tools and GitHub Actions workflow.
+Use VulnoraIQ for demonstrations, tabletop reviews, internal VAPT reporting, and presenting completed evidence packs. For CI/CD usage, prefer the command-line tools and GitHub Actions workflow.
