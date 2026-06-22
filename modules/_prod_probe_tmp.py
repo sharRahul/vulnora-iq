@@ -1,1 +1,0 @@
-from core.production_detection import ProductionOwaspDetector
