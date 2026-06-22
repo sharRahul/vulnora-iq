@@ -41,6 +41,8 @@ This additionally runs the safe `demo` target with the `baseline` profile and ge
 - README dashboard SVG example
 - readiness JSON and Markdown summaries
 
+The CI workflow runs the same functional readiness path so every testing-ready change has a repeatable verification record.
+
 ## Expected status interpretation
 
 | Status | Meaning |
