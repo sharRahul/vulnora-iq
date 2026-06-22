@@ -11,6 +11,7 @@ reports/output/*.json
 !reports/output/.gitkeep
 .env
 .env.*
+!.env.production.example
 *.key
 *.pem
 *.db
