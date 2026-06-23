@@ -4,7 +4,7 @@ on:
   push:
     branches: ["main"]
   pull_request:
-    branches: ["main"]
+    branches: ["main", "webui-pr1-polish-accessibility", "webui-pr2-structure", "webui-pr3-tests-ci", "webui-pr4-build-pipeline", "webui-pr5-auth-session", "webui-pr6-docker-deps", "webui-pr7-release-hardening"]
 
 jobs:
   test:
@@ -64,6 +64,22 @@ jobs:
 
       - name: Run production-testing readiness gate
         run: python scripts/validate_production_testing_readiness.py --output-dir reports/output/production-readiness
+
+      - name: Set up Node for WebUI tests
+        if: matrix.python-version == '3.12'
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install WebUI browser test dependencies
+        if: matrix.python-version == '3.12'
+        run: |
+          npm install
+          npx playwright install chromium --with-deps
+
+      - name: Run WebUI browser smoke tests
+        if: matrix.python-version == '3.12'
+        run: npm run test:webui
 
       - name: Run demo scan
         run: |
