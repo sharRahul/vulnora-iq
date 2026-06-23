@@ -27,8 +27,7 @@ The gate may return `warn` while non-demo targets remain placeholders. That is a
 ```bash
 vulnoraiq-production-readiness \
   --run-functional \
-  --output-dir reports/output/production-readiness \
-  --screenshot docs/assets/vulnoraiq-dashboard-example.svg
+  --output-dir reports/output/production-readiness
 ```
 
 This additionally runs the safe `demo` target with the `baseline` profile and generates:

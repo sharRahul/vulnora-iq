@@ -15,7 +15,7 @@ This document separates current working capability from roadmap items so users c
 | Phase 3 — Stronger evaluators | Working-alpha starter | `core/evaluators.py` adds deterministic local evaluators for text checks, schema checks, source access, provenance, approval, citations, action boundaries, resource limits, and manual review. |
 | Phase 4 — Contract-tested adapters | Working starter | `config/target_contracts.yaml` and `integrations/contract_validation.py` validate configured target adapter shapes before authorised testing. |
 | Phase 5 — Web UI hardening | Controlled-internal production ready | `webui/hosted_server.py`, `webui/auth.py`, `webui/persistent_jobs.py`, and `webui/production_checks.py` provide the hardened Web UI with env-token auth, trusted proxy identity mode, CSRF, rate limiting, security headers, proxy trust, audit logging, metrics, request IDs, concurrency limits, and startup validation. |
-| Phase 6 — Report quality and presentation | Working starter | Report generation includes structured evidence; `reports/html_export_package.py` builds a branded export bundle; `docs/assets/vulnoraiq-dashboard-example.svg` provides a README dashboard example image. |
+| Phase 6 — Report quality and presentation | Working starter | Report generation includes structured evidence; `reports/html_export_package.py` builds a branded export bundle; `docs/assets/vulnoraiq-dashboard-example.png` provides a README dashboard example image. |
 | Phase 7 — Release gates | Controlled-internal production ready | Package metadata, GenAI readiness, OWASP/ATLAS mapping, production readiness, runtime config, backup/restore, Docker smoke tooling, and CI gates validate package, runtime, docs, readiness, and functional acceptance. |
 
 ## GenAI Security Production Readiness Plan
@@ -43,7 +43,7 @@ This document separates current working capability from roadmap items so users c
 | Production runtime config validation | Controlled-internal production ready | `scripts/validate_runtime_production_config.py` validates runtime environment before startup. |
 | GenAI Security readiness plan | Working starter complete | `DSGAI01–DSGAI21` safe synthetic scenario coverage, deterministic evaluators, validator, tests, package metadata integration, and CI workflow gates. |
 | Agentic production readiness plan | Complete for controlled internal deployment | Phases 0-8 are complete; Phase 9 public internet/SaaS hardening is deferred. |
-| Dashboard example image | Working starter | `docs/assets/vulnoraiq-dashboard-example.svg` is referenced in `README.md`. |
+| Dashboard example image | Working starter | `docs/assets/vulnoraiq-dashboard-example.png` is a real captured Web UI dashboard screenshot referenced in `README.md`. |
 | Modern Web UI | Controlled-internal production ready | `webui/hosted_server.py` — hardened HTTP server with auth, CSRF, rate limiting, security headers, proxy trust, audit logging, metrics, request IDs, concurrency limits, and structured error handling. |
 | Authentication | Controlled-internal production ready | `webui/auth.py` — env-driven token auth with hmac constant-time comparison, production-mode validation, trusted reverse-proxy identity headers, role-based access control. |
 | CSRF protection | Controlled-internal production ready | Per-session CSRF tokens with configurable TTL, periodic cleanup, validated on state-changing requests. |
@@ -91,8 +91,7 @@ python scripts/validate_genai_readiness.py
 python scripts/validate_production_testing_readiness.py
 python scripts/validate_production_testing_readiness.py \
   --run-functional \
-  --output-dir reports/output/production-readiness \
-  --screenshot docs/assets/vulnoraiq-dashboard-example.svg
+  --output-dir reports/output/production-readiness
 ```
 
 For any configured target outside demo mode:

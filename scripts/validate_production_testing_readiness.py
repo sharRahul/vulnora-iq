@@ -38,7 +38,6 @@ class ProductionTestingReadinessValidator:
 
     def validate(
         self, run_functional: bool = False,
-        screenshot_path: str | Path = "docs/assets/vulnoraiq-dashboard-example.svg",
     ) -> ProductionTestingReadinessSummary:
         self.output_dir.mkdir(parents=True, exist_ok=True)
         checks = [
@@ -68,7 +67,7 @@ class ProductionTestingReadinessValidator:
         ]
         functional_summary: FunctionalTestSummary | None = None
         if run_functional:
-            functional_summary = run_functional_test(self.output_dir / "functional-test", screenshot_path)
+            functional_summary = run_functional_test(self.output_dir / "functional-test")
             checks.append(ReadinessCheck(
                 "functional_acceptance_run", functional_summary.status,
                 "Functional acceptance run completed.", functional_summary.to_dict(),
@@ -525,11 +524,10 @@ class ProductionTestingReadinessValidator:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Validate VulnoraIQ readiness gates.")
     parser.add_argument("--output-dir", default="reports/output/production-readiness")
-    parser.add_argument("--screenshot", default="docs/assets/vulnoraiq-dashboard-example.svg")
     parser.add_argument("--run-functional", action="store_true")
     parser.add_argument("--fail-on-warn", action="store_true")
     args = parser.parse_args()
-    summary = ProductionTestingReadinessValidator(args.output_dir).validate(args.run_functional, args.screenshot)
+    summary = ProductionTestingReadinessValidator(args.output_dir).validate(args.run_functional)
     print(json.dumps(summary.to_dict(), indent=2, sort_keys=True, default=str))
     if summary.status == "fail" or (args.fail_on_warn and summary.status == "warn"):
         raise SystemExit(1)

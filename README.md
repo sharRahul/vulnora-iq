@@ -55,7 +55,7 @@ The default `demo` target is safe and local. Configured non-demo targets require
 
 The dashboard below is generated from the safe local functional test path and shows the intended reporting workflow.
 
-![VulnoraIQ dashboard example](docs/assets/vulnoraiq-dashboard-example.svg)
+![VulnoraIQ dashboard example](docs/assets/vulnoraiq-dashboard-example.png)
 
 ---
 
@@ -175,8 +175,7 @@ python scripts/validate_production_testing_readiness.py
 python scripts/validate_runtime_production_config.py
 python scripts/validate_production_testing_readiness.py \
   --run-functional \
-  --output-dir reports/output/production-readiness \
-  --screenshot docs/assets/vulnoraiq-dashboard-example.svg
+  --output-dir reports/output/production-readiness
 ```
 
 If Docker is available:

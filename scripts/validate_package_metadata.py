@@ -42,7 +42,7 @@ EXPECTED_CLI_ENTRY_POINTS = [
 ]
 EXPECTED_MITRE_ATLAS_DOC = Path("docs/MITRE_ATLAS_AI_MATRIX.md")
 EXPECTED_THIRD_PARTY_NOTICES = Path("THIRD_PARTY_NOTICES.md")
-EXPECTED_DASHBOARD_EXAMPLE = Path("docs/assets/vulnoraiq-dashboard-example.svg")
+EXPECTED_DASHBOARD_EXAMPLE = Path("docs/assets/vulnoraiq-dashboard-example.png")
 EXPECTED_FUNCTIONAL_RUNNER = Path("scripts/run_functional_test.py")
 EXPECTED_PRODUCTION_READINESS_RUNNER = Path("scripts/validate_production_testing_readiness.py")
 EXPECTED_OWASP_ATLAS_MAPPING_RUNNER = Path("scripts/validate_owasp_atlas_mappings.py")
@@ -84,7 +84,7 @@ class PackageMetadataValidator:
         readme = Path("README.md").read_text(encoding="utf-8")
         if "not recommended for unsupervised public internet exposure" not in readme and "not ready for real-world VAPT" not in readme:
             warnings.append("README maturity warning was not found")
-        if "docs/assets/vulnoraiq-dashboard-example.svg" not in readme:
+        if "docs/assets/vulnoraiq-dashboard-example.png" not in readme:
             errors.append("README must include the dashboard example image")
         owasp_dir = Path("docs/owasp")
         for expected_doc in EXPECTED_OWASP_DOCS:
@@ -128,9 +128,9 @@ class PackageMetadataValidator:
         if not EXPECTED_DASHBOARD_EXAMPLE.exists():
             errors.append(f"Missing dashboard example image: {EXPECTED_DASHBOARD_EXAMPLE}")
         else:
-            image = EXPECTED_DASHBOARD_EXAMPLE.read_text(encoding="utf-8")
-            if not image.lstrip().startswith("<svg"):
-                errors.append("Dashboard example image must be an SVG file")
+            image_bytes = EXPECTED_DASHBOARD_EXAMPLE.read_bytes()
+            if not image_bytes.startswith(b"\x89PNG\r\n\x1a\n"):
+                errors.append("Dashboard example image must be a PNG file")
         if not Path("examples/local_demo_targets/owasp_fixture_targets.py").exists():
             errors.append("Missing OWASP fixture target file")
         if not Path("core/evaluators.py").exists():

@@ -300,8 +300,7 @@ python scripts/validate_production_testing_readiness.py
 python scripts/validate_runtime_production_config.py
 python scripts/validate_production_testing_readiness.py \
   --run-functional \
-  --output-dir reports/output/production-readiness \
-  --screenshot docs/assets/vulnoraiq-dashboard-example.svg
+  --output-dir reports/output/production-readiness
 ```
 
 If Docker is available:

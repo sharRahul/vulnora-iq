@@ -7,6 +7,16 @@
   <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">VIQ</span>
+        <span class="brand-name">VulnoraIQ<small>Security Assessment Console</small></span>
+      </div>
+      <div id="session-area" class="session-area" aria-live="polite"></div>
+    </div>
+  </header>
+
   <main class="shell">
     <section class="hero panel">
       <div>
@@ -66,9 +76,9 @@
             <circle class="track" cx="60" cy="60" r="52"></circle>
             <circle id="progress-circle" class="meter" cx="60" cy="60" r="52"></circle>
           </svg>
-          <div><strong id="progress-value">0%</strong><span id="scan-status">Idle</span></div>
+          <div><strong id="progress-value">0%</strong><span id="scan-status" aria-live="polite">Idle</span></div>
         </div>
-        <ol id="event-list" class="timeline"></ol>
+        <ol id="event-list" class="timeline" aria-live="polite" aria-label="Scan progress events"></ol>
       </section>
     </section>
 

@@ -231,8 +231,7 @@ python scripts/validate_package_metadata.py
 python scripts/validate_owasp_atlas_mappings.py
 python scripts/validate_production_testing_readiness.py \
   --run-functional \
-  --output-dir reports/output/production-readiness \
-  --screenshot docs/assets/vulnoraiq-dashboard-example.svg
+  --output-dir reports/output/production-readiness
 ```
 
 ## Deferred Phase 9: Public internet and SaaS hardening

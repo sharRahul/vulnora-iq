@@ -8,16 +8,13 @@ from scripts.run_functional_test import run_functional_test
 
 def test_functional_acceptance_runner_generates_outputs(tmp_path: Path) -> None:
     output_dir = tmp_path / "functional-test"
-    screenshot = tmp_path / "dashboard-example.svg"
 
-    summary = run_functional_test(output_dir=output_dir, screenshot_path=screenshot)
+    summary = run_functional_test(output_dir=output_dir)
 
     assert summary.status == "pass"
     assert summary.target == "demo"
     assert summary.profile == "baseline"
     assert not summary.errors
-    assert screenshot.exists()
-    assert screenshot.read_text(encoding="utf-8").startswith("<svg")
 
     summary_path = output_dir / "functional-test-summary.json"
     assert summary_path.exists()
