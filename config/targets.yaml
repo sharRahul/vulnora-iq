@@ -33,3 +33,29 @@ targets:
     endpoint: https://example.invalid/assessment-webhook
     auth: header_env
     token_env_var: LLM_VAPT_TARGET_TOKEN
+
+  owasp_lab_agent_http:
+    type: http_json
+    description: Local authorised OWASP lab AI agent target using the generic HTTP JSON contract.
+    endpoint: http://127.0.0.1:8000/agent
+    auth: none
+
+  owasp_lab_chat_completions:
+    type: chat_completions_compatible
+    description: Local authorised OWASP lab AI agent exposed through an OpenAI-compatible chat completions API.
+    endpoint: http://127.0.0.1:8000/v1/chat/completions
+    model: owasp-lab-agent
+    auth: none
+
+  owasp_lab_ollama_generate:
+    type: ollama_generate
+    description: Local authorised OWASP lab model or agent exposed through the Ollama generate API.
+    endpoint: http://127.0.0.1:11434/api/generate
+    model: llama3
+    auth: none
+
+  owasp_lab_webhook_json:
+    type: webhook_json
+    description: Local authorised OWASP lab AI agent exposed through a webhook-style JSON endpoint.
+    endpoint: http://127.0.0.1:8000/assessment-webhook
+    auth: none
