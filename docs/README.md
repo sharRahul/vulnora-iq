@@ -22,6 +22,8 @@ This folder contains the operational, security, production-readiness, assurance,
 | Upgrade from `0.0.1.x` to `0.2.0` | [`MIGRATION.md`](MIGRATION.md) |
 | Web UI categorized test catalog | [`WEB_UI_TEST_CATALOG.md`](WEB_UI_TEST_CATALOG.md) |
 | OWASP AI Testing Guide integration and actual local AI agent setup | [`AI_TESTING_GUIDE_INTEGRATION.md`](AI_TESTING_GUIDE_INTEGRATION.md) |
+| OWASP AI Testing Guide full implementation roadmap | [`AI_TESTING_GUIDE_IMPLEMENTATION_PLAN.md`](AI_TESTING_GUIDE_IMPLEMENTATION_PLAN.md) |
+| OWASP LLM framework/control mapping implementation roadmap | [`OWASP_LLM_TOP10_MAPPING_IMPLEMENTATION_PLAN.md`](OWASP_LLM_TOP10_MAPPING_IMPLEMENTATION_PLAN.md) |
 | Phase-by-phase GenAI Security readiness gate | [`genai/PRODUCTION_READINESS_PLAN.md`](genai/PRODUCTION_READINESS_PLAN.md) |
 | Phase-by-phase Agentic Applications readiness gate | [`AGENTIC_APPLICATIONS_PRODUCTION_READINESS_PLAN.md`](AGENTIC_APPLICATIONS_PRODUCTION_READINESS_PLAN.md) |
 | Readiness scoring | [`PRODUCTION_READINESS_SCORECARD.md`](PRODUCTION_READINESS_SCORECARD.md) |
@@ -58,12 +60,16 @@ It must **not** be described as:
 | CI gates | Complete: Ruff, mypy, pytest, pip check, pip-audit, metadata validation, OWASP/ATLAS mapping validation, GenAI readiness validation, readiness validation, functional acceptance |
 | Web UI test catalog | Complete: categorized suites and single-test runnable profiles are visible from the dashboard |
 | OWASP AI Testing Guide integration | Complete for current controlled, safe methodology-harness scope with local AI agent target templates; not certified assurance |
+| OWASP AI Testing Guide implementation plan | Planned: full 32-test AITG manifest, runtime/evidence modules, pillar suites, WebUI/reporting, and CI validation |
+| OWASP LLM framework mapping implementation plan | Planned: normalized framework/control mapping registry with source provenance, confidence, WebUI/report enrichment, and CI validation |
 
 ## OWASP, GenAI, Agentic, and MITRE documentation
 
 | Area | Document |
 | --- | --- |
 | OWASP AI Testing Guide integration | [`AI_TESTING_GUIDE_INTEGRATION.md`](AI_TESTING_GUIDE_INTEGRATION.md) |
+| OWASP AI Testing Guide implementation plan | [`AI_TESTING_GUIDE_IMPLEMENTATION_PLAN.md`](AI_TESTING_GUIDE_IMPLEMENTATION_PLAN.md) |
+| OWASP LLM framework/control mapping implementation plan | [`OWASP_LLM_TOP10_MAPPING_IMPLEMENTATION_PLAN.md`](OWASP_LLM_TOP10_MAPPING_IMPLEMENTATION_PLAN.md) |
 | OWASP LLM 2025 category specs | [`owasp/`](owasp/) |
 | OWASP LLM production-readiness plan | [`owasp/PRODUCTION_READINESS_PLAN.md`](owasp/PRODUCTION_READINESS_PLAN.md) |
 | OWASP to MITRE ATLAS crosswalk | [`owasp/OWASP_TO_MITRE_ATLAS_CROSSWALK.md`](owasp/OWASP_TO_MITRE_ATLAS_CROSSWALK.md) |
