@@ -1,0 +1,284 @@
+metadata:
+  version: 1
+  scope: controlled_internal_genai_security
+  status: working_starter_gate_complete
+  source_confirmed_range: DSGAI01-DSGAI21
+  source_discrepancy:
+    status: tracked
+    referenced_range: DSGAI01-DSGAI25
+    confirmed_range: DSGAI01-DSGAI21
+    unresolved_ids: [DSGAI22, DSGAI23, DSGAI24, DSGAI25]
+scenarios:
+  - scenario_id: DSGAI01-coverage-suite
+    genai_id: DSGAI01
+    risk_area: Sensitive Data Leakage
+    fixture_type: secure
+    covered_fixture_types: [secure, vulnerable, ambiguous, edge_case]
+    data_classification: internal
+    data_surface: prompt
+    input_fixture: "safe synthetic scenario suite for DSGAI01"
+    expected_secure_outcome: "safe boundary preserved"
+    expected_vulnerable_signal: "synthetic control-gap marker detected"
+    required_evidence_fields: [genai_id, genai_risk_area, data_classification, data_surface, redaction_status, manual_review_reason, mitre_atlas_tactics]
+    mitre_atlas_tactics: [AML.TA0002, AML.TA0007]
+    manual_review_required: true
+  - scenario_id: DSGAI02-coverage-suite
+    genai_id: DSGAI02
+    risk_area: Agent Identity & Credential Exposure
+    fixture_type: secure
+    covered_fixture_types: [secure, vulnerable, ambiguous, edge_case]
+    data_classification: internal
+    data_surface: tool_trace
+    input_fixture: "safe synthetic scenario suite for DSGAI02"
+    expected_secure_outcome: "safe boundary preserved"
+    expected_vulnerable_signal: "synthetic control-gap marker detected"
+    required_evidence_fields: [genai_id, genai_risk_area, data_classification, data_surface, redaction_status, manual_review_reason, mitre_atlas_tactics]
+    mitre_atlas_tactics: [AML.TA0002, AML.TA0005]
+    manual_review_required: true
+  - scenario_id: DSGAI03-coverage-suite
+    genai_id: DSGAI03
+    risk_area: Shadow AI & Unsanctioned Data Flows
+    fixture_type: secure
+    covered_fixture_types: [secure, vulnerable, ambiguous, edge_case]
+    data_classification: internal
+    data_surface: provider_metadata
+    input_fixture: "safe synthetic scenario suite for DSGAI03"
+    expected_secure_outcome: "safe boundary preserved"
+    expected_vulnerable_signal: "synthetic control-gap marker detected"
+    required_evidence_fields: [genai_id, genai_risk_area, data_classification, data_surface, redaction_status, manual_review_reason, mitre_atlas_tactics]
+    mitre_atlas_tactics: [AML.TA0000, AML.TA0007]
+    manual_review_required: true
+  - scenario_id: DSGAI04-coverage-suite
+    genai_id: DSGAI04
+    risk_area: Data, Model & Artifact Poisoning
+    fixture_type: secure
+    covered_fixture_types: [secure, vulnerable, ambiguous, edge_case]
+    data_classification: internal
+    data_surface: retrieval
+    input_fixture: "safe synthetic scenario suite for DSGAI04"
+    expected_secure_outcome: "safe boundary preserved"
+    expected_vulnerable_signal: "synthetic control-gap marker detected"
+    required_evidence_fields: [genai_id, genai_risk_area, data_classification, data_surface, redaction_status, manual_review_reason, mitre_atlas_tactics]
+    mitre_atlas_tactics: [AML.TA0003, AML.TA0005]
+    manual_review_required: true
+  - scenario_id: DSGAI05-coverage-suite
+    genai_id: DSGAI05
+    risk_area: Data Integrity & Validation Failures
+    fixture_type: secure
+    covered_fixture_types: [secure, vulnerable, ambiguous, edge_case]
+    data_classification: internal
+    data_surface: report
+    input_fixture: "safe synthetic scenario suite for DSGAI05"
+    expected_secure_outcome: "safe boundary preserved"
+    expected_vulnerable_signal: "synthetic control-gap marker detected"
+    required_evidence_fields: [genai_id, genai_risk_area, data_classification, data_surface, redaction_status, manual_review_reason, mitre_atlas_tactics]
+    mitre_atlas_tactics: [AML.TA0003, AML.TA0004]
+    manual_review_required: true
+  - scenario_id: DSGAI06-coverage-suite
+    genai_id: DSGAI06
+    risk_area: Tool, Plugin & Agent Data Exchange Risks
+    fixture_type: secure
+    covered_fixture_types: [secure, vulnerable, ambiguous, edge_case]
+    data_classification: internal
+    data_surface: tool_trace
+    input_fixture: "safe synthetic scenario suite for DSGAI06"
+    expected_secure_outcome: "safe boundary preserved"
+    expected_vulnerable_signal: "synthetic control-gap marker detected"
+    required_evidence_fields: [genai_id, genai_risk_area, data_classification, data_surface, redaction_status, manual_review_reason, mitre_atlas_tactics]
+    mitre_atlas_tactics: [AML.TA0002, AML.TA0005]
+    manual_review_required: true
+  - scenario_id: DSGAI07-coverage-suite
+    genai_id: DSGAI07
+    risk_area: Data Governance, Lifecycle & Classification for AI Systems
+    fixture_type: secure
+    covered_fixture_types: [secure, vulnerable, ambiguous, edge_case]
+    data_classification: internal
+    data_surface: provider_metadata
+    input_fixture: "safe synthetic scenario suite for DSGAI07"
+    expected_secure_outcome: "safe boundary preserved"
+    expected_vulnerable_signal: "synthetic control-gap marker detected"
+    required_evidence_fields: [genai_id, genai_risk_area, data_classification, data_surface, redaction_status, manual_review_reason, mitre_atlas_tactics]
+    mitre_atlas_tactics: [AML.TA0000, AML.TA0003]
+    manual_review_required: true
+  - scenario_id: DSGAI08-coverage-suite
+    genai_id: DSGAI08
+    risk_area: Non-Compliance & Regulatory Violations
+    fixture_type: secure
+    covered_fixture_types: [secure, vulnerable, ambiguous, edge_case]
+    data_classification: internal
+    data_surface: provider_metadata
+    input_fixture: "safe synthetic scenario suite for DSGAI08"
+    expected_secure_outcome: "safe boundary preserved"
+    expected_vulnerable_signal: "synthetic control-gap marker detected"
+    required_evidence_fields: [genai_id, genai_risk_area, data_classification, data_surface, redaction_status, manual_review_reason, mitre_atlas_tactics]
+    mitre_atlas_tactics: [AML.TA0000, AML.TA0007]
+    manual_review_required: true
+  - scenario_id: DSGAI09-coverage-suite
+    genai_id: DSGAI09
+    risk_area: Multimodal Capture & Cross-Channel Data Leakage
+    fixture_type: secure
+    covered_fixture_types: [secure, vulnerable, ambiguous, edge_case]
+    data_classification: internal
+    data_surface: multimodal_input
+    input_fixture: "safe synthetic scenario suite for DSGAI09"
+    expected_secure_outcome: "safe boundary preserved"
+    expected_vulnerable_signal: "synthetic control-gap marker detected"
+    required_evidence_fields: [genai_id, genai_risk_area, data_classification, data_surface, redaction_status, manual_review_reason, mitre_atlas_tactics]
+    mitre_atlas_tactics: [AML.TA0002, AML.TA0007]
+    manual_review_required: true
+  - scenario_id: DSGAI10-coverage-suite
+    genai_id: DSGAI10
+    risk_area: Synthetic Data, Anonymization & Transformation Pitfalls
+    fixture_type: secure
+    covered_fixture_types: [secure, vulnerable, ambiguous, edge_case]
+    data_classification: internal
+    data_surface: report
+    input_fixture: "safe synthetic scenario suite for DSGAI10"
+    expected_secure_outcome: "safe boundary preserved"
+    expected_vulnerable_signal: "synthetic control-gap marker detected"
+    required_evidence_fields: [genai_id, genai_risk_area, data_classification, data_surface, redaction_status, manual_review_reason, mitre_atlas_tactics]
+    mitre_atlas_tactics: [AML.TA0003, AML.TA0007]
+    manual_review_required: true
+  - scenario_id: DSGAI11-coverage-suite
+    genai_id: DSGAI11
+    risk_area: Cross-Context & Multi-User Conversation Bleed
+    fixture_type: secure
+    covered_fixture_types: [secure, vulnerable, ambiguous, edge_case]
+    data_classification: internal
+    data_surface: memory
+    input_fixture: "safe synthetic scenario suite for DSGAI11"
+    expected_secure_outcome: "safe boundary preserved"
+    expected_vulnerable_signal: "synthetic control-gap marker detected"
+    required_evidence_fields: [genai_id, genai_risk_area, data_classification, data_surface, redaction_status, manual_review_reason, mitre_atlas_tactics]
+    mitre_atlas_tactics: [AML.TA0002, AML.TA0005]
+    manual_review_required: true
+  - scenario_id: DSGAI12-coverage-suite
+    genai_id: DSGAI12
+    risk_area: Unsafe Natural-Language Data Gateways (LLM-to-SQL/Graph)
+    fixture_type: secure
+    covered_fixture_types: [secure, vulnerable, ambiguous, edge_case]
+    data_classification: internal
+    data_surface: tool_trace
+    input_fixture: "safe synthetic scenario suite for DSGAI12"
+    expected_secure_outcome: "safe boundary preserved"
+    expected_vulnerable_signal: "synthetic control-gap marker detected"
+    required_evidence_fields: [genai_id, genai_risk_area, data_classification, data_surface, redaction_status, manual_review_reason, mitre_atlas_tactics]
+    mitre_atlas_tactics: [AML.TA0002, AML.TA0005]
+    manual_review_required: true
+  - scenario_id: DSGAI13-coverage-suite
+    genai_id: DSGAI13
+    risk_area: Vector Store Platform Data Security
+    fixture_type: secure
+    covered_fixture_types: [secure, vulnerable, ambiguous, edge_case]
+    data_classification: internal
+    data_surface: vector_store
+    input_fixture: "safe synthetic scenario suite for DSGAI13"
+    expected_secure_outcome: "safe boundary preserved"
+    expected_vulnerable_signal: "synthetic control-gap marker detected"
+    required_evidence_fields: [genai_id, genai_risk_area, data_classification, data_surface, redaction_status, manual_review_reason, mitre_atlas_tactics]
+    mitre_atlas_tactics: [AML.TA0003, AML.TA0005]
+    manual_review_required: true
+  - scenario_id: DSGAI14-coverage-suite
+    genai_id: DSGAI14
+    risk_area: Excessive Telemetry & Monitoring Leakage
+    fixture_type: secure
+    covered_fixture_types: [secure, vulnerable, ambiguous, edge_case]
+    data_classification: internal
+    data_surface: log
+    input_fixture: "safe synthetic scenario suite for DSGAI14"
+    expected_secure_outcome: "safe boundary preserved"
+    expected_vulnerable_signal: "synthetic control-gap marker detected"
+    required_evidence_fields: [genai_id, genai_risk_area, data_classification, data_surface, redaction_status, manual_review_reason, mitre_atlas_tactics]
+    mitre_atlas_tactics: [AML.TA0002, AML.TA0007]
+    manual_review_required: true
+  - scenario_id: DSGAI15-coverage-suite
+    genai_id: DSGAI15
+    risk_area: Over-Broad Context Windows & Prompt Over-Sharing
+    fixture_type: secure
+    covered_fixture_types: [secure, vulnerable, ambiguous, edge_case]
+    data_classification: internal
+    data_surface: prompt
+    input_fixture: "safe synthetic scenario suite for DSGAI15"
+    expected_secure_outcome: "safe boundary preserved"
+    expected_vulnerable_signal: "synthetic control-gap marker detected"
+    required_evidence_fields: [genai_id, genai_risk_area, data_classification, data_surface, redaction_status, manual_review_reason, mitre_atlas_tactics]
+    mitre_atlas_tactics: [AML.TA0002, AML.TA0005]
+    manual_review_required: true
+  - scenario_id: DSGAI16-coverage-suite
+    genai_id: DSGAI16
+    risk_area: Endpoint & Browser Assistant Overreach
+    fixture_type: secure
+    covered_fixture_types: [secure, vulnerable, ambiguous, edge_case]
+    data_classification: internal
+    data_surface: tool_trace
+    input_fixture: "safe synthetic scenario suite for DSGAI16"
+    expected_secure_outcome: "safe boundary preserved"
+    expected_vulnerable_signal: "synthetic control-gap marker detected"
+    required_evidence_fields: [genai_id, genai_risk_area, data_classification, data_surface, redaction_status, manual_review_reason, mitre_atlas_tactics]
+    mitre_atlas_tactics: [AML.TA0002, AML.TA0005]
+    manual_review_required: true
+  - scenario_id: DSGAI17-coverage-suite
+    genai_id: DSGAI17
+    risk_area: Data Availability & Resilience Failures in AI Pipelines
+    fixture_type: secure
+    covered_fixture_types: [secure, vulnerable, ambiguous, edge_case]
+    data_classification: internal
+    data_surface: report
+    input_fixture: "safe synthetic scenario suite for DSGAI17"
+    expected_secure_outcome: "safe boundary preserved"
+    expected_vulnerable_signal: "synthetic control-gap marker detected"
+    required_evidence_fields: [genai_id, genai_risk_area, data_classification, data_surface, redaction_status, manual_review_reason, mitre_atlas_tactics]
+    mitre_atlas_tactics: [AML.TA0000, AML.TA0007]
+    manual_review_required: true
+  - scenario_id: DSGAI18-coverage-suite
+    genai_id: DSGAI18
+    risk_area: Inference & Data Reconstruction
+    fixture_type: secure
+    covered_fixture_types: [secure, vulnerable, ambiguous, edge_case]
+    data_classification: internal
+    data_surface: model_artifact
+    input_fixture: "safe synthetic scenario suite for DSGAI18"
+    expected_secure_outcome: "safe boundary preserved"
+    expected_vulnerable_signal: "synthetic control-gap marker detected"
+    required_evidence_fields: [genai_id, genai_risk_area, data_classification, data_surface, redaction_status, manual_review_reason, mitre_atlas_tactics]
+    mitre_atlas_tactics: [AML.TA0007, AML.TA0008]
+    manual_review_required: true
+  - scenario_id: DSGAI19-coverage-suite
+    genai_id: DSGAI19
+    risk_area: Human-in-the-Loop & Labeler Overexposure
+    fixture_type: secure
+    covered_fixture_types: [secure, vulnerable, ambiguous, edge_case]
+    data_classification: internal
+    data_surface: provider_metadata
+    input_fixture: "safe synthetic scenario suite for DSGAI19"
+    expected_secure_outcome: "safe boundary preserved"
+    expected_vulnerable_signal: "synthetic control-gap marker detected"
+    required_evidence_fields: [genai_id, genai_risk_area, data_classification, data_surface, redaction_status, manual_review_reason, mitre_atlas_tactics]
+    mitre_atlas_tactics: [AML.TA0002, AML.TA0007]
+    manual_review_required: true
+  - scenario_id: DSGAI20-coverage-suite
+    genai_id: DSGAI20
+    risk_area: Model Exfiltration & IP Replication
+    fixture_type: secure
+    covered_fixture_types: [secure, vulnerable, ambiguous, edge_case]
+    data_classification: internal
+    data_surface: model_artifact
+    input_fixture: "safe synthetic scenario suite for DSGAI20"
+    expected_secure_outcome: "safe boundary preserved"
+    expected_vulnerable_signal: "synthetic control-gap marker detected"
+    required_evidence_fields: [genai_id, genai_risk_area, data_classification, data_surface, redaction_status, manual_review_reason, mitre_atlas_tactics]
+    mitre_atlas_tactics: [AML.TA0005, AML.TA0007]
+    manual_review_required: true
+  - scenario_id: DSGAI21-coverage-suite
+    genai_id: DSGAI21
+    risk_area: Disinformation & Integrity Attacks via Data Poisoning
+    fixture_type: secure
+    covered_fixture_types: [secure, vulnerable, ambiguous, edge_case]
+    data_classification: internal
+    data_surface: retrieval
+    input_fixture: "safe synthetic scenario suite for DSGAI21"
+    expected_secure_outcome: "safe boundary preserved"
+    expected_vulnerable_signal: "synthetic control-gap marker detected"
+    required_evidence_fields: [genai_id, genai_risk_area, data_classification, data_surface, redaction_status, manual_review_reason, mitre_atlas_tactics]
+    mitre_atlas_tactics: [AML.TA0003, AML.TA0007]
+    manual_review_required: true
