@@ -1,14 +1,16 @@
 # Production Readiness Scorecard
 
 **Assessment date:** 2026-06-23  
-**Scope:** VulnoraIQ `0.2.0` controlled internal enterprise deployment for authorised LLM, RAG, tool-using, and agentic application assessments.  
+**Scope:** VulnoraIQ `0.2.0` controlled internal enterprise deployment for authorised LLM, RAG, tool-using, agentic, and GenAI data-security assessments.  
 **Rating scale:** 0-10, where 10 means fully hardened for the stated scope.
 
 ## Verdict
 
 VulnoraIQ is **ready for controlled internal enterprise deployment** when deployed with production configuration validation, strong environment-backed tokens or trusted reverse-proxy identity, reverse-proxy/TLS controls, SQLite persistence, and the documented runbook/incident-response process.
 
-VulnoraIQ is **not ready for public internet-facing, multi-tenant SaaS, unsupervised production hosting, or certified VAPT-grade assurance**. Those capabilities remain deferred to the public/SaaS hardening backlog.
+The GenAI Security readiness gate is now **working starter complete** for controlled internal assessment use: `DSGAI01–DSGAI21` have safe synthetic scenario coverage, deterministic evaluator primitives, required evidence fields, source discrepancy tracking, package metadata validation, tests, and CI workflow gates.
+
+VulnoraIQ is **not ready for public internet-facing, multi-tenant SaaS, unsupervised production hosting, production-validated real-world GenAI detection assurance, or certified VAPT-grade assurance**. Those capabilities remain deferred to the public/SaaS and independent-assurance backlog.
 
 ## Controlled internal deployment scorecard
 
@@ -25,18 +27,19 @@ VulnoraIQ is **not ready for public internet-facing, multi-tenant SaaS, unsuperv
 | 9. Observability and monitoring | 9/10 | `/healthz`, `/readyz`, `/metrics`, `tests/test_metrics.py`, Docker healthcheck | No alert rules, SLOs, or distributed tracing. | No |
 | 10. Backup and restore | 9/10 | `scripts/backup_sqlite_store.py`, `scripts/restore_sqlite_store.py`, `tests/test_backup_restore.py`, `docs/RUNBOOK.md` | No automated backup scheduler or backup-age metric. | No |
 | 11. Containerisation | 9/10 | `Dockerfile`, `.dockerignore`, `docker-compose.yml`, `.env.production.example`, `tests/test_container_config.py` | No container image signing or container scanner workflow. | No |
-| 12. CI/CD and quality gates | 9/10 | `.github/workflows/ci.yml`, `.github/workflows/python-ci.yml`, `pyproject.toml`, `tests/`, `scripts/validate_package_metadata.py`, `scripts/validate_production_testing_readiness.py`, `scripts/validate_owasp_atlas_mappings.py` | No build/publish release workflow, SAST/DAST pipeline, or image scan gate. | No |
+| 12. CI/CD and quality gates | 9/10 | `.github/workflows/ci.yml`, `.github/workflows/python-ci.yml`, `pyproject.toml`, `tests/`, `scripts/validate_package_metadata.py`, `scripts/validate_production_testing_readiness.py`, `scripts/validate_owasp_atlas_mappings.py`, `scripts/validate_genai_readiness.py` | No build/publish release workflow, SAST/DAST pipeline, or image scan gate. | No |
 | 13. Secrets management | 8/10 | `webui/auth.py`, `.env.production.example`, `webui/production_checks.py`, `docs/RUNBOOK.md` | No direct Vault/AWS/Azure/GCP secrets-manager integration or automated rotation. | No |
 | 14. Operational runbooks | 7/10 | `docs/RUNBOOK.md`, `docs/DEPLOYMENT.md`, backup/restore scripts | Needs environment-specific contacts, alert thresholds, and capacity planning. | No |
 | 15. Incident response | 6/10 | `docs/INCIDENT_RESPONSE.md`, audit logs, metrics, rollback guidance | Needs organisation-specific escalation contacts, breach-notification process, SIEM rules, and tabletop validation. | No |
 | 16. Release management | 7/10 | `docs/RELEASE_CHECKLIST.md`, `CHANGELOG.md`, `scripts/build_release_package.py`, `scripts/validate_package_metadata.py` | No signed artifacts, canary release workflow, or automated release publishing. | No |
-| 17. Scanner / evaluator assurance | 9/10 | `docs/ASSESSMENT_ASSURANCE.md`, `core/production_detection.py`, `config/owasp_oracles.yaml`, `config/production_owasp_detection.yaml`, `tests/test_production_detection.py` | No independent penetration test, third-party benchmark, or certified VAPT assurance. | No |
+| 17. Scanner / evaluator assurance | 9/10 | `docs/ASSESSMENT_ASSURANCE.md`, `core/production_detection.py`, `core/evaluators.py`, `core/genai_evaluators.py`, `config/owasp_oracles.yaml`, `tests/test_production_detection.py`, `tests/test_genai_readiness_validation.py` | No independent validation against authorised real targets or certified VAPT assurance. | No |
 | 18. Multi-instance / multi-tenant limitations | 8/10 | Single-instance deployment boundary, SQLite WAL persistence, reverse-proxy docs | No tenant isolation, shared CSRF/rate-limit state, or horizontally scalable database. | No for controlled internal; yes for SaaS. |
-| 19. OWASP / MITRE ATLAS mapping governance | 9/10 | `scripts/validate_owasp_atlas_mappings.py`, `tests/test_owasp_atlas_mapping_validation.py`, `.github/workflows/ci.yml`, `.github/workflows/python-ci.yml` | Current mappings are candidate/validated framework mappings and still require manual security review before assurance claims. | No |
+| 19. OWASP / MITRE ATLAS mapping governance | 9/10 | `scripts/validate_owasp_atlas_mappings.py`, `tests/test_owasp_atlas_mapping_validation.py`, `.github/workflows/ci.yml`, `.github/workflows/python-ci.yml` | Current mappings are framework mappings and require manual security review before assurance claims. | No |
+| 20. GenAI Security readiness governance | 8/10 | `benchmarks/fixtures/genai/scenarios.yaml`, `core/genai_evaluators.py`, `scripts/validate_genai_readiness.py`, `tests/test_genai_readiness_validation.py`, CI workflows, `docs/genai/PRODUCTION_READINESS_PLAN.md` | Working-starter safe synthetic coverage only; needs real-world validation, provider inventory connectors, dashboard/report depth, and independent assurance. | No |
 
 **Overall controlled internal score:** **8.5/10**
 
-The gate-compliance register scores **10/10** because all controlled-internal blockers are closed. The scorecard remains lower because it includes non-blocking maturity items such as SIEM integration, OIDC, signed releases, SAST/DAST, public/SaaS architecture, and independent assurance.
+The gate-compliance register scores **10/10** because all controlled-internal blockers are closed. The scorecard remains lower because it includes non-blocking maturity items such as SIEM integration, OIDC, signed releases, SAST/DAST, public/SaaS architecture, GenAI real-world validation, and independent assurance.
 
 ## Public internet / SaaS readiness scorecard
 
@@ -61,6 +64,7 @@ The gate-compliance register scores **10/10** because all controlled-internal bl
 | Scanner/evaluator assurance | 4/10 | No independent audit/certification or continuous adversarial benchmark. |
 | Multi-instance / multi-tenant limitations | 2/10 | No tenant isolation or horizontally scalable architecture. |
 | OWASP / MITRE ATLAS mapping governance | 6/10 | Good traceability foundation, but mappings are not assurance-certified. |
+| GenAI Security readiness governance | 4/10 | Working-starter safe synthetic coverage only; no tenant-aware GenAI validation or independent assurance. |
 
 **Overall public internet / SaaS score:** **3.8/10**
 
@@ -70,6 +74,10 @@ Use:
 
 > Controlled internal enterprise production-readiness gate passed.
 
+Allowed GenAI-specific wording:
+
+> GenAI Security working-starter readiness gate completed for controlled internal assessment use with safe synthetic `DSGAI01–DSGAI21` scenario coverage.
+
 Do not use:
 
 - public internet ready
@@ -77,6 +85,7 @@ Do not use:
 - multi-tenant ready
 - certified VAPT-grade ready
 - production pentest replacement
+- independently validated real-world GenAI detection coverage
 
 ## Validation commands
 
@@ -89,6 +98,7 @@ python -m pip check
 pip-audit
 python scripts/validate_package_metadata.py
 python scripts/validate_owasp_atlas_mappings.py
+python scripts/validate_genai_readiness.py
 python scripts/validate_production_testing_readiness.py \
   --run-functional \
   --output-dir reports/output/production-readiness \
@@ -97,6 +107,7 @@ python scripts/validate_production_testing_readiness.py \
 
 ## Related documents
 
+- [`genai/PRODUCTION_READINESS_PLAN.md`](genai/PRODUCTION_READINESS_PLAN.md)
 - [`AGENTIC_APPLICATIONS_PRODUCTION_READINESS_PLAN.md`](AGENTIC_APPLICATIONS_PRODUCTION_READINESS_PLAN.md)
 - [`PRODUCTION_HARDENING_BACKLOG.md`](PRODUCTION_HARDENING_BACKLOG.md)
 - [`DEPLOYMENT.md`](DEPLOYMENT.md)
