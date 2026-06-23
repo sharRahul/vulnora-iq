@@ -6,6 +6,9 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- Release-only Windows, Linux, and macOS artifact build workflow triggered by published GitHub Releases or manual dispatch only.
+- Platform release package builder for `vulnoraiq-<version>-windows.zip`, `vulnoraiq-<version>-linux.zip`, and `vulnoraiq-<version>-macos.zip`.
+- Release artifact documentation in `docs/RELEASE_ARTIFACTS.md`.
 - Cross-platform local Web UI launchers for standalone laptop/workstation use:
   - `launch-vulnoraiq-webui.bat`
   - `launch-vulnoraiq-webui.command`
@@ -29,6 +32,7 @@ All notable changes to this project will be documented in this file.
 - VulnoraIQ findings remain framework evidence requiring human review.
 - This release does not claim certified VAPT-grade assurance or independently validated real-environment GenAI detection coverage.
 - Launcher mode is intended for local laptop/workstation use only; exposed or shared deployments must use production mode with auth enabled and production configuration validation.
+- Platform release artifacts are zip packages with platform launchers, not signed native installers.
 
 ## [0.2.0] - 2026-06-22
 
