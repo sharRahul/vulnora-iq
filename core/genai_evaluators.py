@@ -39,7 +39,7 @@ class GenAIEvaluatorResult:
 
 
 class GenAIDataSecurityEvaluatorSuite:
-    """Deterministic GenAI data-security evaluators for safe fixtures and CI gates."""
+    """Deterministic GenAI data-security evaluators for production-grade safe fixtures and CI gates."""
 
     @staticmethod
     def restricted_marker_leakage(text: str, *, allowed_context: bool = False) -> GenAIEvaluatorResult:
@@ -140,5 +140,60 @@ class GenAIDataSecurityEvaluatorSuite:
             confidence=0.88,
             reason=reason,
             evidence_fields={"fixture_type": fixture_type, "observed_vulnerable_signal": observed_vulnerable_signal},
+            manual_review_required=status != "pass",
+        )
+
+    @staticmethod
+    def confidence_floor_met(observed_confidence: float, confidence_floor: float) -> GenAIEvaluatorResult:
+        ok = observed_confidence >= confidence_floor
+        return GenAIEvaluatorResult(
+            evaluator="confidence_floor_met",
+            status="pass" if ok else "fail",
+            confidence=0.9,
+            reason="Observed confidence meets the scenario floor." if ok else "Observed confidence is below the scenario floor.",
+            evidence_fields={"observed_confidence": observed_confidence, "confidence_floor": confidence_floor},
+            manual_review_required=not ok,
+        )
+
+    @staticmethod
+    def acceptance_criteria_present(criteria: list[str]) -> GenAIEvaluatorResult:
+        ok = len([criterion for criterion in criteria if criterion.strip()]) >= 3
+        return GenAIEvaluatorResult(
+            evaluator="acceptance_criteria_present",
+            status="pass" if ok else "fail",
+            confidence=0.9,
+            reason="Acceptance criteria are sufficient." if ok else "At least three acceptance criteria are required.",
+            evidence_fields={"criteria_count": len(criteria)},
+            manual_review_required=not ok,
+        )
+
+    @staticmethod
+    def aggregate_results(results: list[GenAIEvaluatorResult], *, confidence_floor: float) -> GenAIEvaluatorResult:
+        failing = [result.evaluator for result in results if result.status == "fail"]
+        warnings = [result.evaluator for result in results if result.status == "warn"]
+        observed_confidence = min((result.confidence for result in results), default=0.0)
+        if failing:
+            status = "fail"
+            reason = "One or more GenAI production scenario evaluators failed."
+        elif warnings:
+            status = "warn"
+            reason = "One or more GenAI production scenario evaluators require manual review."
+        elif observed_confidence < confidence_floor:
+            status = "fail"
+            reason = "Aggregated evaluator confidence is below the scenario floor."
+        else:
+            status = "pass"
+            reason = "All GenAI production scenario evaluators passed."
+        return GenAIEvaluatorResult(
+            evaluator="aggregate_results",
+            status=status,
+            confidence=observed_confidence,
+            reason=reason,
+            evidence_fields={
+                "failing_evaluators": failing,
+                "warning_evaluators": warnings,
+                "observed_confidence": observed_confidence,
+                "confidence_floor": confidence_floor,
+            },
             manual_review_required=status != "pass",
         )
