@@ -11,7 +11,7 @@ npx playwright install chromium
 npm run test:webui
 ```
 
-The Playwright configuration starts the hosted WebUI on `127.0.0.1:8787` with authentication disabled and writes temporary job output under `reports/output/webui-playwright`.
+The current Playwright smoke test loads `webui/static/index.html` directly as a static file. It does not start the hosted server, which keeps the first browser gate stable and fast. Hosted-server, auth, scan queueing, and dashboard-flow tests are tracked as future coverage after the static smoke path is stable.
 
 ## CI behavior
 
@@ -24,6 +24,7 @@ Browser tests run only on the Python 3.12 CI matrix leg to avoid multiplying bro
 
 ## Future coverage
 
+- Hosted WebUI server startup.
 - Login/token flow when auth is enabled.
 - Demo scan queueing and dashboard rendering.
 - Catalog, history, and findings filtering.
