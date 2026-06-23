@@ -6,7 +6,7 @@ Target: controlled production assessment readiness, not SaaS multi-tenant produc
 
 ## Current verdict
 
-VulnoraIQ is ready for **controlled internal enterprise deployment** with the security, operational, and deployment controls listed below. It is **not ready for public internet-facing, multi-tenant SaaS, or unsupervised production hosting**. See [`PRODUCTION_READINESS_SCORECARD.md`](PRODUCTION_READINESS_SCORECARD.md) for detailed scoring and remaining gaps, and [`AGENTIC_APPLICATIONS_PRODUCTION_READINESS_PLAN.md`](AGENTIC_APPLICATIONS_PRODUCTION_READINESS_PLAN.md) for the phase-by-phase implementation gate.
+VulnoraIQ is ready for **controlled internal enterprise deployment** with the security, operational, and deployment controls listed below. The Agentic Applications Production Readiness Plan is **complete for phases 0-8** under this controlled-internal scope. It is **not ready for public internet-facing, multi-tenant SaaS, or unsupervised production hosting**. See [`PRODUCTION_READINESS_SCORECARD.md`](PRODUCTION_READINESS_SCORECARD.md) for detailed scoring and remaining gaps, and [`AGENTIC_APPLICATIONS_PRODUCTION_READINESS_PLAN.md`](AGENTIC_APPLICATIONS_PRODUCTION_READINESS_PLAN.md) for the phase-by-phase implementation gate.
 
 ## Closed blockers (completed in production hardening tranche)
 
@@ -48,4 +48,4 @@ The 10/10 gate-compliance score means all PRD-001 through PRD-011 blockers are c
 
 ## Production claim rule
 
-Do not describe VulnoraIQ as public-internet or multi-tenant SaaS ready until the remaining gaps above are addressed. Controlled internal deployment readiness is attested by this register, the scorecard, the Agentic Applications Production Readiness Plan, and the production-readiness validation gate.
+Do not describe VulnoraIQ as public-internet or multi-tenant SaaS ready until the remaining gaps above are addressed. Controlled internal deployment readiness is attested by this register, the scorecard, the completed Agentic Applications Production Readiness Plan, and the production-readiness validation gate.
