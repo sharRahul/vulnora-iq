@@ -2,9 +2,9 @@
 
 This document separates current complete capability from future assurance and maturity items so users can understand what is ready today.
 
-> **Current maturity:** VulnoraIQ version `0.2.0` has passed the **controlled internal production-readiness gate** for self-hosted laptop/server use, with security hardening, SQLite persistence, auth, CSRF, rate limiting, audit logging, metrics, backup/restore tooling, container support, standalone local launchers, production startup validation, completed OWASP LLM readiness coverage for the current safe local/internal scope, completed Agentic Applications readiness gates, and completed GenAI Security scenario-harness readiness for `DSGAI01–DSGAI21`.
+> **Current maturity:** VulnoraIQ version `0.2.0` has passed the **controlled internal production-readiness gate** for self-hosted laptop/server use, with security hardening, SQLite persistence, auth, CSRF, rate limiting, audit logging, metrics, backup/restore tooling, container support, standalone local launchers, production startup validation, completed OWASP LLM readiness coverage for the current safe local/internal scope, completed OWASP AI Testing Guide methodology-harness integration, completed Agentic Applications readiness gates, and completed GenAI Security scenario-harness readiness for `DSGAI01–DSGAI21`.
 
-> **Important limitation:** OWASP LLM 2025, GenAI Security, Agentic Applications, and MITRE ATLAS mappings are framework evidence and planning/validation controls. They are not the same as independently validated assurance. Treat output as development and internal assessment evidence requiring human review.
+> **Important limitation:** OWASP LLM 2025, OWASP AI Testing Guide, GenAI Security, Agentic Applications, and MITRE ATLAS mappings are framework evidence and planning/validation controls. They are not the same as independently validated assurance. Treat output as development and internal assessment evidence requiring human review.
 
 ## Seven-phase implementation status
 
@@ -44,6 +44,7 @@ This document separates current complete capability from future assurance and ma
 | Production readiness gate | Complete for self-hosted production scope | `scripts/validate_production_testing_readiness.py` validates production controls and documentation guardrails. |
 | Production runtime config validation | Complete for self-hosted production scope | `scripts/validate_runtime_production_config.py` validates runtime environment before startup. |
 | GenAI Security readiness plan | Complete for current scope | `DSGAI01–DSGAI21` safe synthetic scenario coverage, deterministic evaluators, validator, tests, package metadata integration, and CI workflow gates. |
+| OWASP AI Testing Guide integration | Complete for current scope | `ai_testing_guide_foundation` profile, safe payload library, framework modules, local OWASP lab targets, documentation, and tests are in place for controlled methodology-harness assessment. |
 | Agentic production readiness plan | Complete for self-hosted internal deployment | Agentic readiness gates are complete for the intended local/internal-server application model. |
 | Web UI home screen image | Complete | `docs/assets/vulnoraiq-webui-home.png` is a real captured Web UI home screen screenshot referenced in `README.md`. |
 | Modern Web UI | Complete for self-hosted production scope | `webui/hosted_server.py` — hardened HTTP server with auth, CSRF, rate limiting, security headers, proxy trust, audit logging, metrics, request IDs, concurrency limits, and structured error handling. |
@@ -63,7 +64,7 @@ This document separates current complete capability from future assurance and ma
 | Demo target | Complete | The default `demo` target uses an in-memory echo client and requires no external API keys. |
 | Local demo targets | Complete for current scope | Safe HTTP JSON, control-gap, and OWASP good/bad fixture targets for local demonstration and tests. |
 | Configured target adapters | Complete for current scope | Chat-completions-compatible, Ollama-style generate, webhook JSON, and HTTP JSON endpoint shapes. |
-| Profiles | Complete for current scope | `baseline`, `rag`, `agent`, and `full` profiles are defined and validated by smoke/functional flows. |
+| Profiles | Complete for current scope | `baseline`, `rag`, `agent`, `full`, and `ai_testing_guide_foundation` profiles are defined and validated by smoke/functional or profile-resolution flows. |
 | Scanner | Complete for current scope | Scanner loads config, runs profile modules, scores findings, evaluates policy, and creates evidence. Findings require human review. |
 | OWASP LLM 2025 oracle coverage | Complete for current scope | Safe oracle coverage exists for all 10 OWASP LLM 2025 categories. |
 | GenAI Security coverage | Complete for current scope | Safe synthetic `DSGAI01–DSGAI21` manifest, deterministic evaluator suite, CI validator, and source discrepancy tracking. |
@@ -111,7 +112,7 @@ python scripts/validate_production_testing_readiness.py \
 For any configured target outside demo mode:
 
 1. Confirm the target is owned by you or explicitly approved for assessment.
-2. Replace the placeholder endpoint in `config/targets.yaml`.
+2. Replace the placeholder endpoint in `config/targets.yaml` or start a local lab target that matches one of the `owasp_lab_*` loopback templates.
 3. Validate target contracts before testing.
 4. Set any required token environment variable.
 5. Run with the CLI authorisation flag or tick the Web UI authorisation confirmation.
@@ -120,7 +121,7 @@ For any configured target outside demo mode:
 
 ## Implementation roadmap status
 
-All production hardening blockers PRD-001 through PRD-012 are closed for self-hosted internal deployment. The OWASP LLM 2025 safe local/internal readiness scope is complete for all 10 categories. The Agentic Applications Production Readiness Plan is complete for the intended laptop/server application model. The GenAI Security Production Readiness Plan is complete for `DSGAI01–DSGAI21` controlled internal readiness. The standalone local launcher path is complete for laptop/workstation use.
+All production hardening blockers PRD-001 through PRD-012 are closed for self-hosted internal deployment. The OWASP LLM 2025 safe local/internal readiness scope is complete for all 10 categories. The OWASP AI Testing Guide foundation suite is complete for the current controlled methodology-harness scope. The Agentic Applications Production Readiness Plan is complete for the intended laptop/server application model. The GenAI Security Production Readiness Plan is complete for `DSGAI01–DSGAI21` controlled internal readiness. The standalone local launcher path is complete for laptop/workstation use.
 
 The next phases should focus on:
 
