@@ -2,7 +2,7 @@
 
 > **Current target:** `0.2.0` / `0.2.0-rc1`  
 > **Scope:** controlled internal enterprise production-readiness release  
-> **Last updated:** 2026-06-22
+> **Last updated:** 2026-06-23
 
 This checklist must be completed before tagging a production-readiness release candidate or final release.
 
@@ -19,6 +19,7 @@ Do **not** describe `0.2.0` as public SaaS, multi-tenant, unsupervised internet-
 - [ ] All planned release changes are merged or intentionally deferred.
 - [ ] `README.md`, `SECURITY.md`, `CHANGELOG.md`, and `docs/` are aligned with current maturity.
 - [ ] `docs/PRODUCTION_READINESS_SCORECARD.md` and `docs/PRODUCTION_HARDENING_BACKLOG.md` do not contradict each other.
+- [ ] `docs/AGENTIC_APPLICATIONS_PRODUCTION_READINESS_PLAN.md` reflects the current phase gate status.
 - [ ] `docs/ASSESSMENT_ASSURANCE.md` clearly states scanner/evaluator limitations.
 - [ ] No P0/P1 release blockers remain.
 - [ ] Known accepted risks are documented.
@@ -72,12 +73,13 @@ Acceptance:
 - [ ] pip check passes or unrelated environment warnings are documented.
 - [ ] pip-audit has no unaccepted high/critical runtime vulnerabilities.
 
-## Stage 3: package and readiness validation
+## Stage 3: package, mapping, and readiness validation
 
 Run:
 
 ```bash
 python scripts/validate_package_metadata.py
+python scripts/validate_owasp_atlas_mappings.py
 python scripts/validate_production_testing_readiness.py
 python scripts/validate_runtime_production_config.py
 python scripts/validate_production_testing_readiness.py \
@@ -89,6 +91,7 @@ python scripts/validate_production_testing_readiness.py \
 Acceptance:
 
 - [ ] Package metadata validation passes.
+- [ ] OWASP/ATLAS mapping metadata validation passes.
 - [ ] Production readiness validation passes all checks.
 - [ ] Runtime production config validation passes under a valid production env.
 - [ ] Functional acceptance passes.
@@ -164,6 +167,7 @@ Acceptance:
 - [ ] `INCIDENT_RESPONSE.md` references current audit events, SQLite, metrics, and token/proxy auth.
 - [ ] `MIGRATION.md` covers `0.0.1.x` to `0.2.0`.
 - [ ] `ASSESSMENT_ASSURANCE.md` warns that findings are framework evidence, not certified VAPT assurance.
+- [ ] `AGENTIC_APPLICATIONS_PRODUCTION_READINESS_PLAN.md` shows the current phase-by-phase gate status.
 - [ ] `PRODUCTION_HARDENING_BACKLOG.md` documents public/SaaS gaps.
 
 ## Stage 8: security review
@@ -172,6 +176,7 @@ Acceptance:
 - [ ] `.env.production.example` contains placeholders only.
 - [ ] Production auth is fail-closed.
 - [ ] `listen_address_safe` check is reachable in `validate_all()`.
+- [ ] OWASP/ATLAS mapping metadata validator passes for active oracles/checks.
 - [ ] Trusted proxy identity spoofing tests pass.
 - [ ] CSRF, rate-limit, request-size, artifact traversal, metrics auth, and audit tests pass.
 - [ ] Dependency audit is reviewed.

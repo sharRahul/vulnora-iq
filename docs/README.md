@@ -17,6 +17,7 @@ This folder contains the operational, security, production-readiness, assurance,
 | Incident handling | [`INCIDENT_RESPONSE.md`](INCIDENT_RESPONSE.md) |
 | Release gates and RC/final tagging | [`RELEASE_CHECKLIST.md`](RELEASE_CHECKLIST.md) |
 | Upgrade from `0.0.1.x` to `0.2.0` | [`MIGRATION.md`](MIGRATION.md) |
+| Phase-by-phase agentic readiness gate | [`AGENTIC_APPLICATIONS_PRODUCTION_READINESS_PLAN.md`](AGENTIC_APPLICATIONS_PRODUCTION_READINESS_PLAN.md) |
 | Readiness scoring | [`PRODUCTION_READINESS_SCORECARD.md`](PRODUCTION_READINESS_SCORECARD.md) |
 | Hardening backlog and accepted risks | [`PRODUCTION_HARDENING_BACKLOG.md`](PRODUCTION_HARDENING_BACKLOG.md) |
 | What scan findings do and do not prove | [`ASSESSMENT_ASSURANCE.md`](ASSESSMENT_ASSURANCE.md) |
@@ -47,7 +48,7 @@ It must **not** be described as:
 | Observability | `/healthz`, `/readyz`, auth-protected `/metrics`, structured JSON audit logs |
 | Backup/restore | SQLite online backup and restore scripts with validation |
 | Container | Non-root Dockerfile, `/data` volume, healthcheck, Docker Compose example |
-| CI gates | Ruff, mypy, pytest, pip check, pip-audit, metadata validation, readiness validation, functional acceptance |
+| CI gates | Ruff, mypy, pytest, pip check, pip-audit, metadata validation, OWASP/ATLAS mapping validation, readiness validation, functional acceptance |
 
 ## OWASP, GenAI, Agentic, and MITRE documentation
 
@@ -59,7 +60,8 @@ It must **not** be described as:
 | GenAI security implementation plan | [`genai/`](genai/) |
 | GenAI production-readiness plan | [`genai/PRODUCTION_READINESS_PLAN.md`](genai/PRODUCTION_READINESS_PLAN.md) |
 | Agentic Applications implementation plan | [`agentic/`](agentic/) |
-| Agentic Applications production-readiness plan | [`agentic/PRODUCTION_READINESS_PLAN.md`](agentic/PRODUCTION_READINESS_PLAN.md) |
+| Agentic Applications source-doc production-readiness plan | [`agentic/PRODUCTION_READINESS_PLAN.md`](agentic/PRODUCTION_READINESS_PLAN.md) |
+| Agentic Applications repo phase gate | [`AGENTIC_APPLICATIONS_PRODUCTION_READINESS_PLAN.md`](AGENTIC_APPLICATIONS_PRODUCTION_READINESS_PLAN.md) |
 | OWASP source document review index | [`owasp-documents/`](owasp-documents/) |
 | MITRE ATLAS AI planning matrix | [`MITRE_ATLAS_AI_MATRIX.md`](MITRE_ATLAS_AI_MATRIX.md) |
 | MITRE ATLAS mapping notes | [`mitre-atlas-mapping.md`](mitre-atlas-mapping.md) |
@@ -87,13 +89,14 @@ When production posture or assessment coverage changes, update these together:
 3. `docs/README.md`
 4. `docs/DEPLOYMENT.md`
 5. `docs/IMPLEMENTATION_STATUS.md`
-6. `docs/PRODUCTION_READINESS_SCORECARD.md`
-7. `docs/PRODUCTION_HARDENING_BACKLOG.md`
-8. `docs/ASSESSMENT_ASSURANCE.md`
-9. `docs/owasp/OWASP_TO_MITRE_ATLAS_CROSSWALK.md`
-10. `docs/genai/`
-11. `docs/agentic/`
-12. `docs/owasp-documents/`
-13. `CHANGELOG.md`
+6. `docs/AGENTIC_APPLICATIONS_PRODUCTION_READINESS_PLAN.md`
+7. `docs/PRODUCTION_READINESS_SCORECARD.md`
+8. `docs/PRODUCTION_HARDENING_BACKLOG.md`
+9. `docs/ASSESSMENT_ASSURANCE.md`
+10. `docs/owasp/OWASP_TO_MITRE_ATLAS_CROSSWALK.md`
+11. `docs/genai/`
+12. `docs/agentic/`
+13. `docs/owasp-documents/`
+14. `CHANGELOG.md`
 
 If a capability is starter-level, partial, experimental, accepted risk, source discrepancy, or roadmap-only, mark it clearly in every document that mentions it.

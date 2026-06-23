@@ -68,6 +68,9 @@ jobs:
       - name: Validate package metadata
         run: python scripts/validate_package_metadata.py
 
+      - name: Validate OWASP/MITRE mapping metadata
+        run: python scripts/validate_owasp_atlas_mappings.py
+
       - name: Validate target contracts
         run: |
           python - <<'PY'
