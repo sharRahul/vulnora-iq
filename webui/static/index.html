@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>VulnoraIQ Console</title>
   <link rel="stylesheet" href="/static/styles.css">
+  <link rel="stylesheet" href="/static/scan-progress.css">
+  <link rel="stylesheet" href="/static/ui-polish.css">
 </head>
 <body>
   <header class="topbar">
@@ -48,6 +50,21 @@
           <select id="profile-select" name="profile"></select>
         </label>
         <div id="selected-profile-detail" class="selected-profile-detail"></div>
+
+        <section id="run-readiness" class="run-readiness" aria-live="polite">
+          <div>
+            <p class="eyebrow">Run readiness</p>
+            <h3 id="readiness-title">Ready to configure</h3>
+            <p id="readiness-message">Choose a target and test option to see what will run before starting.</p>
+          </div>
+          <div class="readiness-grid">
+            <article><span>Target</span><strong id="readiness-target">-</strong></article>
+            <article><span>Test option</span><strong id="readiness-profile">-</strong></article>
+            <article><span>Modules</span><strong id="readiness-modules">-</strong></article>
+            <article><span>Authorisation</span><strong id="readiness-authorisation">Demo/local</strong></article>
+          </div>
+        </section>
+
         <section class="test-catalog-wrap" aria-labelledby="test-catalog-title">
           <div class="catalog-header">
             <div>
@@ -55,6 +72,25 @@
               <p>Select a full suite or a single focused test. The selected card controls what the scan runs.</p>
             </div>
             <button type="button" id="select-full-profile" class="secondary">Select full suite</button>
+          </div>
+          <div class="toolbar catalog-toolbar" aria-label="Filter test catalog">
+            <label>
+              Search tests
+              <input id="catalog-search" type="search" placeholder="Search by test, module, or description">
+            </label>
+            <label>
+              Category
+              <select id="catalog-category-filter"></select>
+            </label>
+            <label>
+              Type
+              <select id="catalog-mode-filter">
+                <option value="all">All options</option>
+                <option value="suite">Suites only</option>
+                <option value="single">Single tests only</option>
+              </select>
+            </label>
+            <span id="catalog-count" class="filter-count">0 options</span>
           </div>
           <div id="test-catalog" class="test-catalog"></div>
         </section>
@@ -71,6 +107,23 @@
           <span>02</span>
           <h2>Realtime progress</h2>
         </div>
+
+        <div id="active-scan-card" class="active-scan-card idle" aria-live="polite">
+          <div class="scan-visual" aria-hidden="true">
+            <span class="scan-orb"></span>
+            <span class="scan-sweep"></span>
+          </div>
+          <div class="active-scan-copy">
+            <p class="eyebrow">Active scan</p>
+            <h3 id="active-scan-title">No scan running</h3>
+            <p id="active-scan-detail">Choose a target and test option to start a live assessment.</p>
+          </div>
+          <div class="scan-percent-pill">
+            <strong id="active-scan-percent">0%</strong>
+            <span>complete</span>
+          </div>
+        </div>
+
         <div class="progress-ring">
           <svg viewBox="0 0 120 120" aria-label="Scan progress">
             <circle class="track" cx="60" cy="60" r="52"></circle>
@@ -78,6 +131,19 @@
           </svg>
           <div><strong id="progress-value">0%</strong><span id="scan-status" aria-live="polite">Idle</span></div>
         </div>
+
+        <div class="progress-bar-shell" aria-label="Scan percentage complete">
+          <div id="progress-bar" class="progress-bar" style="width: 0%"></div>
+        </div>
+
+        <div class="scan-stage-grid" aria-label="Current scan details">
+          <article><span>Target</span><strong id="active-scan-target">-</strong></article>
+          <article><span>Test option</span><strong id="active-scan-profile">-</strong></article>
+          <article><span>Current stage</span><strong id="active-scan-stage">Idle</strong></article>
+          <article><span>Last update</span><strong id="active-scan-updated">Waiting</strong></article>
+        </div>
+
+        <p id="active-scan-message" class="active-scan-message">Waiting for a scan to start.</p>
         <ol id="event-list" class="timeline" aria-live="polite" aria-label="Scan progress events"></ol>
       </section>
     </section>
@@ -98,6 +164,18 @@
           <article><span>Policy status</span><strong id="summary-policy">pass</strong></article>
         </div>
 
+        <section class="top-risks-panel">
+          <div class="dashboard-section-header">
+            <div>
+              <h3>Top risks</h3>
+              <p>Highest-severity findings that need review first.</p>
+            </div>
+            <button type="button" id="copy-summary" class="secondary compact">Copy summary</button>
+          </div>
+          <div id="top-risks-list" class="top-risks-list"></div>
+          <p id="copy-summary-message" class="form-message"></p>
+        </section>
+
         <div class="grid two dashboard-grid">
           <section>
             <h3>Severity distribution</h3>
@@ -110,13 +188,42 @@
         </div>
 
         <section>
-          <h3>Findings</h3>
+          <div class="dashboard-section-header">
+            <div>
+              <h3>Findings</h3>
+              <p>Filter findings by severity or policy status before reviewing evidence.</p>
+            </div>
+            <span id="findings-count" class="filter-count">0 findings</span>
+          </div>
+          <div class="toolbar findings-toolbar" aria-label="Filter findings">
+            <label>
+              Severity
+              <select id="finding-severity-filter">
+                <option value="all">All severities</option>
+                <option value="critical">Critical</option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+                <option value="info">Info</option>
+              </select>
+            </label>
+            <label>
+              Policy status
+              <select id="finding-policy-filter">
+                <option value="all">All policy statuses</option>
+                <option value="fail">Fail</option>
+                <option value="warn">Warn</option>
+                <option value="pass">Pass</option>
+                <option value="manual_review">Manual review</option>
+              </select>
+            </label>
+          </div>
           <div id="findings-list" class="findings-list"></div>
         </section>
 
         <section>
           <h3>Outputs for presentation</h3>
-          <div id="artifact-links" class="artifact-links"></div>
+          <div id="artifact-links" class="artifact-links grouped-artifacts"></div>
         </section>
       </div>
     </section>
@@ -125,6 +232,23 @@
       <div class="section-title">
         <span>04</span>
         <h2>Recent scans</h2>
+      </div>
+      <div id="history-summary" class="history-summary" aria-live="polite"></div>
+      <div class="toolbar history-toolbar" aria-label="Filter scan history">
+        <label>
+          Search scans
+          <input id="history-search" type="search" placeholder="Search by target or test option">
+        </label>
+        <label>
+          Status
+          <select id="history-status-filter">
+            <option value="all">All statuses</option>
+            <option value="queued">Queued</option>
+            <option value="running">Running</option>
+            <option value="completed">Completed</option>
+            <option value="failed">Failed</option>
+          </select>
+        </label>
       </div>
       <div id="job-history" class="job-history"></div>
     </section>
