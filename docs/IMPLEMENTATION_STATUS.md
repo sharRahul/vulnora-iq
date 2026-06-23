@@ -2,9 +2,9 @@
 
 This document separates current working capability from roadmap items so users can understand what is ready today.
 
-> **Current maturity:** VulnoraIQ version `0.2.0` has passed the **controlled internal enterprise production-readiness gate** with security hardening, SQLite persistence, auth, CSRF, rate limiting, audit logging, metrics, backup/restore tooling, container support, production startup validation, completed Agentic Applications readiness phases 0-8, and a completed GenAI Security working-starter readiness gate for `DSGAI01–DSGAI21`. It is **not ready for public internet-facing, multi-tenant SaaS, unsupervised production hosting, or certified VAPT-grade assurance** without additional controls such as OIDC/SSO, horizontal scaling, external testing, WAF/CDN/DDoS protection, HA persistence, tenant isolation, and independent assurance.
+> **Current maturity:** VulnoraIQ version `0.2.0` has passed the **controlled internal production-readiness gate** for self-hosted laptop/server use, with security hardening, SQLite persistence, auth, CSRF, rate limiting, audit logging, metrics, backup/restore tooling, container support, production startup validation, completed Agentic Applications readiness gates, and a completed GenAI Security working-starter readiness gate for `DSGAI01–DSGAI21`.
 
-> **Important limitation:** OWASP LLM 2025, GenAI Security, Agentic Applications, and MITRE ATLAS mappings are framework evidence and planning/validation controls. They are not the same as independent production-validated detection assurance. Treat output as development and internal assessment evidence requiring human review.
+> **Important limitation:** OWASP LLM 2025, GenAI Security, Agentic Applications, and MITRE ATLAS mappings are framework evidence and planning/validation controls. They are not the same as independently validated assurance. Treat output as development and internal assessment evidence requiring human review.
 
 ## Seven-phase implementation status
 
@@ -13,10 +13,10 @@ This document separates current working capability from roadmap items so users c
 | Phase 1 — OWASP depth | Working-alpha starter | `docs/owasp/` contains implementation specs for all 10 OWASP LLM 2025 categories. |
 | Phase 2 — Safe demo fixtures | Working-alpha starter | `examples/local_demo_targets/owasp_fixture_targets.py` models local good/bad control behaviour for all 10 categories. |
 | Phase 3 — Stronger evaluators | Working-alpha starter | `core/evaluators.py` adds deterministic local evaluators for text checks, schema checks, source access, provenance, approval, citations, action boundaries, resource limits, and manual review. |
-| Phase 4 — Contract-tested adapters | Working starter | `config/target_contracts.yaml` and `integrations/contract_validation.py` validate configured target adapter shapes before authorised testing. |
-| Phase 5 — Web UI hardening | Controlled-internal production ready | `webui/hosted_server.py`, `webui/auth.py`, `webui/persistent_jobs.py`, and `webui/production_checks.py` provide the hardened Web UI with env-token auth, trusted proxy identity mode, CSRF, rate limiting, security headers, proxy trust, audit logging, metrics, request IDs, concurrency limits, and startup validation. |
+| Phase 4 — Contract-tested adapters | Working starter | `config/target_contracts.yaml` and `integrations/contract_validation.py` validate configured target adapter shapes before approved testing. |
+| Phase 5 — Web UI hardening | Self-hosted production ready | `webui/hosted_server.py`, `webui/auth.py`, `webui/persistent_jobs.py`, and `webui/production_checks.py` provide the hardened Web UI with env-token auth, trusted proxy identity mode, CSRF, rate limiting, security headers, proxy trust, audit logging, metrics, request IDs, concurrency limits, and startup validation. |
 | Phase 6 — Report quality and presentation | Working starter | Report generation includes structured evidence; `reports/html_export_package.py` builds a branded export bundle; `docs/assets/vulnoraiq-dashboard-example.png` provides a README dashboard example image. |
-| Phase 7 — Release gates | Controlled-internal production ready | Package metadata, GenAI readiness, OWASP/ATLAS mapping, production readiness, runtime config, backup/restore, Docker smoke tooling, and CI gates validate package, runtime, docs, readiness, and functional acceptance. |
+| Phase 7 — Release gates | Self-hosted production ready | Package metadata, GenAI readiness, OWASP/ATLAS mapping, production readiness, runtime config, backup/restore, Docker smoke tooling, and CI gates validate package, runtime, docs, readiness, and functional acceptance. |
 
 ## GenAI Security Production Readiness Plan
 
@@ -24,40 +24,40 @@ This document separates current working capability from roadmap items so users c
 | --- | --- | --- |
 | Controlled internal GenAI Security readiness for `DSGAI01–DSGAI21` | Working starter complete | `docs/genai/PRODUCTION_READINESS_PLAN.md`, `benchmarks/fixtures/genai/scenarios.yaml`, `core/genai_evaluators.py`, `scripts/validate_genai_readiness.py`, `tests/test_genai_readiness_validation.py` |
 | Source discrepancy `DSGAI22–DSGAI25` | Tracked / map later | Preserved in `benchmarks/fixtures/genai/scenarios.yaml` metadata. |
-| Public internet / SaaS GenAI assurance | Deferred | Requires tenant isolation, SIEM/SOAR integration, external assurance, SLOs, and public ingress controls. |
+| Stronger assurance validation | Future maturity item | Requires approved environment validation, evidence review, and independent assessment before stronger assurance claims. |
 
 ## Agentic Applications Production Readiness Plan
 
 | Scope | Status | Evidence |
 | --- | --- | --- |
-| Controlled internal enterprise deployment phases 0-8 | Complete | `docs/AGENTIC_APPLICATIONS_PRODUCTION_READINESS_PLAN.md`, `scripts/validate_owasp_atlas_mappings.py`, `.github/workflows/ci.yml`, `.github/workflows/python-ci.yml` |
-| Public internet / SaaS hardening phase 9 | Deferred | Tracked as future backlog in `docs/PRODUCTION_HARDENING_BACKLOG.md` and the Agentic readiness plan. |
+| Self-hosted controlled internal deployment gates | Complete | `docs/AGENTIC_APPLICATIONS_PRODUCTION_READINESS_PLAN.md`, `scripts/validate_owasp_atlas_mappings.py`, `.github/workflows/ci.yml`, `.github/workflows/python-ci.yml` |
+| Independent assurance validation | Future maturity item | Tracked through the scorecard, assurance documentation, and hardening backlog. |
 
 ## Current working capability
 
 | Area | Status | Notes |
 | --- | --- | --- |
 | Python package scaffold | Working starter | VulnoraIQ version `0.2.0` installs as a Python package with CLI entry points. |
-| Functional acceptance runner | Working starter | `scripts/run_functional_test.py` runs a safe demo/baseline assessment, validates outputs, and refreshes dashboard example SVG. |
-| Production readiness gate | Controlled-internal production ready | `scripts/validate_production_testing_readiness.py` validates all production controls and documentation guardrails. |
-| Production runtime config validation | Controlled-internal production ready | `scripts/validate_runtime_production_config.py` validates runtime environment before startup. |
+| Functional acceptance runner | Working starter | `scripts/run_functional_test.py` runs a safe demo/baseline assessment, validates outputs, and refreshes the dashboard example PNG. |
+| Production readiness gate | Self-hosted production ready | `scripts/validate_production_testing_readiness.py` validates production controls and documentation guardrails. |
+| Production runtime config validation | Self-hosted production ready | `scripts/validate_runtime_production_config.py` validates runtime environment before startup. |
 | GenAI Security readiness plan | Working starter complete | `DSGAI01–DSGAI21` safe synthetic scenario coverage, deterministic evaluators, validator, tests, package metadata integration, and CI workflow gates. |
-| Agentic production readiness plan | Complete for controlled internal deployment | Phases 0-8 are complete; Phase 9 public internet/SaaS hardening is deferred. |
+| Agentic production readiness plan | Complete for self-hosted internal deployment | Agentic readiness gates are complete for the intended local/internal-server application model. |
 | Dashboard example image | Working starter | `docs/assets/vulnoraiq-dashboard-example.png` is a real captured Web UI dashboard screenshot referenced in `README.md`. |
-| Modern Web UI | Controlled-internal production ready | `webui/hosted_server.py` — hardened HTTP server with auth, CSRF, rate limiting, security headers, proxy trust, audit logging, metrics, request IDs, concurrency limits, and structured error handling. |
-| Authentication | Controlled-internal production ready | `webui/auth.py` — env-driven token auth with hmac constant-time comparison, production-mode validation, trusted reverse-proxy identity headers, role-based access control. |
-| CSRF protection | Controlled-internal production ready | Per-session CSRF tokens with configurable TTL, periodic cleanup, validated on state-changing requests. |
-| Rate limiting | Controlled-internal production ready | IP-based in-memory rate limiting with configurable window/max and periodic cleanup. Use proxy/WAF/shared controls for public or multi-instance deployments. |
-| Security headers | Controlled-internal production ready | CSP, HSTS conditional behaviour, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, and Permissions-Policy on every response. |
-| Proxy IP trust | Controlled-internal production ready | `X-Forwarded-For` and trusted proxy identity are trusted only from configured CIDRs. |
-| Audit logging | Controlled-internal production ready | Structured JSON-line audit with request IDs, no token/secret/request-body leakage. |
-| Prometheus metrics | Controlled-internal production ready | `/metrics` endpoint with request/scan/auth counters, protected by default. |
-| Job persistence | Controlled-internal production ready | SQLite default with WAL mode, schema versioning, foreign keys, and busy timeout. JSON store is legacy/dev only. |
-| Backup and restore | Controlled-internal production ready | `scripts/backup_sqlite_store.py` and `scripts/restore_sqlite_store.py` use the SQLite online backup API, validation, compression, and retention. |
-| Container deployment | Controlled-internal production ready | Dockerfile with non-root user, `/data` volume, healthcheck; `docker-compose.yml` with production env example. |
-| Concurrency limits | Controlled-internal production ready | Configurable max concurrent scans and queue limit, with audit of rejected requests. |
-| Scan artifact security | Controlled-internal production ready | Path protection, allowlist-based artifact lookup, audit logging, proper Content-Disposition. |
-| Runbook and incident response | Controlled-internal production ready | `docs/RUNBOOK.md`, `docs/INCIDENT_RESPONSE.md`, `docs/RELEASE_CHECKLIST.md`. |
+| Modern Web UI | Self-hosted production ready | `webui/hosted_server.py` — hardened HTTP server with auth, CSRF, rate limiting, security headers, proxy trust, audit logging, metrics, request IDs, concurrency limits, and structured error handling. |
+| Authentication | Self-hosted production ready | `webui/auth.py` — env-driven token auth with hmac constant-time comparison, production-mode validation, trusted reverse-proxy identity headers, role-based access control. |
+| CSRF protection | Self-hosted production ready | Per-session CSRF tokens with configurable TTL, periodic cleanup, validated on state-changing requests. |
+| Rate limiting | Self-hosted production ready | IP-based in-memory rate limiting with configurable window/max and periodic cleanup. Use reverse-proxy controls for internal server deployments that need centralised network controls. |
+| Security headers | Self-hosted production ready | CSP, HSTS conditional behaviour, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, and Permissions-Policy on every response. |
+| Proxy IP trust | Self-hosted production ready | `X-Forwarded-For` and trusted proxy identity are trusted only from configured CIDRs. |
+| Audit logging | Self-hosted production ready | Structured JSON-line audit with request IDs, no token/secret/request-body leakage. |
+| Prometheus metrics | Self-hosted production ready | `/metrics` endpoint with request/scan/auth counters, protected by default. |
+| Job persistence | Self-hosted production ready | SQLite default with WAL mode, schema versioning, foreign keys, and busy timeout. JSON store is legacy/dev only. |
+| Backup and restore | Self-hosted production ready | `scripts/backup_sqlite_store.py` and `scripts/restore_sqlite_store.py` use the SQLite online backup API, validation, compression, and retention. |
+| Container deployment | Self-hosted production ready | Dockerfile with non-root user, `/data` volume, healthcheck; `docker-compose.yml` with production env example. |
+| Concurrency limits | Self-hosted production ready | Configurable max concurrent scans and queue limit, with audit of rejected requests. |
+| Scan artifact security | Self-hosted production ready | Path protection, allowlist-based artifact lookup, audit logging, proper Content-Disposition. |
+| Runbook and incident response | Self-hosted production ready | `docs/RUNBOOK.md`, `docs/INCIDENT_RESPONSE.md`, `docs/RELEASE_CHECKLIST.md`. |
 | Demo target | Working | The default `demo` target uses an in-memory echo client and requires no external API keys. |
 | Local demo targets | Working-alpha starter | Safe HTTP JSON, control-gap, and OWASP good/bad fixture targets for local demonstration and tests. |
 | Configured target adapters | Working starter | Chat-completions-compatible, Ollama-style generate, webhook JSON, and HTTP JSON endpoint shapes. |
@@ -66,10 +66,10 @@ This document separates current working capability from roadmap items so users c
 | OWASP LLM 2025 oracle coverage | Working starter | Safe starter oracle coverage for all 10 OWASP LLM 2025 categories. |
 | GenAI Security coverage | Working starter | Safe synthetic `DSGAI01–DSGAI21` manifest, deterministic evaluator suite, CI validator, and source discrepancy tracking. |
 | MITRE ATLAS AI matrix | Working starter | Planning matrix with source-driven generation and unmapped backlog preservation. |
-| Package metadata validation | Controlled-internal production ready | Validates package name, version, CLI entries, README maturity warnings, OWASP docs, MITRE ATLAS doc, third-party notices, functional test assets, evaluators, fixtures, OWASP/ATLAS metadata, and GenAI readiness assets before release. |
-| OWASP/ATLAS mapping metadata validation | Controlled-internal production ready | `scripts/validate_owasp_atlas_mappings.py` and CI validate required mapping metadata for active oracles/checks. |
-| GenAI readiness validation | Controlled-internal production ready | `scripts/validate_genai_readiness.py` and CI validate GenAI scenario manifests, evidence fields, fixture coverage, docs, and source discrepancy tracking. |
-| CI | Controlled-internal production ready | GitHub Actions across Python 3.10/3.11/3.12; Ruff, mypy, pytest, pip check, pip-audit, metadata validation, OWASP/ATLAS mapping validation, GenAI readiness validation, production readiness validation, demo scan, functional acceptance readiness path. |
+| Package metadata validation | Self-hosted production ready | Validates package name, version, CLI entries, README maturity warnings, OWASP docs, MITRE ATLAS doc, third-party notices, functional test assets, evaluators, fixtures, OWASP/ATLAS metadata, and GenAI readiness assets before release. |
+| OWASP/ATLAS mapping metadata validation | Self-hosted production ready | `scripts/validate_owasp_atlas_mappings.py` and CI validate required mapping metadata for active oracles/checks. |
+| GenAI readiness validation | Self-hosted production ready | `scripts/validate_genai_readiness.py` and CI validate GenAI scenario manifests, evidence fields, fixture coverage, docs, and source discrepancy tracking. |
+| CI | Self-hosted production ready | GitHub Actions across Python 3.10/3.11/3.12; Ruff, mypy, pytest, pip check, pip-audit, metadata validation, OWASP/ATLAS mapping validation, GenAI readiness validation, production readiness validation, demo scan, functional acceptance readiness path. |
 
 ## Current safe usage
 
@@ -106,13 +106,14 @@ For any configured target outside demo mode:
 
 ## Implementation roadmap status
 
-All production hardening blockers PRD-001 through PRD-012 are closed for controlled internal enterprise deployment. The Agentic Applications Production Readiness Plan is complete for phases 0-8. The GenAI Security Production Readiness Plan is complete at working-starter level for `DSGAI01–DSGAI21` controlled internal readiness.
+All production hardening blockers PRD-001 through PRD-012 are closed for self-hosted internal deployment. The Agentic Applications Production Readiness Plan is complete for the intended laptop/server application model. The GenAI Security Production Readiness Plan is complete at working-starter level for `DSGAI01–DSGAI21` controlled internal readiness.
 
 The next phases should focus on:
 
-- Public internet / SaaS / multi-tenant readiness: OIDC/JWT-native identity, tenant isolation, WAF/CDN/DDoS controls, distributed rate limiting, HA persistence, and external testing.
-- Scanner/evaluator depth: deeper OWASP and GenAI check logic, evaluator thresholds, fixture realism, and authorised real-world validation.
-- Report language and assurance validation for external claims.
+- Scanner/evaluator depth: deeper OWASP and GenAI check logic, evaluator thresholds, fixture realism, and approved environment validation.
+- Packaged laptop/server installation paths and smoother local startup/shutdown guidance.
+- Target adapter templates for AI agents, LLM APIs, RAG systems, and local model servers.
+- Report language and assurance validation for stronger claims.
 
 Scanner and evaluator assurance limitations are documented in [`docs/ASSESSMENT_ASSURANCE.md`](ASSESSMENT_ASSURANCE.md).
 
