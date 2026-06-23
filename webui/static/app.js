@@ -6,6 +6,23 @@ const state = {
 
 const qs = (selector) => document.querySelector(selector);
 
+const CATEGORY_ORDER = [
+  'Assessment suites',
+  'OWASP LLM Top 10 single tests',
+  'RAG and vector store tests',
+  'Agentic and tool-use tests',
+  'Other tests',
+];
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+
 function setProgress(value, status) {
   const safe = Math.max(0, Math.min(100, Number(value || 0)));
   const circumference = 326.7;
@@ -17,27 +34,122 @@ function setProgress(value, status) {
 function addEvent(event) {
   const li = document.createElement('li');
   li.className = event.level === 'error' ? 'error' : '';
-  li.innerHTML = `<strong>${event.stage}</strong><div>${event.message}</div><small>${new Date(event.timestamp).toLocaleString()} · ${event.progress}%</small>`;
+  li.innerHTML = `<strong>${escapeHtml(event.stage)}</strong><div>${escapeHtml(event.message)}</div><small>${new Date(event.timestamp).toLocaleString()} · ${event.progress}%</small>`;
   qs('#event-list').prepend(li);
   setProgress(event.progress, event.stage);
 }
 
 function badge(value) {
   const normalised = String(value || 'unknown').toLowerCase();
-  return `<span class="badge ${normalised}">${normalised}</span>`;
+  return `<span class="badge ${escapeHtml(normalised)}">${escapeHtml(normalised)}</span>`;
+}
+
+function profileDisplayName(name, profile) {
+  return profile.display_name || name.replace(/^test_/, '').replaceAll('_', ' ');
+}
+
+function profileCategory(profile) {
+  return profile.category || 'Other tests';
+}
+
+function profileModules(profile) {
+  return Array.isArray(profile.modules) ? profile.modules : [];
+}
+
+function orderedCategories(groups) {
+  const known = CATEGORY_ORDER.filter((category) => groups.has(category));
+  const extra = [...groups.keys()].filter((category) => !CATEGORY_ORDER.includes(category)).sort();
+  return [...known, ...extra];
+}
+
+function renderProfileSelect() {
+  const profileSelect = qs('#profile-select');
+  const groups = new Map();
+  Object.entries(state.config.profiles || {}).forEach(([name, profile]) => {
+    const category = profileCategory(profile);
+    if (!groups.has(category)) groups.set(category, []);
+    groups.get(category).push([name, profile]);
+  });
+
+  profileSelect.innerHTML = orderedCategories(groups).map((category) => {
+    const options = groups.get(category)
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([name, profile]) => `<option value="${escapeHtml(name)}">${escapeHtml(profileDisplayName(name, profile))} · ${profileModules(profile).length} module${profileModules(profile).length === 1 ? '' : 's'}</option>`)
+      .join('');
+    return `<optgroup label="${escapeHtml(category)}">${options}</optgroup>`;
+  }).join('');
+}
+
+function renderSelectedProfile() {
+  const selected = qs('#profile-select').value;
+  const profile = state.config.profiles[selected] || {};
+  const modules = profileModules(profile);
+  qs('#selected-profile-detail').innerHTML = `
+    <strong>${escapeHtml(profileDisplayName(selected, profile))}</strong>
+    <p>${escapeHtml(profile.description || 'No description available.')}</p>
+    <small>${escapeHtml(profileCategory(profile))} · ${modules.length} module${modules.length === 1 ? '' : 's'} selected</small>
+  `;
+  document.querySelectorAll('.profile-card').forEach((card) => {
+    card.classList.toggle('active', card.dataset.profile === selected);
+  });
+}
+
+function renderTestCatalog() {
+  const catalog = qs('#test-catalog');
+  const groups = new Map();
+  Object.entries(state.config.profiles || {}).forEach(([name, profile]) => {
+    const category = profileCategory(profile);
+    if (!groups.has(category)) groups.set(category, []);
+    groups.get(category).push([name, profile]);
+  });
+
+  catalog.innerHTML = orderedCategories(groups).map((category) => {
+    const cards = groups.get(category)
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([name, profile]) => {
+        const modules = profileModules(profile);
+        const moduleBadges = modules.map((moduleName) => `<span>${escapeHtml(moduleName)}</span>`).join('');
+        return `
+          <article class="profile-card" data-profile="${escapeHtml(name)}">
+            <div>
+              <strong>${escapeHtml(profileDisplayName(name, profile))}</strong>
+              <p>${escapeHtml(profile.description || '')}</p>
+              <div class="module-list">${moduleBadges}</div>
+            </div>
+            <button type="button" data-profile-select="${escapeHtml(name)}">Run this option</button>
+          </article>
+        `;
+      }).join('');
+    return `
+      <section class="test-category">
+        <div class="test-category-header">
+          <h4>${escapeHtml(category)}</h4>
+          <span>${groups.get(category).length} option${groups.get(category).length === 1 ? '' : 's'}</span>
+        </div>
+        <div class="profile-card-grid">${cards}</div>
+      </section>
+    `;
+  }).join('');
+
+  catalog.querySelectorAll('[data-profile-select]').forEach((button) => {
+    button.addEventListener('click', () => {
+      qs('#profile-select').value = button.dataset.profileSelect;
+      renderSelectedProfile();
+      qs('#scan-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+  renderSelectedProfile();
 }
 
 async function loadConfig() {
   const response = await fetch('/api/config');
   state.config = await response.json();
   const targetSelect = qs('#target-select');
-  const profileSelect = qs('#profile-select');
-  targetSelect.innerHTML = Object.entries(state.config.targets)
-    .map(([name, target]) => `<option value="${name}">${name} · ${target.type || 'target'}</option>`)
+  targetSelect.innerHTML = Object.entries(state.config.targets || {})
+    .map(([name, target]) => `<option value="${escapeHtml(name)}">${escapeHtml(name)} · ${escapeHtml(target.type || 'target')}</option>`)
     .join('');
-  profileSelect.innerHTML = Object.entries(state.config.profiles)
-    .map(([name, profile]) => `<option value="${name}">${name} · ${(profile.modules || []).length} modules</option>`)
-    .join('');
+  renderProfileSelect();
+  renderTestCatalog();
 }
 
 async function refreshJobs() {
@@ -51,10 +163,10 @@ async function refreshJobs() {
   container.innerHTML = data.jobs.map((job) => `
     <div class="job-item">
       <div>
-        <strong>${job.target} / ${job.profile}</strong><br>
-        <small>${job.status} · ${job.progress}% · ${new Date(job.created_at).toLocaleString()}</small>
+        <strong>${escapeHtml(job.target)} / ${escapeHtml(profileDisplayName(job.profile, state.config.profiles[job.profile] || {}))}</strong><br>
+        <small>${escapeHtml(job.status)} · ${job.progress}% · ${new Date(job.created_at).toLocaleString()}</small>
       </div>
-      <button type="button" data-job-id="${job.id}">View</button>
+      <button type="button" data-job-id="${escapeHtml(job.id)}">View</button>
     </div>
   `).join('');
   container.querySelectorAll('button').forEach((button) => {
@@ -91,7 +203,7 @@ async function startScan(event) {
     setProgress(0, 'Failed to start');
   } finally {
     button.disabled = false;
-    button.textContent = 'Start assessment';
+    button.textContent = 'Start selected assessment';
   }
 }
 
@@ -129,10 +241,12 @@ async function loadJob(jobId) {
 
 function renderDashboard(job) {
   const summary = job.summary || {};
+  const profile = state.config.profiles[job.profile] || {};
   qs('#empty-state').classList.add('hidden');
   qs('#dashboard').classList.remove('hidden');
   qs('#summary-target').textContent = summary.target || job.target;
-  qs('#summary-profile').textContent = summary.profile || job.profile;
+  qs('#summary-profile').textContent = profileDisplayName(summary.profile || job.profile, profile);
+  qs('#summary-category').textContent = profileCategory(profile);
   qs('#summary-findings').textContent = summary.finding_count ?? 0;
   qs('#summary-severity').textContent = summary.highest_severity || 'info';
   qs('#summary-policy').textContent = summary.policy_status || 'pass';
@@ -156,8 +270,8 @@ function renderSeverity(counts) {
 function renderPolicies(policies) {
   qs('#policy-list').innerHTML = policies.map((policy) => `
     <article class="policy-item">
-      <strong>${badge(policy.status)} ${policy.policy_id}</strong>
-      <p>${policy.message || ''}</p>
+      <strong>${badge(policy.status)} ${escapeHtml(policy.policy_id)}</strong>
+      <p>${escapeHtml(policy.message || '')}</p>
     </article>
   `).join('') || '<p>No policy results.</p>';
 }
@@ -165,9 +279,9 @@ function renderPolicies(policies) {
 function renderFindings(findings) {
   qs('#findings-list').innerHTML = findings.map((finding, index) => `
     <article class="finding-item">
-      <strong>${index + 1}. ${finding.title}</strong>
-      <p>${badge(finding.severity)} ${finding.owasp_id} · ${finding.affected_component}</p>
-      <p>${finding.recommendation || ''}</p>
+      <strong>${index + 1}. ${escapeHtml(finding.title)}</strong>
+      <p>${badge(finding.severity)} ${escapeHtml(finding.owasp_id)} · ${escapeHtml(finding.affected_component)}</p>
+      <p>${escapeHtml(finding.recommendation || '')}</p>
     </article>
   `).join('') || '<p>No findings.</p>';
 }
@@ -181,7 +295,7 @@ function renderArtifacts(job) {
     dashboard_html: 'HTML dashboard',
   };
   qs('#artifact-links').innerHTML = Object.keys(job.outputs || {}).map((name) => `
-    <a href="/api/scans/${job.id}/artifact/${name}" target="_blank" rel="noreferrer">${labels[name] || name}</a>
+    <a href="/api/scans/${escapeHtml(job.id)}/artifact/${escapeHtml(name)}" target="_blank" rel="noreferrer">${escapeHtml(labels[name] || name)}</a>
   `).join('');
 }
 
@@ -189,6 +303,11 @@ async function init() {
   await loadConfig();
   await refreshJobs();
   qs('#scan-form').addEventListener('submit', startScan);
+  qs('#profile-select').addEventListener('change', renderSelectedProfile);
+  qs('#select-full-profile').addEventListener('click', () => {
+    qs('#profile-select').value = 'full';
+    renderSelectedProfile();
+  });
   setProgress(0, 'Idle');
 }
 
