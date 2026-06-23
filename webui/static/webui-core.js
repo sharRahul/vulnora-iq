@@ -69,6 +69,43 @@ window.VulnoraIQWebUI = window.VulnoraIQWebUI || {};
     if (element) element.setAttribute('aria-busy', busy ? 'true' : 'false');
   }
 
+  function safeStorage(storage) {
+    return {
+      get(key) {
+        try {
+          return storage?.getItem(key) || '';
+        } catch (error) {
+          return '';
+        }
+      },
+      set(key, value) {
+        try {
+          if (value) storage?.setItem(key, value);
+          else storage?.removeItem(key);
+        } catch (error) {
+          /* storage unavailable */
+        }
+      },
+    };
+  }
+
+  function tokenStorage(strategy = 'session') {
+    if (strategy === 'local') return safeStorage(window.localStorage);
+    if (strategy === 'memory') {
+      const memory = new Map();
+      return {
+        get(key) {
+          return memory.get(key) || '';
+        },
+        set(key, value) {
+          if (value) memory.set(key, value);
+          else memory.delete(key);
+        },
+      };
+    }
+    return safeStorage(window.sessionStorage);
+  }
+
   namespace.core = {
     qs,
     qsa,
@@ -77,5 +114,6 @@ window.VulnoraIQWebUI = window.VulnoraIQWebUI || {};
     normalizeApiError,
     announce,
     setBusy,
+    tokenStorage,
   };
 })(window.VulnoraIQWebUI);
