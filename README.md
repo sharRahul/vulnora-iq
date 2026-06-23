@@ -1,35 +1,37 @@
 # VulnoraIQ
 
-**VulnoraIQ** is an AI security assessment framework for authorised testing of **LLM applications, RAG pipelines, AI agents, tool-using systems, GenAI data flows, vector stores, providers, telemetry, reports, and orchestration layers**.
+**VulnoraIQ** is a self-hosted AI security assessment application for authorised testing of **LLM applications, RAG pipelines, AI agents, tool-using systems, GenAI data flows, vector stores, providers, telemetry, reports, and orchestration layers**.
 
-It helps security teams run internal AI-application assessments, collect evidence, score findings, generate reports, and track OWASP LLM / OWASP GenAI / Agentic / MITRE ATLAS coverage as the framework matures.
+It is designed to run on a **laptop, workstation, lab machine, or internal server** so security teams can test AI agents and LLM applications they own or are explicitly authorised to assess.
+
+VulnoraIQ helps teams collect evidence, score findings, generate reports, and track OWASP LLM / OWASP GenAI / Agentic / MITRE ATLAS coverage as the framework matures.
 
 ---
 
 ## Current status
 
 **Version:** `0.2.0`  
-**Deployment posture:** controlled internal enterprise production-readiness gate passed  
+**Deployment posture:** self-hosted laptop/server application with controlled internal production-readiness gate passed  
 **Assessment assurance:** starter/framework evidence, not certified VAPT-grade assurance
 
 | Area | Status |
 | --- | --- |
-| Local demo / development | Supported |
-| Controlled internal enterprise deployment | Supported with production configuration validation |
+| Local laptop / workstation demo | Supported |
+| Self-hosted internal server deployment | Supported with production configuration validation |
 | OWASP LLM coverage | Working starter |
 | GenAI Security readiness | Working starter with safe synthetic `DSGAI01–DSGAI21` scenarios and CI validation |
 | Agentic Applications readiness | Complete for controlled internal phase gates |
-| Public internet-facing deployment | Not recommended without extra controls |
-| Multi-tenant SaaS hosting | Not supported |
+| Public internet-facing service | Out of scope / not recommended |
+| Multi-tenant SaaS hosting | Out of scope / not supported |
 | Certified VAPT-grade security assurance | Not claimed |
 
-> **Maturity warning:** VulnoraIQ is not recommended for unsupervised public internet exposure without the additional controls listed above.
+> **Maturity warning:** VulnoraIQ is intended to run as a local or self-hosted internal application. Do not expose it directly to the public internet.
 
 `0.2.0` may be described as:
 
-> **Controlled internal enterprise production-readiness gate passed.**
+> **Self-hosted laptop/server AI security testing application with controlled internal production-readiness gate passed.**
 
-It must **not** be described as ready for public SaaS, multi-tenant, or unsupervised internet-facing deployment, as certified VAPT-grade assurance, or as a real-world VAPT replacement.
+It must **not** be described as a SaaS platform, a multi-tenant hosted service, an unsupervised internet-facing service, certified VAPT-grade assurance, or a real-world VAPT replacement.
 
 For details, see:
 
@@ -82,7 +84,7 @@ The dashboard below is generated from the safe local functional test path and sh
 - Source-driven ATLAS matrix generation with explicit `Unmapped / map later` backlog preservation.
 - MITRE ATLAS-derived documentation tracked in [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
 
-### Production hardening for controlled internal deployment
+### Production hardening for self-hosted internal deployment
 
 - Hosted Web UI with Server-Sent Events progress updates.
 - Auth enabled by default and fail-closed.
@@ -118,7 +120,7 @@ The demo target uses an in-memory echo client and does not call external service
 
 ---
 
-## Web UI: production-mode startup
+## Web UI: self-hosted startup
 
 Production mode fails closed if required controls are missing or unsafe.
 
@@ -235,13 +237,12 @@ python scripts/container_smoke_test.py
 Next engineering priorities:
 
 - deeper OWASP/GenAI category logic and evaluator thresholds
-- richer real-world fixtures and benchmark targets
-- provider/data inventory connectors for GenAI assessments
-- native OIDC/JWT validation
-- distributed rate limiting and shared CSRF/session state
-- PostgreSQL or another HA persistence backend for multi-instance deployments
-- WAF/CDN/DDoS deployment guidance
-- tenant isolation model for SaaS
+- richer local and self-hosted benchmark targets
+- provider/data inventory connectors for authorised GenAI assessments
+- clearer target adapter templates for AI agents, LLM APIs, RAG systems, and local model servers
+- packaged laptop/server installation paths
+- optional OIDC/JWT validation for enterprise self-hosted deployments
+- stronger single-server operations guidance for reverse proxy, TLS, backups, and audit logs
 - independent penetration test of the Web UI and assessment engine
 - report language maturity review for external assurance use
 
