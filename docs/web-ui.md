@@ -20,15 +20,37 @@ Open:
 http://127.0.0.1:8787
 ```
 
+## Signing in
+
+Authentication is **enabled by default**. The page loads without a token, but all
+assessment data and actions require one. When auth is enabled the top bar shows a
+**Sign in required** prompt: paste an access token and select **Connect**. The console
+then sends the token (default header `X-VulnoraIQ-Token`) on every request and attaches
+a CSRF token to scan submissions automatically.
+
+Tokens map to roles and permissions:
+
+| Token source | Role | Capabilities |
+| --- | --- | --- |
+| `VULNORAIQ_ADMIN_TOKEN` | admin | view, download, demo + configured scans, full config/targets |
+| `VULNORAIQ_ANALYST_TOKEN` | analyst | view, download, demo scans |
+| `VULNORAIQ_VIEWER_TOKEN` | viewer | view and download only |
+
+For local development (non-production) you can sign in with the built-in
+`vulnoraiq-internal-admin-token`, or disable auth entirely with
+`VULNORAIQ_AUTH_ENABLED=false` (open-access demo mode, not for shared deployments).
+Use **Sign out** in the top bar to clear the session token.
+
 ## User workflow
 
-1. Select a target.
-2. Select an assessment profile.
-3. Confirm authorisation for any configured non-demo target.
-4. Start the assessment.
-5. Watch the progress ring and realtime event timeline.
-6. Review the completed executive dashboard.
-7. Download presentation-ready outputs.
+1. Sign in with an access token (when auth is enabled).
+2. Select a target.
+3. Select an assessment profile or a single test from the categorised catalog.
+4. Confirm authorisation for any configured non-demo target.
+5. Start the assessment.
+6. Watch the progress ring and realtime event timeline.
+7. Review the completed executive dashboard.
+8. Download presentation-ready outputs.
 
 ## Hosted-mode foundations
 
@@ -40,7 +62,11 @@ The hosted server uses:
 - `webui/persistent_jobs.py` for JSON-backed scan job storage.
 - `reports/output/webui/jobs.json` as the default persistent job history file.
 
-Authentication is disabled by default for local development, but the role model is implemented so hosted deployments can enable token-based access in `config/web_users.yaml`.
+Authentication is enabled by default; static UI assets are served publicly so the
+sign-in prompt can load, while every `/api/*` data endpoint stays behind token auth.
+Set `VULNORAIQ_AUTH_ENABLED=false` only for isolated local development. Role and token
+configuration lives in `config/web_users.yaml` (file-based fallback) or the
+`VULNORAIQ_*_TOKEN` environment variables (preferred for hosted deployments).
 
 ## Dashboard sections
 

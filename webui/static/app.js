@@ -1,9 +1,13 @@
 const state = {
   config: { targets: {}, profiles: {} },
+  session: { auth_enabled: false, authenticated: false, auth_required: false, permissions: [] },
+  tokenHeader: 'X-VulnoraIQ-Token',
   currentJob: null,
-  eventSource: null,
+  streamAbort: null,
+  csrfToken: null,
 };
 
+const TOKEN_STORAGE_KEY = 'vulnoraiq.token';
 const qs = (selector) => document.querySelector(selector);
 
 const CATEGORY_ORDER = [
@@ -22,6 +26,158 @@ function escapeHtml(value) {
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#039;');
 }
+
+// ----- Auth / session helpers -------------------------------------------------
+
+function getToken() {
+  try {
+    return sessionStorage.getItem(TOKEN_STORAGE_KEY) || '';
+  } catch (error) {
+    return '';
+  }
+}
+
+function setToken(token) {
+  try {
+    if (token) sessionStorage.setItem(TOKEN_STORAGE_KEY, token);
+    else sessionStorage.removeItem(TOKEN_STORAGE_KEY);
+  } catch (error) {
+    /* storage unavailable - token simply will not persist */
+  }
+  state.csrfToken = null;
+}
+
+function authHeaders(extra = {}) {
+  const headers = { ...extra };
+  const token = getToken();
+  if (token) headers[state.tokenHeader] = token;
+  return headers;
+}
+
+async function apiFetch(url, options = {}) {
+  const opts = { ...options };
+  opts.headers = authHeaders(opts.headers || {});
+  const response = await fetch(url, opts);
+  if (response.status === 401) {
+    state.session.authenticated = false;
+    state.session.auth_required = true;
+    renderSession();
+    throw new Error('Authentication required. Enter a valid access token to continue.');
+  }
+  if (response.status === 403) {
+    throw new Error('Your account does not have permission for that action.');
+  }
+  return response;
+}
+
+function can(permission) {
+  return Array.isArray(state.session.permissions) && state.session.permissions.includes(permission);
+}
+
+async function loadSession() {
+  const response = await apiFetch('/api/session');
+  state.session = await response.json();
+  if (state.session.token_header) state.tokenHeader = state.session.token_header;
+  renderSession();
+  return state.session;
+}
+
+function renderSession() {
+  const area = qs('#session-area');
+  if (!area) return;
+  const session = state.session;
+
+  if (!session.auth_enabled) {
+    area.innerHTML = `
+      <span class="session-badge open">Auth disabled</span>
+      <div class="session-identity"><strong>Open access mode</strong><small>Demo testing only</small></div>
+    `;
+    return;
+  }
+
+  if (session.authenticated) {
+    area.innerHTML = `
+      <div class="session-identity">
+        <strong>${escapeHtml(session.username || 'Authenticated user')}</strong>
+        <small>${escapeHtml(session.role || 'role')} · ${session.permissions.length} permission${session.permissions.length === 1 ? '' : 's'}</small>
+      </div>
+      <span class="session-badge">Signed in</span>
+      <button type="button" id="sign-out" class="topbar-button">Sign out</button>
+    `;
+    const signOut = qs('#sign-out');
+    if (signOut) signOut.addEventListener('click', signOutHandler);
+    return;
+  }
+
+  area.innerHTML = `
+    <span class="session-badge locked">Sign in required</span>
+    <form id="signin-form" class="signin-form">
+      <input id="token-input" type="password" autocomplete="off" placeholder="Access token" aria-label="Access token">
+      <button type="submit" class="topbar-button accent">Connect</button>
+    </form>
+  `;
+  const form = qs('#signin-form');
+  if (form) form.addEventListener('submit', signInHandler);
+}
+
+async function signInHandler(event) {
+  event.preventDefault();
+  const input = qs('#token-input');
+  const token = (input && input.value || '').trim();
+  if (!token) return;
+  setToken(token);
+  try {
+    await loadSession();
+    if (!state.session.authenticated) {
+      setToken('');
+      renderSession();
+      qs('#form-message').textContent = 'That token was not accepted. Please check it and try again.';
+      return;
+    }
+    qs('#form-message').textContent = '';
+    await bootstrapData();
+  } catch (error) {
+    qs('#form-message').textContent = error.message;
+  }
+}
+
+function signOutHandler() {
+  setToken('');
+  if (state.streamAbort) state.streamAbort.abort();
+  loadSession().then(() => {
+    clearWorkspace();
+  });
+}
+
+function clearWorkspace() {
+  qs('#target-select').innerHTML = '';
+  qs('#profile-select').innerHTML = '';
+  qs('#test-catalog').innerHTML = '';
+  qs('#selected-profile-detail').innerHTML = '';
+  qs('#job-history').innerHTML = '<div class="empty-state">Sign in to view and run assessments.</div>';
+  qs('#event-list').innerHTML = '';
+  setProgress(0, 'Idle');
+  updateFormAvailability();
+}
+
+function updateFormAvailability() {
+  const button = qs('.primary');
+  const locked = state.session.auth_enabled && !state.session.authenticated;
+  button.disabled = locked;
+  qs('#authorised').disabled = locked;
+  qs('#target-select').disabled = locked;
+  qs('#profile-select').disabled = locked;
+}
+
+async function getCsrfToken() {
+  if (state.csrfToken) return state.csrfToken;
+  const response = await apiFetch('/api/csrf-token');
+  const data = await response.json();
+  state.csrfToken = data.csrf_token;
+  return state.csrfToken;
+}
+
+// ----- Progress + rendering ---------------------------------------------------
 
 function setProgress(value, status) {
   const safe = Math.max(0, Math.min(100, Number(value || 0)));
@@ -95,7 +251,13 @@ function renderSelectedProfile() {
     <small>${escapeHtml(profileCategory(profile, selected))} · ${modules.length || 'configured'} module${modules.length === 1 ? '' : 's'} selected</small>
   `;
   document.querySelectorAll('.profile-card').forEach((card) => {
-    card.classList.toggle('active', card.dataset.profile === selected);
+    const active = card.dataset.profile === selected;
+    card.classList.toggle('active', active);
+    const selectButton = card.querySelector('[data-profile-select]');
+    if (selectButton) {
+      selectButton.setAttribute('aria-pressed', active ? 'true' : 'false');
+      selectButton.textContent = active ? 'Selected' : 'Select this option';
+    }
   });
 }
 
@@ -123,7 +285,7 @@ function renderTestCatalog() {
               <p>${escapeHtml(profile.description || '')}</p>
               <div class="module-list">${moduleBadges}</div>
             </div>
-            <button type="button" data-profile-select="${escapeHtml(name)}">Run this option</button>
+            <button type="button" data-profile-select="${escapeHtml(name)}" aria-pressed="false">Select this option</button>
           </article>
         `;
       }).join('');
@@ -149,7 +311,7 @@ function renderTestCatalog() {
 }
 
 async function loadConfig() {
-  const response = await fetch('/api/config');
+  const response = await apiFetch('/api/config');
   state.config = await response.json();
   const targetSelect = qs('#target-select');
   const targets = Object.keys(state.config.targets || {}).length ? state.config.targets : { demo: { type: 'demo' } };
@@ -161,7 +323,7 @@ async function loadConfig() {
 }
 
 async function refreshJobs() {
-  const response = await fetch('/api/scans');
+  const response = await apiFetch('/api/scans');
   const data = await response.json();
   const container = qs('#job-history');
   if (!data.jobs.length) {
@@ -196,15 +358,16 @@ async function startScan(event) {
   button.disabled = true;
   button.textContent = 'Starting...';
   try {
-    const response = await fetch('/api/scans', {
+    const csrfToken = await getCsrfToken();
+    const response = await apiFetch('/api/scans', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken },
       body: JSON.stringify(payload),
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || 'Unable to start scan');
     state.currentJob = data;
-    subscribeToJob(data.id);
+    streamJob(data.id);
     await refreshJobs();
   } catch (error) {
     qs('#form-message').textContent = error.message;
@@ -212,39 +375,75 @@ async function startScan(event) {
   } finally {
     button.disabled = false;
     button.textContent = 'Start selected assessment';
+    updateFormAvailability();
   }
 }
 
-function subscribeToJob(jobId) {
-  if (state.eventSource) state.eventSource.close();
-  state.eventSource = new EventSource(`/api/scans/${jobId}/events`);
-  state.eventSource.onmessage = (message) => {
-    addEvent(JSON.parse(message.data));
-  };
-  state.eventSource.addEventListener('done', async (message) => {
-    state.eventSource.close();
-    const job = JSON.parse(message.data);
-    state.currentJob = job;
-    if (job.status === 'completed') renderDashboard(job);
-    if (job.status === 'failed') qs('#form-message').textContent = job.error || 'Scan failed';
-    await refreshJobs();
-  });
-  state.eventSource.onerror = () => {
+// Header-capable replacement for EventSource: streams the SSE body via fetch so
+// the auth token can be sent. Falls back to a status reload on interruption.
+async function streamJob(jobId) {
+  if (state.streamAbort) state.streamAbort.abort();
+  const controller = new AbortController();
+  state.streamAbort = controller;
+  try {
+    const response = await apiFetch(`/api/scans/${jobId}/events`, {
+      headers: { Accept: 'text/event-stream' },
+      signal: controller.signal,
+    });
+    if (!response.ok || !response.body) throw new Error('stream unavailable');
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const frames = buffer.split('\n\n');
+      buffer = frames.pop() || '';
+      for (const frame of frames) {
+        handleStreamFrame(frame);
+      }
+    }
+  } catch (error) {
+    if (controller.signal.aborted) return;
     qs('#form-message').textContent = 'Realtime connection interrupted. Refreshing job status.';
-    state.eventSource.close();
     loadJob(jobId);
-  };
+  }
+}
+
+function handleStreamFrame(frame) {
+  let eventType = 'message';
+  const dataLines = [];
+  for (const line of frame.split('\n')) {
+    if (line.startsWith('event:')) eventType = line.slice(6).trim();
+    else if (line.startsWith('data:')) dataLines.push(line.slice(5).trim());
+  }
+  if (!dataLines.length) return;
+  let parsed;
+  try {
+    parsed = JSON.parse(dataLines.join('\n'));
+  } catch (error) {
+    return;
+  }
+  if (eventType === 'done') {
+    state.currentJob = parsed;
+    if (parsed.status === 'completed') renderDashboard(parsed);
+    if (parsed.status === 'failed') qs('#form-message').textContent = parsed.error || 'Scan failed';
+    refreshJobs();
+    return;
+  }
+  addEvent(parsed);
 }
 
 async function loadJob(jobId) {
-  const response = await fetch(`/api/scans/${jobId}`);
+  const response = await apiFetch(`/api/scans/${jobId}`);
   if (!response.ok) return;
   const job = await response.json();
   state.currentJob = job;
   qs('#event-list').innerHTML = '';
   job.events.forEach(addEvent);
   if (job.status === 'completed') renderDashboard(job);
-  if (!['completed', 'failed'].includes(job.status)) subscribeToJob(job.id);
+  if (!['completed', 'failed'].includes(job.status)) streamJob(job.id);
 }
 
 function renderDashboard(job) {
@@ -307,9 +506,17 @@ function renderArtifacts(job) {
   `).join('');
 }
 
-async function init() {
+async function bootstrapData() {
+  updateFormAvailability();
+  if (state.session.auth_enabled && !state.session.authenticated) {
+    clearWorkspace();
+    return;
+  }
   await loadConfig();
   await refreshJobs();
+}
+
+async function init() {
   qs('#scan-form').addEventListener('submit', startScan);
   qs('#profile-select').addEventListener('change', renderSelectedProfile);
   qs('#select-full-profile').addEventListener('click', () => {
@@ -317,6 +524,8 @@ async function init() {
     renderSelectedProfile();
   });
   setProgress(0, 'Idle');
+  await loadSession();
+  await bootstrapData();
 }
 
 init().catch((error) => {

@@ -441,6 +441,24 @@ class HostedWebUiHandler(BaseHTTPRequestHandler):
                 status=HTTPStatus.OK if ready else HTTPStatus.SERVICE_UNAVAILABLE,
             )
             return
+        if clean_path == "/api/session":
+            # Public endpoint: lets the UI discover whether auth is required and,
+            # if a token was supplied, the current identity and permissions.
+            session_principal = self._principal(client_ip)
+            auth_enabled = AUTH_MANAGER.enabled()
+            authenticated = bool(session_principal and session_principal.authenticated)
+            self._send_json(
+                {
+                    "auth_enabled": auth_enabled,
+                    "authenticated": authenticated,
+                    "auth_required": auth_enabled and session_principal is None,
+                    "token_header": AUTH_MANAGER.header_name(),
+                    "username": session_principal.username if session_principal else None,
+                    "role": session_principal.role if session_principal else None,
+                    "permissions": sorted(session_principal.permissions) if session_principal else [],
+                }
+            )
+            return
         if clean_path == "/metrics":
             if os.getenv("VULNORAIQ_METRICS_AUTH_REQUIRED", "true").strip().lower() in ("1", "true", "yes"):
                 principal = self._principal(client_ip)
@@ -449,6 +467,15 @@ class HostedWebUiHandler(BaseHTTPRequestHandler):
                     self._send_error_response(HTTPStatus.UNAUTHORIZED, "authentication required")
                     return
             self._serve_metrics()
+            return
+
+        # Static UI assets are public so the page can load and present a sign-in
+        # prompt; all /api/* data endpoints below remain behind authentication.
+        if clean_path == "/":
+            self._serve_static("index.html")
+            return
+        if clean_path.startswith("/static/"):
+            self._serve_static(clean_path.removeprefix("/static/"))
             return
 
         principal = self._principal(client_ip)
@@ -465,12 +492,6 @@ class HostedWebUiHandler(BaseHTTPRequestHandler):
             session_key = self._session_key(principal)
             token = _csrf_token_for(session_key)
             self._send_json({"csrf_token": token})
-            return
-        if clean_path == "/":
-            self._serve_static("index.html")
-            return
-        if clean_path.startswith("/static/"):
-            self._serve_static(clean_path.removeprefix("/static/"))
             return
         if clean_path == "/api/config":
             full_config = load_config()

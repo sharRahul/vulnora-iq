@@ -82,8 +82,7 @@ jobs:
         run: |
           python scripts/validate_production_testing_readiness.py \
             --run-functional \
-            --output-dir reports/output/production-readiness \
-            --screenshot docs/assets/vulnoraiq-dashboard-example.svg
+            --output-dir reports/output/production-readiness
 
       - name: Upload readiness artifacts
         if: matrix.python-version == '3.12'

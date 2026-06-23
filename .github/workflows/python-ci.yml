@@ -94,8 +94,7 @@ jobs:
       - name: Run functional acceptance test
         run: |
           python scripts/run_functional_test.py \
-            --output-dir reports/output/functional-test \
-            --screenshot docs/assets/vulnoraiq-dashboard-example.svg
+            --output-dir reports/output/functional-test
 
       - name: Run baseline assessment smoke test
         run: |
@@ -166,5 +165,4 @@ jobs:
           name: vulnoraiq-demo-reports-${{ matrix.python-version }}
           path: |
             reports/output/
-            docs/assets/vulnoraiq-dashboard-example.svg
             dist/vulnoraiq-example-package.zip
