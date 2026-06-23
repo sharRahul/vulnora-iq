@@ -1,0 +1,101 @@
+name: Build Release Artifacts
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version or tag name to embed in artifact names"
+        required: true
+        default: "0.2.0"
+      upload_to_release:
+        description: "Upload artifacts to an existing GitHub Release for this version/tag"
+        required: true
+        type: boolean
+        default: false
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build-platform-release:
+    name: Build ${{ matrix.platform }} release package
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: windows
+            os: windows-latest
+          - platform: linux
+            os: ubuntu-latest
+          - platform: macos
+            os: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Resolve release version
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "release" ]]; then
+            echo "VULNORAIQ_RELEASE_VERSION=${{ github.event.release.tag_name }}" >> "$GITHUB_ENV"
+          else
+            echo "VULNORAIQ_RELEASE_VERSION=${{ inputs.version }}" >> "$GITHUB_ENV"
+          fi
+
+      - name: Install release build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e .[dev]
+
+      - name: Validate release metadata and readiness
+        run: |
+          python scripts/validate_package_metadata.py
+          python scripts/validate_owasp_atlas_mappings.py
+          python scripts/validate_genai_readiness.py
+          python scripts/validate_production_testing_readiness.py --output-dir reports/output/production-readiness
+
+      - name: Build platform package
+        run: |
+          python scripts/build_platform_release_package.py --platform ${{ matrix.platform }} --version "$env:VULNORAIQ_RELEASE_VERSION"
+        if: runner.os == 'Windows'
+
+      - name: Build platform package
+        run: |
+          python scripts/build_platform_release_package.py --platform ${{ matrix.platform }} --version "$VULNORAIQ_RELEASE_VERSION"
+        if: runner.os != 'Windows'
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vulnoraiq-${{ env.VULNORAIQ_RELEASE_VERSION }}-${{ matrix.platform }}
+          path: dist/release/vulnoraiq-${{ env.VULNORAIQ_RELEASE_VERSION }}-${{ matrix.platform }}.zip
+          if-no-files-found: error
+
+      - name: Upload artifact to GitHub Release
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          gh release upload "${{ github.event.release.tag_name }}" \
+            "dist/release/vulnoraiq-${VULNORAIQ_RELEASE_VERSION}-${{ matrix.platform }}.zip" \
+            --clobber
+
+      - name: Upload artifact to existing GitHub Release
+        if: github.event_name == 'workflow_dispatch' && inputs.upload_to_release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          gh release upload "${VULNORAIQ_RELEASE_VERSION}" \
+            "dist/release/vulnoraiq-${VULNORAIQ_RELEASE_VERSION}-${{ matrix.platform }}.zip" \
+            --clobber
