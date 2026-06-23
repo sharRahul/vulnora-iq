@@ -218,3 +218,102 @@ Restart and verify `/healthz`, `/readyz`, scan history, and artifact download.
 **Detection**
 
 - `pip-audit` reports a vulnerable dependency.
+- GitHub Dependabot or security advisory opens an alert.
+
+**Containment**
+
+1. Assess whether the vulnerable package is runtime, dev-only, or unused.
+2. Patch or pin a fixed version.
+3. Run quality and readiness checks.
+4. Update `CHANGELOG.md` if the fix affects users.
+
+### 10. Web UI security bug
+
+Examples:
+
+- auth bypass
+- CSRF bypass
+- unsafe proxy-header trust
+- token leakage in logs
+- report/artifact unauthorised access
+
+**Response**
+
+1. Reproduce locally with a failing regression test.
+2. Fix the root cause.
+3. Run the full readiness gate.
+4. Update `SECURITY.md`, `CHANGELOG.md`, and docs if operator action is required.
+5. Release a patch or security advisory if exploitable.
+
+### 11. GenAI readiness regression
+
+Examples:
+
+- `scripts/validate_genai_readiness.py` fails on a release branch.
+- `DSGAI01–DSGAI21` scenario coverage is missing or incomplete.
+- `DSGAI22–DSGAI25` source discrepancy tracking is removed.
+- Required GenAI evidence fields drift from docs or reports.
+- Docs overstate GenAI coverage beyond working-starter evidence.
+
+**Response**
+
+1. Treat this as a release-blocking documentation/validation incident.
+2. Preserve the failing GitHub Actions logs.
+3. Fix the scenario manifest, evaluator, tests, or docs.
+4. Run:
+
+   ```bash
+   python scripts/validate_genai_readiness.py
+   pytest tests/test_genai_readiness_validation.py -q
+   python scripts/validate_package_metadata.py
+   ```
+
+5. Update release notes and assurance docs if wording changed.
+
+## Post-incident review
+
+For medium/high/critical incidents, record:
+
+- timeline
+- affected version/commit
+- detection source
+- root cause
+- impact and blast radius
+- containment actions
+- recovery actions
+- tests added
+- docs updated
+- release/advisory decision
+
+## Validation commands after incident remediation
+
+```bash
+ruff check .
+mypy .
+pytest -q
+python -m pip check
+pip-audit
+python scripts/validate_package_metadata.py
+python scripts/validate_owasp_atlas_mappings.py
+python scripts/validate_genai_readiness.py
+python scripts/validate_production_testing_readiness.py
+python scripts/validate_runtime_production_config.py
+python scripts/validate_production_testing_readiness.py \
+  --run-functional \
+  --output-dir reports/output/production-readiness
+```
+
+If Docker is available:
+
+```bash
+docker build -t vulnoraiq:incident-fix .
+python scripts/container_smoke_test.py
+```
+
+## Communication guidance
+
+Do not overclaim assurance in incident communications. Use the project boundary language:
+
+- Self-hosted laptop/server deployment: supported when configured and validated.
+- GenAI Security readiness: working starter evidence for controlled internal assessment use.
+- Scanner findings: framework evidence requiring human review, not certified VAPT assurance.
