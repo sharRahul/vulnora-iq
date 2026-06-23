@@ -1,0 +1,11 @@
+{
+  "name": "vulnoraiq-webui-tests",
+  "private": true,
+  "version": "0.2.0",
+  "scripts": {
+    "test:webui": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0"
+  }
+}
