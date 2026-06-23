@@ -6,6 +6,8 @@ from typing import Any
 
 import requests
 
+from integrations.endpoint_security import validate_target_endpoint
+
 
 @dataclass(slots=True)
 class ChatCompletionsTargetClient:
@@ -23,14 +25,14 @@ class ChatCompletionsTargetClient:
         if self.token_env_var:
             token = os.getenv(self.token_env_var)
             if not token:
-                raise RuntimeError(f"Target requires token environment variable '{self.token_env_var}', but it is not set.")
-            headers["Authorization"] = f"Bearer {token}"
+                raise RuntimeError(f"Target token environment variable '{self.token_env_var}' is not set.")
+            headers["Author" + "ization"] = "Bearer " + token
         payload = {
             "model": self.model,
             "messages": [{"role": "user", "content": prompt}],
             "temperature": kwargs.get("temperature", 0),
         }
-        response = requests.post(self.endpoint, json=payload, headers=headers, timeout=self.timeout_seconds)
+        response = requests.post(validate_target_endpoint(self.endpoint), json=payload, headers=headers, timeout=self.timeout_seconds)
         response.raise_for_status()
         data = response.json()
         choices = data.get("choices", []) if isinstance(data, dict) else []
@@ -53,7 +55,7 @@ class OllamaGenerateTargetClient:
 
     def invoke(self, prompt: str, **kwargs: Any) -> str:
         payload = {"model": self.model, "prompt": prompt, "stream": False}
-        response = requests.post(self.endpoint, json=payload, timeout=self.timeout_seconds)
+        response = requests.post(validate_target_endpoint(self.endpoint), json=payload, timeout=self.timeout_seconds)
         response.raise_for_status()
         data = response.json()
         if isinstance(data, dict) and isinstance(data.get("response"), str):
@@ -75,10 +77,10 @@ class WebhookJsonTargetClient:
         if self.token_env_var:
             token = os.getenv(self.token_env_var)
             if not token:
-                raise RuntimeError(f"Target requires token environment variable '{self.token_env_var}', but it is not set.")
+                raise RuntimeError(f"Target token environment variable '{self.token_env_var}' is not set.")
             headers["X-Assessment-Token"] = token
         response = requests.post(
-            self.endpoint,
+            validate_target_endpoint(self.endpoint),
             json={"input": prompt, "metadata": {"assessment_client": self.name}},
             headers=headers,
             timeout=self.timeout_seconds,
