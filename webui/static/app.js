@@ -48,8 +48,13 @@ function profileDisplayName(name, profile) {
   return profile.display_name || name.replace(/^test_/, '').replaceAll('_', ' ');
 }
 
-function profileCategory(profile) {
-  return profile.category || 'Other tests';
+function profileCategory(profile, name = '') {
+  if (profile.category) return profile.category;
+  if (['baseline', 'rag', 'agent', 'full'].includes(name)) return 'Assessment suites';
+  if (name.startsWith('test_owasp_llm')) return 'OWASP LLM Top 10 single tests';
+  if (name.startsWith('test_rag') || name.startsWith('test_retrieval') || name.startsWith('test_corpus')) return 'RAG and vector store tests';
+  if (name.startsWith('test_agent') || name.startsWith('test_tool') || name.startsWith('test_memory') || name.startsWith('test_multi_agent')) return 'Agentic and tool-use tests';
+  return 'Other tests';
 }
 
 function profileModules(profile) {
@@ -66,7 +71,7 @@ function renderProfileSelect() {
   const profileSelect = qs('#profile-select');
   const groups = new Map();
   Object.entries(state.config.profiles || {}).forEach(([name, profile]) => {
-    const category = profileCategory(profile);
+    const category = profileCategory(profile, name);
     if (!groups.has(category)) groups.set(category, []);
     groups.get(category).push([name, profile]);
   });
@@ -74,7 +79,7 @@ function renderProfileSelect() {
   profileSelect.innerHTML = orderedCategories(groups).map((category) => {
     const options = groups.get(category)
       .sort(([left], [right]) => left.localeCompare(right))
-      .map(([name, profile]) => `<option value="${escapeHtml(name)}">${escapeHtml(profileDisplayName(name, profile))} · ${profileModules(profile).length} module${profileModules(profile).length === 1 ? '' : 's'}</option>`)
+      .map(([name, profile]) => `<option value="${escapeHtml(name)}">${escapeHtml(profileDisplayName(name, profile))} · ${profileModules(profile).length || 'configured'} module${profileModules(profile).length === 1 ? '' : 's'}</option>`)
       .join('');
     return `<optgroup label="${escapeHtml(category)}">${options}</optgroup>`;
   }).join('');
@@ -87,7 +92,7 @@ function renderSelectedProfile() {
   qs('#selected-profile-detail').innerHTML = `
     <strong>${escapeHtml(profileDisplayName(selected, profile))}</strong>
     <p>${escapeHtml(profile.description || 'No description available.')}</p>
-    <small>${escapeHtml(profileCategory(profile))} · ${modules.length} module${modules.length === 1 ? '' : 's'} selected</small>
+    <small>${escapeHtml(profileCategory(profile, selected))} · ${modules.length || 'configured'} module${modules.length === 1 ? '' : 's'} selected</small>
   `;
   document.querySelectorAll('.profile-card').forEach((card) => {
     card.classList.toggle('active', card.dataset.profile === selected);
@@ -98,7 +103,7 @@ function renderTestCatalog() {
   const catalog = qs('#test-catalog');
   const groups = new Map();
   Object.entries(state.config.profiles || {}).forEach(([name, profile]) => {
-    const category = profileCategory(profile);
+    const category = profileCategory(profile, name);
     if (!groups.has(category)) groups.set(category, []);
     groups.get(category).push([name, profile]);
   });
@@ -108,7 +113,9 @@ function renderTestCatalog() {
       .sort(([left], [right]) => left.localeCompare(right))
       .map(([name, profile]) => {
         const modules = profileModules(profile);
-        const moduleBadges = modules.map((moduleName) => `<span>${escapeHtml(moduleName)}</span>`).join('');
+        const moduleBadges = modules.length
+          ? modules.map((moduleName) => `<span>${escapeHtml(moduleName)}</span>`).join('')
+          : '<span>Configured server-side profile</span>';
         return `
           <article class="profile-card" data-profile="${escapeHtml(name)}">
             <div>
@@ -145,7 +152,8 @@ async function loadConfig() {
   const response = await fetch('/api/config');
   state.config = await response.json();
   const targetSelect = qs('#target-select');
-  targetSelect.innerHTML = Object.entries(state.config.targets || {})
+  const targets = Object.keys(state.config.targets || {}).length ? state.config.targets : { demo: { type: 'demo' } };
+  targetSelect.innerHTML = Object.entries(targets)
     .map(([name, target]) => `<option value="${escapeHtml(name)}">${escapeHtml(name)} · ${escapeHtml(target.type || 'target')}</option>`)
     .join('');
   renderProfileSelect();
@@ -246,7 +254,7 @@ function renderDashboard(job) {
   qs('#dashboard').classList.remove('hidden');
   qs('#summary-target').textContent = summary.target || job.target;
   qs('#summary-profile').textContent = profileDisplayName(summary.profile || job.profile, profile);
-  qs('#summary-category').textContent = profileCategory(profile);
+  qs('#summary-category').textContent = profileCategory(profile, job.profile);
   qs('#summary-findings').textContent = summary.finding_count ?? 0;
   qs('#summary-severity').textContent = summary.highest_severity || 'info';
   qs('#summary-policy').textContent = summary.policy_status || 'pass';
