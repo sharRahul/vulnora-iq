@@ -4,7 +4,7 @@ on:
   push:
     branches: ["main"]
   pull_request:
-    branches: ["main", "webui-pr1-polish-accessibility", "webui-pr2-structure", "webui-pr3-tests-ci", "webui-pr4-build-pipeline", "webui-pr5-auth-session", "webui-pr6-docker-deps", "webui-pr7-release-hardening"]
+    branches: ["main", "webui-*"]
 
 jobs:
   test:
