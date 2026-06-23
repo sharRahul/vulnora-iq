@@ -1,13 +1,13 @@
+const { resolve } = require('node:path');
 const { defineConfig } = require('vite');
 
 module.exports = defineConfig({
-  root: 'webui/static',
   build: {
-    outDir: 'dist',
+    outDir: 'webui/static/dist',
     emptyOutDir: true,
     manifest: true,
     rollupOptions: {
-      input: 'index.html',
+      input: resolve(__dirname, 'webui/static/webui-build-entry.js'),
     },
   },
 });
