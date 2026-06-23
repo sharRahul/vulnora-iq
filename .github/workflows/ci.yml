@@ -57,6 +57,9 @@ jobs:
       - name: Validate package metadata
         run: python scripts/validate_package_metadata.py
 
+      - name: Validate OWASP/MITRE mapping metadata
+        run: python scripts/validate_owasp_atlas_mappings.py
+
       - name: Run production-testing readiness gate
         run: python scripts/validate_production_testing_readiness.py --output-dir reports/output/production-readiness
 
