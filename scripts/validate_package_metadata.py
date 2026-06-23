@@ -40,6 +40,8 @@ EXPECTED_CLI_ENTRY_POINTS = [
     "vulnoraiq-validate-owasp-atlas-mappings",
     "vulnoraiq-validate-genai-readiness",
 ]
+EXPECTED_LICENSE = "Apache-2.0"
+EXPECTED_LICENSE_FILE = Path("LICENSE")
 EXPECTED_MITRE_ATLAS_DOC = Path("docs/MITRE_ATLAS_AI_MATRIX.md")
 EXPECTED_THIRD_PARTY_NOTICES = Path("THIRD_PARTY_NOTICES.md")
 EXPECTED_DASHBOARD_EXAMPLE = Path("docs/assets/vulnoraiq-webui-home.png")
@@ -71,11 +73,26 @@ class PackageMetadataValidator:
         warnings: list[str] = []
         package_name = self._match(pyproject, r'^name = "([^"]+)"')
         package_version = self._match(pyproject, r'^version = "([^"]+)"')
+        package_license = self._match(pyproject, r'^license = \{ text = "([^"]+)" \}')
         framework = config.get("framework", {})
         if package_name != "vulnoraiq":
             errors.append(f"Unexpected package name: {package_name}")
         if package_version != str(framework.get("version")):
             errors.append(f"pyproject version {package_version} does not match framework version {framework.get('version')}")
+        if package_license != EXPECTED_LICENSE:
+            errors.append(f"pyproject license must be {EXPECTED_LICENSE}, found {package_license}")
+        if not EXPECTED_LICENSE_FILE.exists():
+            errors.append(f"Missing project license file: {EXPECTED_LICENSE_FILE}")
+        else:
+            license_text = EXPECTED_LICENSE_FILE.read_text(encoding="utf-8")
+            for required_text in (
+                "Apache License",
+                "Version 2.0, January 2004",
+                "Copyright 2026 Rahul Sharma",
+                "Licensed under the Apache License, Version 2.0",
+            ):
+                if required_text not in license_text:
+                    errors.append(f"LICENSE missing required Apache-2.0 text: {required_text}")
         if framework.get("display_name") != "VulnoraIQ":
             errors.append("framework.display_name must be VulnoraIQ")
         for command in EXPECTED_CLI_ENTRY_POINTS:
@@ -99,7 +116,12 @@ class PackageMetadataValidator:
             errors.append(f"Missing third-party notices file: {EXPECTED_THIRD_PARTY_NOTICES}")
         else:
             notice = EXPECTED_THIRD_PARTY_NOTICES.read_text(encoding="utf-8")
-            for required_text in ("MITRE ATLAS", "Apache License, Version 2.0", "Copyright 2021-2026 MITRE"):
+            for required_text in (
+                "MITRE ATLAS",
+                "Apache License, Version 2.0",
+                "Copyright 2021-2026 MITRE",
+                "VulnoraIQ-specific source code",
+            ):
                 if required_text not in notice:
                     errors.append(f"Third-party notices missing required attribution text: {required_text}")
         if EXPECTED_MITRE_ATLAS_DOC.exists():
