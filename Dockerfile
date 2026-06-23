@@ -3,7 +3,7 @@ FROM python:3.12-slim AS runtime
 LABEL org.opencontainers.image.title="VulnoraIQ" \
       org.opencontainers.image.description="AI security assessment framework for LLM applications, RAG systems, agents, and orchestration layers" \
       org.opencontainers.image.source="https://github.com/sharRahul/vulnoraiq" \
-      org.opencontainers.image.licenses="MIT" \
+      org.opencontainers.image.licenses="Apache-2.0" \
       org.opencontainers.image.version="0.2.0"
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
