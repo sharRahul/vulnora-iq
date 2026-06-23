@@ -2,7 +2,7 @@
 
 This guide describes the supported VulnoraIQ `0.2.0` deployment posture.
 
-> **Scope:** VulnoraIQ `0.2.0` has passed the controlled internal enterprise production-readiness gate. It is suitable for single-organisation/internal deployment when configured with the controls below. GenAI Security readiness is working starter coverage for controlled internal assessment use. VulnoraIQ is **not** public internet-facing SaaS or multi-tenant ready without additional controls such as OIDC/SSO, tenant isolation, HA persistence, distributed rate limiting, WAF/CDN/DDoS protection, and external testing.
+> **Scope:** VulnoraIQ `0.2.0` is a self-hosted application for authorised AI-agent and LLM-application testing. It is designed to run on a laptop, workstation, lab machine, or internal server controlled by the assessor or organisation. It is suitable for single-organisation/internal deployment when configured with the controls below. GenAI Security readiness is working starter coverage for controlled internal assessment use. VulnoraIQ is **not** intended to be operated as a public SaaS, multi-tenant hosted platform, or unsupervised internet-facing service.
 
 ## Quick start: local development
 
@@ -29,7 +29,7 @@ curl http://127.0.0.1:8787/readyz
 
 The demo target is safe and local. Configured non-demo targets require explicit authorisation.
 
-## Quick start: production-mode validation
+## Quick start: self-hosted production-mode validation
 
 Production mode fails closed when unsafe runtime configuration is detected.
 
@@ -235,7 +235,7 @@ export VULNORAIQ_MAX_CONCURRENT_SCANS=5
 export VULNORAIQ_SCAN_QUEUE_LIMIT=20
 ```
 
-The application rate limiter is in-memory and per-process. For public exposure or multi-instance deployment, enforce rate limiting at the reverse proxy/WAF layer and use a shared rate-limit backend in a future architecture.
+The application rate limiter is in-memory and per-process. For self-hosted internal server deployments, place the app behind your organisation's reverse proxy if centralised network controls, TLS, or additional request filtering are required.
 
 ## Persistence
 
@@ -268,7 +268,7 @@ Recommended operations:
 
 ## Reverse proxy and TLS
 
-The built-in HTTP server should run behind a reverse proxy for controlled enterprise deployment. See the runbook for nginx/Caddy validation commands and certificate checks.
+For internal server deployments, the built-in HTTP server can run behind a reverse proxy such as nginx or Caddy for TLS termination and enterprise network controls. Local laptop/workstation demos can remain bound to `127.0.0.1`.
 
 ## Backup and restore
 
@@ -290,12 +290,12 @@ Run the GenAI validator before release and after modifying GenAI docs, scenario 
 
 ## Production Checklist
 
-Confirm each item before a controlled internal enterprise deployment:
+Confirm each item before a self-hosted internal deployment:
 
 - [ ] `python scripts/validate_runtime_production_config.py` passes with `VULNORAIQ_ENV=production`.
 - [ ] `VULNORAIQ_AUTH_ENABLED=true` and a strong `VULNORAIQ_ADMIN_TOKEN` (no demo/default tokens) are set.
 - [ ] Persistent state — `VULNORAIQ_JOB_STORE_PATH`, `VULNORAIQ_WEB_OUTPUT_ROOT`, and `VULNORAIQ_WEB_USERS_PATH` — lives on the mounted `/data` volume.
-- [ ] The service runs behind a reverse proxy (nginx/Caddy) terminating TLS, with trusted proxy CIDRs configured.
+- [ ] For internal server deployments, the service runs behind an approved reverse proxy terminating TLS when remote access is required.
 - [ ] Scheduled backup of the SQLite store is in place and a restore has been validated.
 - [ ] Audit logging is enabled and audit logs are shipped and retained per internal policy.
 - [ ] `python scripts/validate_genai_readiness.py` passes after any GenAI docs or scenario changes.
