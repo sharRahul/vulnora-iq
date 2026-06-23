@@ -1,7 +1,7 @@
 # VulnoraIQ Release Checklist
 
 > **Current target:** `0.2.0` / `0.2.0-rc1`  
-> **Scope:** controlled internal enterprise production-readiness release  
+> **Scope:** self-hosted laptop/server production-readiness release  
 > **Last updated:** 2026-06-23
 
 This checklist must be completed before tagging a production-readiness release candidate or final release.
@@ -10,13 +10,13 @@ This checklist must be completed before tagging a production-readiness release c
 
 `0.2.0` may be described as:
 
-> Controlled internal enterprise production-readiness gate passed.
+> Self-hosted laptop/server AI security testing application with controlled internal production-readiness gate passed.
 
 GenAI-specific wording may say:
 
 > GenAI Security working-starter readiness gate completed for controlled internal assessment use with safe synthetic `DSGAI01–DSGAI21` scenario coverage.
 
-Do **not** describe `0.2.0` as public SaaS, multi-tenant, unsupervised internet-facing, certified VAPT-grade ready, or independently production-validated for every GenAI category.
+Do **not** describe `0.2.0` as certified VAPT-grade ready or independently production-validated for every GenAI category.
 
 ## Pre-release requirements
 
@@ -178,7 +178,7 @@ Acceptance:
 ## Stage 8: documentation review
 
 - [ ] README quick start is current.
-- [ ] README Web UI instructions include production-mode and Docker Compose path.
+- [ ] README Web UI instructions include self-hosted startup and shutdown guidance.
 - [ ] `SECURITY.md` reflects `0.2.0` controls and supported versions.
 - [ ] `DEPLOYMENT.md` includes latest env vars and proxy/TLS guidance.
 - [ ] `RUNBOOK.md` uses real `0.2.0` commands and includes GenAI readiness validation in upgrade checks.
@@ -187,7 +187,7 @@ Acceptance:
 - [ ] `ASSESSMENT_ASSURANCE.md` warns that findings are framework evidence, not certified VAPT assurance.
 - [ ] `docs/genai/PRODUCTION_READINESS_PLAN.md` shows the current GenAI Security phase-by-phase gate status.
 - [ ] `AGENTIC_APPLICATIONS_PRODUCTION_READINESS_PLAN.md` shows the current Agentic Applications phase-by-phase gate status.
-- [ ] `PRODUCTION_HARDENING_BACKLOG.md` documents public/SaaS gaps.
+- [ ] `PRODUCTION_HARDENING_BACKLOG.md` documents self-hosted maturity items.
 
 ## Stage 9: security review
 
@@ -257,9 +257,3 @@ Rollback steps:
 5. Document root cause and create a hotfix issue.
 
 ## Final release decision
-
-| Decision | Criteria |
-| --- | --- |
-| Tag `v0.2.0-rc1` | All local checks pass; docs aligned; GenAI readiness gate passes; Docker/backup smoke planned or passed |
-| Tag `v0.2.0` | RC cycle passed cleanly with Docker smoke, backup/restore, GenAI readiness validation, and CI/tag validation |
-| Keep unreleased | Any production-readiness validator failure, GenAI readiness validator failure, doc contradiction, security regression, or broken runtime smoke test |
