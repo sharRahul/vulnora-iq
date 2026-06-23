@@ -7,7 +7,7 @@ module.exports = defineConfig({
     emptyOutDir: true,
     manifest: true,
     rollupOptions: {
-      input: 'webui/static/index.html',
+      input: 'index.html',
     },
   },
 });
