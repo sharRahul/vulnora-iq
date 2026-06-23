@@ -115,6 +115,8 @@ The next phases should focus on:
 - Scanner/evaluator depth: deeper OWASP and GenAI check logic, evaluator thresholds, fixture realism, and authorised real-world validation.
 - Report language and assurance validation for external claims.
 
+Scanner and evaluator assurance limitations are documented in [`docs/ASSESSMENT_ASSURANCE.md`](ASSESSMENT_ASSURANCE.md).
+
 ## Documentation rule
 
 README, `SECURITY.md`, and all top-level docs must remain aligned. If a capability is only a starter, placeholder, partial, experimental, accepted risk, source discrepancy, or roadmap item, mark it as such everywhere it appears.
