@@ -26,6 +26,7 @@ Do **not** describe `0.2.0` as certified VAPT-grade ready or independently produ
 - [ ] `docs/genai/PRODUCTION_READINESS_PLAN.md` reflects the current GenAI Security phase gate status.
 - [ ] `docs/AGENTIC_APPLICATIONS_PRODUCTION_READINESS_PLAN.md` reflects the current Agentic Applications phase gate status.
 - [ ] `docs/ASSESSMENT_ASSURANCE.md` clearly states scanner/evaluator limitations.
+- [ ] Local launcher mode is documented as loopback-only and separate from production mode.
 - [ ] No P0/P1 release blockers remain.
 - [ ] Known accepted risks are documented.
 - [ ] CI is green on the release branch or `main`.
@@ -42,20 +43,20 @@ Recommended flow for this release:
 
 1. Tag `v0.2.0-rc1` after a clean local and CI validation pass.
 2. Run one release-candidate validation cycle.
-3. Tag `v0.2.0` only after RC smoke, Docker smoke, backup/restore, GenAI readiness validation, and docs review pass.
+3. Tag `v0.2.0` only after RC smoke, Docker smoke, backup/restore, GenAI readiness validation, launcher smoke, and docs review pass.
 
 ## Stage 1: version and changelog
 
 - [ ] Confirm `pyproject.toml` version is correct.
 - [ ] Confirm README maturity banner references the same version.
-- [ ] Confirm `CHANGELOG.md` has a dated section for the version.
+- [ ] Confirm `CHANGELOG.md` has a dated section for the version or clearly documents unreleased launcher/docs changes.
 - [ ] Confirm breaking changes are listed:
   - legacy `webui/server.py` removed
   - SQLite is default persistence
   - JSON backend is dev/legacy only
   - file auth disabled in production
   - `VULNORAIQ_ADMIN_TOKEN` required in production
-- [ ] Confirm release notes include known limitations, including GenAI current-scope completion limitations.
+- [ ] Confirm release notes include known limitations, including GenAI current-scope completion limitations and the launcher-mode local-only boundary.
 
 ## Stage 2: local quality gates
 
@@ -103,16 +104,20 @@ Acceptance:
 - [ ] Functional acceptance passes.
 - [ ] Dashboard example asset remains refreshed.
 
-## Stage 4: Web UI smoke test
+## Stage 4: Web UI and standalone launcher smoke test
 
 Manual or scripted checks:
 
+- [ ] `python launch-vulnoraiq-webui.py --no-browser` starts on loopback.
+- [ ] The startup panel reports dependency checks and quick-start actions.
+- [ ] The **Refresh checks** button refreshes startup status.
+- [ ] The **Stop local server** button stops a launcher-mode server cleanly.
 - [ ] `/healthz` returns HTTP `200`.
 - [ ] `/readyz` returns HTTP `200` when config is loaded.
-- [ ] `/metrics` requires auth by default.
-- [ ] unauthenticated `/api/scans` returns `401`.
-- [ ] valid admin token can retrieve `/api/csrf-token`.
-- [ ] `POST /api/scans` without CSRF returns `403`.
+- [ ] `/metrics` requires auth by default in hosted/production mode.
+- [ ] unauthenticated `/api/scans` returns `401` in hosted/production mode.
+- [ ] valid admin token can retrieve `/api/csrf-token` in hosted/production mode.
+- [ ] `POST /api/scans` without CSRF returns `403` in hosted/production mode.
 - [ ] valid CSRF token allows demo scan creation.
 - [ ] artifact download works for completed demo scan.
 - [ ] artifact path-protection check rejects unsafe artifact paths.
@@ -178,10 +183,10 @@ Acceptance:
 ## Stage 8: documentation review
 
 - [ ] README quick start is current.
-- [ ] README Web UI instructions include self-hosted startup and shutdown guidance.
-- [ ] `SECURITY.md` reflects `0.2.0` controls and supported versions.
-- [ ] `DEPLOYMENT.md` includes latest env vars and proxy/TLS guidance.
-- [ ] `RUNBOOK.md` uses real `0.2.0` commands and includes GenAI readiness validation in upgrade checks.
+- [ ] README Web UI instructions include standalone launcher, self-hosted startup, and shutdown guidance.
+- [ ] `SECURITY.md` reflects `0.2.0` controls, supported versions, local launcher boundary, and production-mode expectations.
+- [ ] `DEPLOYMENT.md` includes latest launcher files, env vars, proxy/TLS guidance, and local-vs-production boundaries.
+- [ ] `RUNBOOK.md` uses real `0.2.0` commands and includes launcher troubleshooting plus GenAI readiness validation in upgrade checks.
 - [ ] `INCIDENT_RESPONSE.md` references current audit events, SQLite, metrics, and token/proxy auth.
 - [ ] `MIGRATION.md` covers `0.0.1.x` to `0.2.0`.
 - [ ] `ASSESSMENT_ASSURANCE.md` warns that findings are framework evidence, not certified VAPT assurance.
@@ -194,6 +199,7 @@ Acceptance:
 - [ ] No real secrets in repository.
 - [ ] `.env.production.example` contains placeholders only.
 - [ ] Production auth is fail-closed.
+- [ ] Local launcher mode remains loopback-only and is not used as a shared production deployment path.
 - [ ] `listen_address_safe` check is reachable in `validate_all()`.
 - [ ] OWASP/ATLAS mapping metadata validator passes for active oracles/checks.
 - [ ] GenAI readiness validator passes for source-confirmed GenAI scenario coverage and docs.
@@ -214,6 +220,7 @@ After tag:
 - [ ] GitHub Actions pass for the tag.
 - [ ] Release notes are generated from `CHANGELOG.md`.
 - [ ] RC deployment smoke is run.
+- [ ] Local launcher smoke is run on at least one laptop/workstation.
 - [ ] No blocker found during RC observation window.
 
 ## Stage 11: final release tag
@@ -245,6 +252,7 @@ Trigger rollback for:
 - data integrity issue
 - repeatable production startup failure
 - broken backup/restore
+- broken standalone launcher on the release branch
 - critical/high dependency vulnerability without mitigation
 - GenAI readiness validator regression on release branch
 
@@ -253,7 +261,9 @@ Rollback steps:
 1. Stop the service.
 2. Revert to previous image/tag/code revision.
 3. Restore pre-release SQLite backup if needed.
-4. Validate `/healthz`, `/readyz`, `/metrics`, scan history, artifact access, and GenAI readiness gates.
+4. Validate `/healthz`, `/readyz`, `/metrics`, scan history, artifact access, standalone launcher path where applicable, and GenAI readiness gates.
 5. Document root cause and create a hotfix issue.
 
 ## Final release decision
+
+Final release is approved only when the selected release branch/tag has green CI, completed documentation review, local launcher smoke, hosted/production Web UI smoke, GenAI readiness validation, backup/restore validation, Docker/container smoke where applicable, and explicit maintainer sign-off.
