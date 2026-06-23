@@ -40,13 +40,41 @@ def build_startup_status(host: str, port: int, shutdown_allowed: bool) -> dict[s
             "pass" if python_ok else "fail",
             f"Python {sys.version.split()[0]} detected; VulnoraIQ requires Python 3.10 or newer.",
         ),
-        _status_item("PyYAML dependency", "pass" if _module_available("yaml") else "fail", "Required to load YAML configuration files."),
-        _status_item("VulnoraIQ package modules", "pass" if (ROOT / "core" / "scanner.py").exists() else "fail", "Core scanner package is available from this checkout."),
-        _status_item("Targets config", "pass" if (ROOT / "config" / "targets.yaml").exists() else "fail", "Target definitions are available."),
-        _status_item("Attack profiles config", "pass" if (ROOT / "config" / "attack_profiles.yaml").exists() else "fail", "Assessment profiles are available."),
-        _status_item("Web UI assets", "pass" if (ROOT / "webui" / "static" / "index.html").exists() else "fail", "Static Web UI files are present."),
-        _status_item("Output directory", "pass" if output_root.exists() else "warn", f"Reports will be written under {output_root}."),
-        _status_item("SQLite job store", "pass" if job_store_path.parent.exists() else "warn", f"Job history will use {job_store_path}."),
+        _status_item(
+            "PyYAML dependency",
+            "pass" if _module_available("yaml") else "fail",
+            "Required to load YAML configuration files.",
+        ),
+        _status_item(
+            "VulnoraIQ package modules",
+            "pass" if (ROOT / "core" / "scanner.py").exists() else "fail",
+            "Core scanner package is available from this checkout.",
+        ),
+        _status_item(
+            "Targets config",
+            "pass" if (ROOT / "config" / "targets.yaml").exists() else "fail",
+            "Target definitions are available.",
+        ),
+        _status_item(
+            "Attack profiles config",
+            "pass" if (ROOT / "config" / "attack_profiles.yaml").exists() else "fail",
+            "Assessment profiles are available.",
+        ),
+        _status_item(
+            "Web UI assets",
+            "pass" if (ROOT / "webui" / "static" / "index.html").exists() else "fail",
+            "Static Web UI files are present.",
+        ),
+        _status_item(
+            "Output directory",
+            "pass" if output_root.exists() else "warn",
+            f"Reports will be written under {output_root}.",
+        ),
+        _status_item(
+            "SQLite job store",
+            "pass" if job_store_path.parent.exists() else "warn",
+            f"Job history will use {job_store_path}.",
+        ),
     ]
     blocked = any(item["status"] == "fail" for item in dependency_checks)
     warnings = any(item["status"] == "warn" for item in dependency_checks)
@@ -56,18 +84,30 @@ def build_startup_status(host: str, port: int, shutdown_allowed: bool) -> dict[s
         _status_item("Configure local job store", "pass", f"Using SQLite path {job_store_path}."),
         _status_item("Open browser", "pass", f"Browser launched at http://{host}:{port}/."),
         _status_item("Local session", "pass", "Launcher mode runs on loopback for local self-hosted assessment work."),
-        _status_item("Stop button", "pass" if shutdown_allowed else "warn", "Enabled only for loopback launcher mode with explicit shutdown permission."),
+        _status_item(
+            "Stop button",
+            "pass" if shutdown_allowed else "warn",
+            "Enabled only for loopback launcher mode with explicit shutdown permission.",
+        ),
     ]
     change_options = [
         _status_item("Host", "pass", f"Current host: {host}. Change with --host or edit the launcher file."),
         _status_item("Port", "pass", f"Current port: {port}. Change with --port or edit the launcher file."),
         _status_item("Output root", "pass", f"Current output root: {output_root}. Change VULNORAIQ_WEB_OUTPUT_ROOT."),
         _status_item("Job store", "pass", f"Current job store: {job_store_path}. Change VULNORAIQ_JOB_STORE_PATH."),
-        _status_item("Auth", "pass", f"Launcher auth setting: {os.getenv('VULNORAIQ_AUTH_ENABLED', 'false')} for local loopback mode."),
+        _status_item(
+            "Auth",
+            "pass",
+            f"Launcher auth setting: {os.getenv('VULNORAIQ_AUTH_ENABLED', 'false')} for local loopback mode.",
+        ),
     ]
     return {
         "status": status,
-        "message": "Local launcher checks passed." if status == "ready" else "Review warnings or failures before running scans.",
+        "message": (
+            "Local launcher checks passed."
+            if status == "ready"
+            else "Review warnings or failures before running scans."
+        ),
         "launcher_mode": True,
         "host": host,
         "port": port,
@@ -149,7 +189,16 @@ def run_launcher(args: argparse.Namespace) -> int:
                 principal = self._principal(client_ip)
                 if not principal:
                     _inc_metric("auth_failures")
-                    _audit_structured("auth_failure", AUTH_MANAGER.anonymous(), request_id, client_ip, "GET", "/api/startup", 401, "startup checks auth required")
+                    _audit_structured(
+                        "auth_failure",
+                        AUTH_MANAGER.anonymous(),
+                        request_id,
+                        client_ip,
+                        "GET",
+                        "/api/startup",
+                        401,
+                        "startup checks auth required",
+                    )
                     self._send_error_response(HTTPStatus.UNAUTHORIZED, "authentication required")
                     return
                 if not self._check_rate_limit(principal, client_ip):
@@ -164,7 +213,16 @@ def run_launcher(args: argparse.Namespace) -> int:
                 principal = self._principal(client_ip)
                 if not principal:
                     _inc_metric("auth_failures")
-                    _audit_structured("auth_failure", AUTH_MANAGER.anonymous(), request_id, client_ip, "POST", clean_path, 401, "shutdown auth required")
+                    _audit_structured(
+                        "auth_failure",
+                        AUTH_MANAGER.anonymous(),
+                        request_id,
+                        client_ip,
+                        "POST",
+                        clean_path,
+                        401,
+                        "shutdown auth required",
+                    )
                     self._send_error_response(HTTPStatus.UNAUTHORIZED, "authentication required")
                     return
                 if not self._check_rate_limit(principal, client_ip):
@@ -173,19 +231,46 @@ def run_launcher(args: argparse.Namespace) -> int:
                 csrf_token = self.headers.get("X-CSRF-Token")
                 if not _validate_csrf(session_key, csrf_token):
                     _inc_metric("csrf_failures")
-                    _audit_structured("csrf_failure", principal, request_id, client_ip, "POST", clean_path, 403, "shutdown invalid csrf")
+                    _audit_structured(
+                        "csrf_failure",
+                        principal,
+                        request_id,
+                        client_ip,
+                        "POST",
+                        clean_path,
+                        403,
+                        "shutdown invalid csrf",
+                    )
                     self._send_error_response(HTTPStatus.FORBIDDEN, "invalid or missing CSRF token")
                     return
                 if not shutdown_allowed:
                     self._send_error_response(HTTPStatus.CONFLICT, "server shutdown is disabled for this runtime")
                     return
-                _audit_structured("server_shutdown_requested", principal, request_id, client_ip, "POST", clean_path, 202, "launcher stop requested")
-                self._send_json({"status": "stopping", "message": "Local VulnoraIQ Web UI server is stopping."}, status=HTTPStatus.ACCEPTED)
+                _audit_structured(
+                    "server_shutdown_requested",
+                    principal,
+                    request_id,
+                    client_ip,
+                    "POST",
+                    clean_path,
+                    202,
+                    "launcher stop requested",
+                )
+                self._send_json(
+                    {
+                        "status": "stopping",
+                        "message": "Local VulnoraIQ Web UI server is stopping.",
+                    },
+                    status=HTTPStatus.ACCEPTED,
+                )
                 threading.Thread(target=self.server.shutdown, daemon=True).start()
                 return
             super()._do_POST_routes(path, client_ip, request_id)
 
-    logging.basicConfig(level=os.getenv("VULNORAIQ_LOG_LEVEL", "INFO"), format="%(asctime)s %(levelname)s %(name)s %(message)s")
+    logging.basicConfig(
+        level=os.getenv("VULNORAIQ_LOG_LEVEL", "INFO"),
+        format="%(asctime)s %(levelname)s %(name)s %(message)s",
+    )
     threading.Thread(target=_rate_limit_cleanup_loop, daemon=True).start()
     server = ThreadingHTTPServer((args.host, args.port), LauncherWebUiHandler)
     print("VulnoraIQ local launcher checks:")
