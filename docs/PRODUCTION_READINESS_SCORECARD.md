@@ -8,6 +8,8 @@
 
 VulnoraIQ is **complete for the self-hosted internal deployment scope** when deployed with production configuration validation, strong environment-backed tokens or trusted reverse-proxy identity, reverse-proxy/TLS controls where remote internal access is required, SQLite persistence, and the documented runbook/incident-response process.
 
+The local standalone launcher is **complete for laptop/workstation use**: cross-platform launchers start the local Web UI, run dependency/startup checks, prepare the local SQLite/output paths, open the browser, and provide a loopback launcher-mode stop control. Launcher mode is not the shared/production deployment path.
+
 The GenAI Security readiness gate is now **complete for the current controlled-internal scenario-harness scope**: `DSGAI01–DSGAI21` have safe synthetic scenario coverage, deterministic evaluator primitives, required evidence fields, source discrepancy tracking, package metadata validation, tests, and CI workflow gates.
 
 VulnoraIQ does **not** claim production-validated real-environment GenAI detection assurance or certified VAPT-grade assurance. Findings remain framework evidence requiring human review.
@@ -29,17 +31,18 @@ VulnoraIQ does **not** claim production-validated real-environment GenAI detecti
 | 11. Containerisation | 9/10 | `Dockerfile`, `.dockerignore`, `docker-compose.yml`, `.env.production.example`, `tests/test_container_config.py` | Container image signing or container scanner workflow. | No |
 | 12. CI/CD and quality gates | 9/10 | `.github/workflows/ci.yml`, `.github/workflows/python-ci.yml`, `pyproject.toml`, `tests/`, `scripts/validate_package_metadata.py`, `scripts/validate_production_testing_readiness.py`, `scripts/validate_owasp_atlas_mappings.py`, `scripts/validate_genai_readiness.py` | Build/publish release workflow, SAST/DAST pipeline, or image scan gate. | No |
 | 13. Secrets management | 8/10 | `webui/auth.py`, `.env.production.example`, `webui/production_checks.py`, `docs/RUNBOOK.md` | Direct Vault/AWS/Azure/GCP secrets-manager integration or automated rotation. | No |
-| 14. Operational runbooks | 7/10 | `docs/RUNBOOK.md`, `docs/DEPLOYMENT.md`, backup/restore scripts | Environment-specific contacts, alert thresholds, and capacity planning. | No |
+| 14. Operational runbooks | 8/10 | `docs/RUNBOOK.md`, `docs/DEPLOYMENT.md`, backup/restore scripts, launcher startup/shutdown docs | Environment-specific contacts, alert thresholds, and capacity planning. | No |
 | 15. Incident response | 6/10 | `docs/INCIDENT_RESPONSE.md`, audit logs, metrics, rollback guidance | Organisation-specific escalation contacts, breach-notification process, SIEM rules, and tabletop validation. | No |
 | 16. Release management | 7/10 | `docs/RELEASE_CHECKLIST.md`, `CHANGELOG.md`, `scripts/build_release_package.py`, `scripts/validate_package_metadata.py` | Signed artifacts, staged release workflow, or automated release publishing. | No |
 | 17. Scanner / evaluator assurance | 9/10 | `docs/ASSESSMENT_ASSURANCE.md`, `core/production_detection.py`, `core/evaluators.py`, `core/genai_evaluators.py`, `config/owasp_oracles.yaml`, `tests/test_production_detection.py`, `tests/test_genai_readiness_validation.py` | Independent validation against approved real environments or certified VAPT assurance. | No |
 | 18. Single-instance limitations | 8/10 | Single-instance deployment boundary, SQLite WAL persistence, reverse-proxy docs | Shared CSRF/rate-limit state or horizontally scalable database. | No |
 | 19. OWASP / MITRE ATLAS mapping governance | 9/10 | `scripts/validate_owasp_atlas_mappings.py`, `tests/test_owasp_atlas_mapping_validation.py`, `.github/workflows/ci.yml`, `.github/workflows/python-ci.yml` | Manual security review before stronger assurance claims. | No |
 | 20. GenAI Security readiness governance | 8/10 | `benchmarks/fixtures/genai/scenarios.yaml`, `core/genai_evaluators.py`, `scripts/validate_genai_readiness.py`, `tests/test_genai_readiness_validation.py`, CI workflows, `docs/genai/PRODUCTION_READINESS_PLAN.md` | Approved-environment validation, provider inventory connectors, dashboard/report depth, and independent assurance. | No |
+| 21. Standalone local app startup | 8/10 | `launch-vulnoraiq-webui.*`, `scripts/launch_webui.py`, `webui/static/launcher-controls.*`, README launcher docs | Signed installers/native packages and broader OS-level QA. | No |
 
 **Overall self-hosted internal score:** **8.5/10**
 
-The gate-compliance register scores **10/10** because all self-hosted internal blockers are closed and all current-scope items are complete. The scorecard remains lower because it includes non-blocking maturity items such as SIEM integration, OIDC, signed releases, SAST/DAST, image scanning, GenAI approved-environment validation, and independent assurance.
+The gate-compliance register scores **10/10** because all self-hosted internal blockers are closed and all current-scope items are complete. The scorecard remains lower because it includes non-blocking maturity items such as SIEM integration, OIDC, signed releases, SAST/DAST, image scanning, GenAI approved-environment validation, native installers, and independent assurance.
 
 ## Current release claim
 
@@ -51,11 +54,16 @@ Allowed GenAI-specific wording:
 
 > GenAI Security readiness gate completed for controlled internal assessment use with safe synthetic `DSGAI01–DSGAI21` scenario coverage.
 
+Allowed standalone-app wording:
+
+> Local standalone launcher available for laptop/workstation self-hosted use with startup checks, browser launch, and loopback stop control.
+
 Do not use:
 
 - certified VAPT-grade ready
 - production pentest replacement
 - independently validated real-environment GenAI detection coverage
+- launcher mode as a shared production service
 
 ## Validation commands
 
