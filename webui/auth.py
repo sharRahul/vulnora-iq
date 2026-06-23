@@ -68,7 +68,7 @@ class WebAuthManager:
     """Role-aware auth manager driven by environment variables.
 
     Auth is enabled by default (VULNORAIQ_AUTH_ENABLED=true).
-    Set VULNORAIQ_AUTH_ENABLED=false to disable only for trusted local launcher use.
+    Set VULNORAIQ_AUTH_ENABLED=false to disable (not recommended for production).
 
     Auth modes (VULNORAIQ_AUTH_MODE):
       token (default) - env var token matching with constant-time comparison
@@ -166,7 +166,7 @@ class WebAuthManager:
 
     def authenticate_token(self, token: str | None) -> AuthPrincipal | None:
         if not self.enabled():
-            return AuthPrincipal("local-open", "admin", _DEFAULT_PERMISSIONS["admin"], authenticated=False)
+            return AuthPrincipal("anonymous", "analyst", _DEFAULT_PERMISSIONS["analyst"], authenticated=False)
 
         if not token:
             return None
@@ -201,7 +201,7 @@ class WebAuthManager:
     ) -> AuthPrincipal | None:
         """Authenticate via trusted reverse-proxy identity headers."""
         if not self.enabled():
-            return AuthPrincipal("local-open", "admin", _DEFAULT_PERMISSIONS["admin"], authenticated=False)
+            return AuthPrincipal("anonymous", "analyst", _DEFAULT_PERMISSIONS["analyst"], authenticated=False)
 
         if not trusted:
             return None
