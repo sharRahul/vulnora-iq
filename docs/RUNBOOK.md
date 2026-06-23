@@ -1,8 +1,8 @@
 # VulnoraIQ Production Runbook
 
-This runbook is for VulnoraIQ `0.2.0` controlled internal enterprise deployments.
+This runbook is for VulnoraIQ `0.2.0` self-hosted laptop/server deployments.
 
-> **Scope:** adapt paths, hostnames, secret-management steps, reverse proxy, and backup destinations to your environment. VulnoraIQ `0.2.0` is not public SaaS or multi-tenant ready. GenAI Security coverage is working starter evidence for controlled internal assessment use, not certified assurance.
+> **Scope:** adapt paths, hostnames, secret-management steps, reverse proxy, and backup destinations to your environment. VulnoraIQ `0.2.0` is intended to run as a local or self-hosted internal application for authorised assessment work. GenAI Security coverage is working starter evidence for controlled internal assessment use, not certified assurance.
 
 ## 1. Service management
 
@@ -31,6 +31,12 @@ vulnoraiq-web --host 127.0.0.1 --port 8787
 ### Stop / restart service
 
 ```bash
+# Foreground terminal run
+# Press Ctrl+C in the terminal where vulnoraiq-web is running.
+
+# Background direct run on port 8787
+lsof -ti :8787 | xargs kill
+
 # Docker Compose
 docker compose down
 docker compose restart
@@ -161,6 +167,8 @@ There is no separate job-management CLI yet. Use this controlled manual procedur
 
 ## 8. Reverse proxy and TLS checks
 
+Use these checks when running on an internal server behind nginx or Caddy:
+
 ```bash
 sudo nginx -t
 caddy validate --config /etc/caddy/Caddyfile
@@ -183,7 +191,7 @@ echo | openssl s_client -servername vulnoraiq.example.com \
 | `401 authentication required` | Token header missing or wrong | Send `X-VulnoraIQ-Token`; rotate/regenerate token if needed |
 | `403 forbidden` | Role lacks permission or CSRF missing | Use admin/analyst token as appropriate; fetch `/api/csrf-token` before POST |
 | `413 request too large` | Body exceeds `VULNORAIQ_MAX_REQUEST_BODY` | Reduce request size or raise limit within production validation bounds |
-| `429 rate limit exceeded` | IP exceeded app rate limit | Check client retry behaviour; tune env vars; add proxy/WAF limits |
+| `429 rate limit exceeded` | IP exceeded app rate limit | Check client retry behaviour; tune env vars; add proxy limits where needed |
 | `scan queue at capacity` | Too many active/queued scans | Tune `VULNORAIQ_MAX_CONCURRENT_SCANS` / `VULNORAIQ_SCAN_QUEUE_LIMIT` or wait |
 | `/metrics` returns 401 | Metrics auth required | Add `X-VulnoraIQ-Token` or intentionally disable auth only in a protected monitoring network |
 | Ready check returns 503 | Targets/profiles failed to load | Check `VULNORAIQ_CONFIG_DIR`, `config/targets.yaml`, and `config/attack_profiles.yaml` |
@@ -246,4 +254,4 @@ echo | openssl s_client -servername vulnoraiq.example.com \
 
 ## 13. Escalation
 
-Use [`INCIDENT_RESPONSE.md`](INCIDENT_RESPONSE.md) for security events. Escalate immediately for suspected token leak, auth bypass, artifact exposure, repeated rate-limit spikes, scan queue exhaustion, corrupted SQLite store, dependency vulnerability affecting runtime security, or GenAI readiness regression on a release branch.
+Use [`INCIDENT_RESPONSE.md`](INCIDENT_RESPONSE.md) for security events. Escalate immediately for suspected token leak, access-control failure, report exposure, repeated rate-limit spikes, scan queue exhaustion, corrupted SQLite store, dependency issue affecting runtime security, or GenAI readiness regression on a release branch.
