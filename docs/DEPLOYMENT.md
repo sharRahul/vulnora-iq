@@ -2,7 +2,7 @@
 
 This guide describes the supported VulnoraIQ `0.2.0` deployment posture.
 
-> **Scope:** VulnoraIQ `0.2.0` has passed the controlled internal enterprise production-readiness gate. It is suitable for single-organisation/internal deployment when configured with the controls below. It is **not** public internet-facing SaaS or multi-tenant ready without additional controls such as OIDC/SSO, tenant isolation, HA persistence, distributed rate limiting, WAF/CDN/DDoS protection, and external penetration testing.
+> **Scope:** VulnoraIQ `0.2.0` has passed the controlled internal enterprise production-readiness gate. It is suitable for single-organisation/internal deployment when configured with the controls below. GenAI Security readiness is working starter coverage for controlled internal assessment use. VulnoraIQ is **not** public internet-facing SaaS or multi-tenant ready without additional controls such as OIDC/SSO, tenant isolation, HA persistence, distributed rate limiting, WAF/CDN/DDoS protection, and external testing.
 
 ## Quick start: local development
 
@@ -57,6 +57,27 @@ Production-mode validation checks:
 - binding to `0.0.0.0` or `::` without trusted proxy configuration fails
 - rate-limit, request-body, and CSRF TTL values are sane
 - audit logging level is valid
+
+## Release and assessment readiness validation
+
+Run these after checkout, before a release candidate, and after changing docs, mappings, or GenAI scenario assets:
+
+```bash
+python scripts/validate_package_metadata.py
+python scripts/validate_owasp_atlas_mappings.py
+python scripts/validate_genai_readiness.py
+python scripts/validate_production_testing_readiness.py
+python scripts/validate_runtime_production_config.py
+```
+
+The GenAI readiness validator checks:
+
+- `DSGAI01–DSGAI21` source-confirmed scenario coverage
+- `DSGAI22–DSGAI25` source-discrepancy preservation
+- secure, vulnerable, ambiguous, and edge-case fixture coverage
+- required GenAI evidence fields
+- MITRE ATLAS tactic ID format
+- GenAI readiness documentation alignment
 
 ## Container deployment
 
@@ -130,17 +151,6 @@ Supported identity headers:
 
 Spoofed identity headers from untrusted client IPs are ignored.
 
-### File-based auth fallback
-
-If no token environment variables are set, development mode can read `config/web_users.yaml`. This fallback is **not allowed in production mode**.
-
-For local development only:
-
-```bash
-cp config/web_users.example.yaml config/web_users.yaml
-# Replace hashes with local-only values.
-```
-
 ## Proxy IP trust
 
 By default, VulnoraIQ does **not** trust `X-Forwarded-For`. This prevents client-IP spoofing.
@@ -195,18 +205,6 @@ export VULNORAIQ_SCAN_QUEUE_LIMIT=20
 
 The application rate limiter is in-memory and per-process. For public exposure or multi-instance deployment, enforce rate limiting at the reverse proxy/WAF layer and use a shared rate-limit backend in a future architecture.
 
-### Security headers
-
-Normal and error responses include:
-
-- `X-Content-Type-Options: nosniff`
-- `X-Frame-Options: DENY`
-- `X-XSS-Protection: 0`
-- `Strict-Transport-Security` when appropriate for trusted TLS/proxy context
-- `Referrer-Policy: strict-origin-when-cross-origin`
-- strict `Content-Security-Policy`
-- `Permissions-Policy: camera=(), microphone=(), geolocation=()`
-
 ## Persistence
 
 SQLite is the default and production-supported backend for controlled internal deployment.
@@ -224,222 +222,36 @@ SQLite settings applied by the job store:
 - schema version table
 - `jobs` and `events` tables
 
-JSON persistence is legacy/development only:
-
-```bash
-export VULNORAIQ_JOB_STORE_BACKEND=json
-```
-
-Production validation rejects the JSON backend.
+JSON persistence is legacy/development only, and production validation rejects it.
 
 ## Audit logging
 
-Audit events are emitted as JSON lines on the `vulnoraiq.audit` logger. Events include request ID, user, role, authentication state, client IP, method, path, status, and detail.
-
-Example:
-
-```json
-{"timestamp":"2026-06-22T10:30:00+00:00","event":"scan_created","request_id":"abc123","user":"env-admin","role":"admin","authenticated":"true","client_ip":"10.0.0.10","method":"POST","path":"/api/scans","status":202,"detail":"target=demo profile=baseline job_id=..."}
-```
-
-Audit logs must not include auth tokens, CSRF tokens, request bodies, secrets, or full report contents.
+Audit events are emitted as JSON lines on the `vulnoraiq.audit` logger. Audit logs must not include auth tokens, CSRF tokens, request bodies, secrets, or full report contents.
 
 Recommended operations:
 
-- ship logs to SIEM using journald, Filebeat, Fluent Bit, or your standard log shipper
+- ship logs to SIEM using your standard log shipper
 - retain audit logs according to internal policy
-- alert on repeated `auth_failure`, `authz_failure`, `csrf_failure`, `rate_limit_exceeded`, `artifact_traversal_attempt`, and `scan_queue_full`
+- alert on repeated auth failures, CSRF failures, rate-limit spikes, unsafe artifact access attempts, and scan queue saturation
 
 ## Reverse proxy and TLS
 
-The built-in HTTP server should run behind a reverse proxy for controlled enterprise deployment.
-
-### nginx example
-
-```nginx
-limit_req_zone $binary_remote_addr zone=vulnoraiq:10m rate=30r/s;
-
-server {
-    listen 443 ssl;
-    server_name vulnoraiq.example.com;
-
-    ssl_certificate /etc/ssl/certs/vulnoraiq.crt;
-    ssl_certificate_key /etc/ssl/private/vulnoraiq.key;
-
-    limit_req zone=vulnoraiq burst=10 nodelay;
-
-    location / {
-        proxy_pass http://127.0.0.1:8787;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_buffering off;
-        proxy_cache off;
-        proxy_read_timeout 86400s;
-    }
-}
-```
-
-### Caddy example
-
-```caddy
-vulnoraiq.example.com {
-    reverse_proxy 127.0.0.1:8787 {
-        header_up X-Real-IP {remote_host}
-        header_up X-Forwarded-For {remote_host}
-        header_up X-Forwarded-Proto {scheme}
-    }
-}
-```
-
-## Metrics and monitoring
-
-- `/healthz` — liveness probe
-- `/readyz` — readiness probe
-- `/metrics` — Prometheus-format metrics, auth-protected by default via `VULNORAIQ_METRICS_AUTH_REQUIRED=true`
-
-Example authenticated metrics scrape:
-
-```bash
-curl -H "X-VulnoraIQ-Token: $VULNORAIQ_ADMIN_TOKEN" http://127.0.0.1:8787/metrics
-```
-
-Useful metrics include auth failures, authorization failures, CSRF failures, rate-limit blocks, scans created/completed/failed, active scans, artifact downloads, oversized requests, scan queue full, internal errors, uptime, and build info.
+The built-in HTTP server should run behind a reverse proxy for controlled enterprise deployment. See the runbook for nginx/Caddy validation commands and certificate checks.
 
 ## Backup and restore
 
-### Backup
-
 ```bash
-python scripts/backup_sqlite_store.py \
-  /data/jobs.db \
-  /data/backups/jobs-$(date +%Y%m%d-%H%M%S).db \
-  --compress \
-  --validate \
-  --retention 90
+python scripts/backup_sqlite_store.py /data/jobs.db /data/backups/jobs-$(date +%Y%m%d-%H%M%S).db --compress --validate --retention 90
+python scripts/restore_sqlite_store.py /data/backups/jobs-YYYYMMDD-HHMMSS.db.gz /tmp/vulnoraiq-restore-test.db --compressed --validate
 ```
 
-### Restore
+## GenAI Security deployment notes
 
-```bash
-# Stop the service first.
-python scripts/restore_sqlite_store.py \
-  /data/backups/jobs-YYYYMMDD-HHMMSS.db.gz \
-  /data/jobs.db \
-  --compressed \
-  --validate
-```
+GenAI readiness assets are repository assets, not runtime secrets:
 
-### Restore drill
+- scenario manifest: `benchmarks/fixtures/genai/scenarios.yaml`
+- evaluator suite: `core/genai_evaluators.py`
+- readiness validator: `scripts/validate_genai_readiness.py`
+- tests: `tests/test_genai_readiness_validation.py`
 
-At least once per release candidate:
-
-1. Create a backup from a test database.
-2. Restore to a new temporary DB path.
-3. Run validation.
-4. Start the Web UI against the restored DB.
-5. Confirm scan history and artifacts behave as expected.
-
-## Filesystem permissions
-
-```bash
-sudo useradd --system --no-create-home vulnoraiq || true
-sudo mkdir -p /data /data/reports /data/backups
-sudo chown -R vulnoraiq:vulnoraiq /data
-sudo chmod 750 /data
-```
-
-The runtime user needs write access to `/data/jobs.db` and `/data/reports`. Configuration should be read-only for the runtime user where possible.
-
-## Secrets management
-
-- Never bake secrets into Docker images.
-- Never commit real `.env.production` files.
-- Use environment variables or a secret manager.
-- Rotate tokens by generating a new token, updating runtime configuration, restarting the service, and invalidating the old value.
-- Keep `.env.production.example` placeholder-only.
-
-## systemd example
-
-```ini
-[Unit]
-Description=VulnoraIQ Web UI
-After=network.target
-
-[Service]
-Type=simple
-User=vulnoraiq
-Group=vulnoraiq
-WorkingDirectory=/app
-Environment=VULNORAIQ_ENV=production
-Environment=VULNORAIQ_AUTH_ENABLED=true
-Environment=VULNORAIQ_ADMIN_TOKEN=replace-with-secret-manager-value
-Environment=VULNORAIQ_JOB_STORE_BACKEND=sqlite
-Environment=VULNORAIQ_JOB_STORE_PATH=/data/jobs.db
-Environment=VULNORAIQ_WEB_OUTPUT_ROOT=/data/reports
-ExecStart=/usr/local/bin/vulnoraiq-web --host 127.0.0.1 --port 8787
-Restart=on-failure
-RestartSec=5
-StandardOutput=journal
-StandardError=journal
-
-[Install]
-WantedBy=multi-user.target
-```
-
-## Environment variable reference
-
-| Variable | Default | Description |
-| --- | --- | --- |
-| `VULNORAIQ_ENV` | — | Set to `production` for production-mode validation |
-| `VULNORAIQ_HOST` | `127.0.0.1` | Bind address |
-| `VULNORAIQ_PORT` | `8787` | Bind port |
-| `VULNORAIQ_AUTH_ENABLED` | `true` | Enable authentication |
-| `VULNORAIQ_AUTH_MODE` | `token` | `token` or `trusted_proxy` |
-| `VULNORAIQ_ADMIN_TOKEN` | — | Admin token, required in production, min 20 chars |
-| `VULNORAIQ_ANALYST_TOKEN` | — | Analyst token |
-| `VULNORAIQ_VIEWER_TOKEN` | — | Viewer token |
-| `VULNORAIQ_LOG_LEVEL` | `INFO` | `DEBUG`, `INFO`, `WARNING`, or `ERROR` |
-| `VULNORAIQ_CONFIG_DIR` | `config` | Config directory |
-| `VULNORAIQ_WEB_USERS_PATH` | `config/web_users.yaml` | Development file-auth fallback path |
-| `VULNORAIQ_WEB_OUTPUT_ROOT` | `reports/output/webui` | Report output root |
-| `VULNORAIQ_JOB_STORE_BACKEND` | `sqlite` | `sqlite` or development-only `json` |
-| `VULNORAIQ_JOB_STORE_PATH` | `reports/output/webui/jobs.db` | Store path |
-| `VULNORAIQ_MAX_REQUEST_BODY` | `10485760` | Max request body in bytes |
-| `VULNORAIQ_RATE_LIMIT_WINDOW` | `60` | Rate-limit window in seconds |
-| `VULNORAIQ_RATE_LIMIT_MAX` | `60` | Max requests per window per IP |
-| `VULNORAIQ_CSRF_TOKEN_TTL` | `300` | CSRF token lifetime in seconds |
-| `VULNORAIQ_TRUST_PROXY_HEADERS` | `false` | Trust proxy-provided client IP/identity headers |
-| `VULNORAIQ_TRUSTED_PROXY_CIDRS` | — | Comma-separated trusted proxy CIDRs |
-| `VULNORAIQ_METRICS_AUTH_REQUIRED` | `true` | Require auth for `/metrics` |
-| `VULNORAIQ_MAX_CONCURRENT_SCANS` | `5` | Max active scans |
-| `VULNORAIQ_SCAN_QUEUE_LIMIT` | `20` | Queue capacity before rejection |
-
-## Production checklist
-
-- [ ] Set `VULNORAIQ_ENV=production`.
-- [ ] Set a strong `VULNORAIQ_ADMIN_TOKEN`.
-- [ ] Keep `VULNORAIQ_AUTH_ENABLED=true`.
-- [ ] Use SQLite backend and persistent `/data` volume.
-- [ ] Validate runtime config with `scripts/validate_runtime_production_config.py`.
-- [ ] Run behind TLS-terminating reverse proxy for any non-local access.
-- [ ] Configure `VULNORAIQ_TRUST_PROXY_HEADERS` and `VULNORAIQ_TRUSTED_PROXY_CIDRS` only for trusted proxies.
-- [ ] Configure proxy/WAF rate limiting for exposed deployments.
-- [ ] Ship audit logs to SIEM/log management.
-- [ ] Set up periodic SQLite backups and test restore.
-- [ ] Run `scripts/validate_production_testing_readiness.py` before release.
-- [ ] Run Docker smoke test if deploying via container.
-- [ ] Review [`ASSESSMENT_ASSURANCE.md`](ASSESSMENT_ASSURANCE.md) before sharing scan results externally.
-
-## Explicit non-goals for `0.2.0`
-
-`0.2.0` does not claim:
-
-- public SaaS readiness
-- multi-tenant isolation
-- HA database operation
-- distributed rate limiting
-- built-in OIDC/JWT validation
-- built-in WAF/CDN/DDoS protection
-- certified VAPT-grade scanner assurance
+Run the GenAI validator before release and after modifying GenAI docs, scenario coverage, evidence fields, or source discrepancy tracking. The validator passing means the working-starter gate is consistent; it does not prove production-validated real-world GenAI detection assurance.
