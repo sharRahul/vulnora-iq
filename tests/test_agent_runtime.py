@@ -5,7 +5,7 @@ from pathlib import Path
 import yaml
 
 from core.scanner import Scanner
-from webui.agent_runtime import AgentRuntimeManager
+from webui.agent_runtime import AgentRuntimeManager, find_docker_cli
 
 
 def test_agent_runtime_templates_are_available() -> None:
@@ -16,6 +16,14 @@ def test_agent_runtime_templates_are_available() -> None:
     assert templates["http_llm_agent"]["target_type"] == "http_json"
     assert templates["http_llm_agent"]["endpoint_path"] == "/agent"
     assert templates["http_llm_agent"]["build_context"] == "docker/agents/http-llm-agent"
+
+
+def test_docker_cli_override_is_detected(tmp_path, monkeypatch) -> None:
+    docker_cli = tmp_path / "docker"
+    docker_cli.write_text("#!/bin/sh\necho Docker version test\n", encoding="utf-8")
+    monkeypatch.setenv("VULNORAIQ_DOCKER_CLI", str(docker_cli))
+
+    assert find_docker_cli() == str(docker_cli)
 
 
 def test_runtime_targets_are_written_and_loaded_by_scanner(tmp_path, monkeypatch) -> None:
