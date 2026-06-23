@@ -6,7 +6,7 @@ Target: laptop/workstation/internal-server assessment readiness.
 
 ## Current verdict
 
-VulnoraIQ is complete for **self-hosted internal deployment** with the security, operational, deployment, Agentic Applications, OWASP LLM, and GenAI Security controls listed below. The Agentic Applications Production Readiness Plan is complete for the intended laptop/server application model. The GenAI Security Production Readiness Plan is complete for `DSGAI01–DSGAI21` with safe synthetic scenario manifests, deterministic evaluators, and CI validation. VulnoraIQ does not claim certified VAPT-grade assurance.
+VulnoraIQ is complete for **self-hosted internal deployment** with the security, operational, deployment, Agentic Applications, OWASP LLM, and GenAI Security controls listed below. The local standalone launcher path is complete for laptop/workstation use with cross-platform launchers, startup checks, browser launch, and a loopback-only stop control. The Agentic Applications Production Readiness Plan is complete for the intended laptop/server application model. The GenAI Security Production Readiness Plan is complete for `DSGAI01–DSGAI21` with safe synthetic scenario manifests, deterministic evaluators, and CI validation. VulnoraIQ does not claim certified VAPT-grade assurance.
 
 See [`PRODUCTION_READINESS_SCORECARD.md`](PRODUCTION_READINESS_SCORECARD.md) for detailed scoring, [`AGENTIC_APPLICATIONS_PRODUCTION_READINESS_PLAN.md`](AGENTIC_APPLICATIONS_PRODUCTION_READINESS_PLAN.md) for agentic phase gates, and [`genai/PRODUCTION_READINESS_PLAN.md`](genai/PRODUCTION_READINESS_PLAN.md) for GenAI Security phase gates.
 
@@ -26,15 +26,17 @@ See [`PRODUCTION_READINESS_SCORECARD.md`](PRODUCTION_READINESS_SCORECARD.md) for
 | PRD-010 | Observability | Health, readiness, metrics endpoints. | `/healthz`, `/readyz`, `/metrics`; `tests/test_metrics.py` |
 | PRD-011 | Agentic mapping governance | CI fails if active oracle/check mapping metadata is missing. | `scripts/validate_owasp_atlas_mappings.py`; `tests/test_owasp_atlas_mapping_validation.py`; CI workflows |
 | PRD-012 | GenAI Security readiness governance | CI fails if GenAI scenario coverage, evidence fields, source discrepancy tracking, or docs readiness drift. | `benchmarks/fixtures/genai/scenarios.yaml`; `core/genai_evaluators.py`; `scripts/validate_genai_readiness.py`; `tests/test_genai_readiness_validation.py`; CI workflows |
+| PRD-013 | Standalone local launcher | Laptop/workstation users can start and stop the Web UI without remembering server commands. | `launch-vulnoraiq-webui.*`; `scripts/launch_webui.py`; `webui/static/launcher-controls.*`; `README.md`; `docs/DEPLOYMENT.md` |
 
 ## Current self-hosted readiness
 
-All blockers PRD-001 through PRD-012 are **Closed** for the self-hosted internal deployment and assessment-readiness scope. All current-scope readiness items are **Complete**.
+All blockers PRD-001 through PRD-013 are **Closed** for the self-hosted internal deployment and assessment-readiness scope. All current-scope readiness items are **Complete**.
 
 ## Post-completion maturity items
 
 | Area | Future maturity item | Priority |
 | --- | --- | --- |
+| Native packaging | Signed installers / native packages beyond repository-checkout launchers | Medium |
 | TLS termination | Environment-specific reverse proxy and certificate validation | Medium |
 | Multi-instance operation | Shared-nothing / stateless design | Medium |
 | OIDC/SSO | Direct OIDC/JWT integration beyond proxy-header identity | Medium |
@@ -48,8 +50,8 @@ All blockers PRD-001 through PRD-012 are **Closed** for the self-hosted internal
 
 ### Notes on scoring
 
-The 10/10 gate-compliance score means all PRD-001 through PRD-012 blockers are closed and all current-scope readiness items are complete. The actual scorecard average for self-hosted internal deployment remains lower because it includes non-blocking maturity items such as SIEM integration, OIDC, signed releases, SAST/DAST, GenAI approved-environment validation, and independent assurance.
+The 10/10 gate-compliance score means all PRD-001 through PRD-013 blockers are closed and all current-scope readiness items are complete. The actual scorecard average for self-hosted internal deployment remains lower because it includes non-blocking maturity items such as SIEM integration, OIDC, signed releases, SAST/DAST, GenAI approved-environment validation, native installers, and independent assurance.
 
 ## Production claim rule
 
-Describe VulnoraIQ as a self-hosted laptop/server AI security testing application with controlled internal production-readiness gate passed. Do not describe VulnoraIQ as certified VAPT-grade, independently production-validated for all GenAI categories, or a replacement for independent assessment. Self-hosted internal deployment readiness is attested by this register, the scorecard, the completed OWASP LLM current-scope coverage, the completed Agentic Applications readiness plan, the completed GenAI Security readiness plan, and the production-readiness validation gates.
+Describe VulnoraIQ as a self-hosted laptop/server AI security testing application with controlled internal production-readiness gate passed. You may also describe the local launcher as complete for laptop/workstation self-hosted use with startup checks and loopback stop control. Do not describe VulnoraIQ as certified VAPT-grade, independently production-validated for all GenAI categories, a replacement for independent assessment, or as exposing launcher mode for shared production deployment. Self-hosted internal deployment readiness is attested by this register, the scorecard, the completed OWASP LLM current-scope coverage, the completed Agentic Applications readiness plan, the completed GenAI Security readiness plan, and the production-readiness validation gates.
