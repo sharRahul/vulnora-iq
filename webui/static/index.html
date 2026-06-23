@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="/static/styles.css">
   <link rel="stylesheet" href="/static/scan-progress.css">
   <link rel="stylesheet" href="/static/ui-polish.css">
+  <link rel="stylesheet" href="/static/launcher-controls.css">
 </head>
 <body>
   <header class="topbar">
@@ -32,6 +33,43 @@
           <strong>Categorised tests visible by default</strong>
           <p>Pick assessment suites, individual OWASP LLM checks, RAG tests, or agentic/tool-use tests from the Web UI.</p>
         </div>
+      </div>
+    </section>
+
+    <section class="panel startup-panel" aria-labelledby="startup-title">
+      <div class="section-title">
+        <span>00</span>
+        <h2 id="startup-title">Startup and local server controls</h2>
+      </div>
+      <div class="startup-grid">
+        <article class="startup-card startup-status-card">
+          <p class="eyebrow">Launcher status</p>
+          <h3 id="startup-status-title">Checking local startup state</h3>
+          <p id="startup-status-message">The double-click launcher exposes startup checks here after the page connects.</p>
+          <span id="startup-status-badge" class="startup-badge pending">Checking</span>
+        </article>
+        <article class="startup-card">
+          <p class="eyebrow">Quick actions</p>
+          <div class="startup-actions">
+            <button type="button" id="startup-refresh" class="secondary compact">Refresh checks</button>
+            <button type="button" id="stop-server" class="danger-button" disabled>Stop local server</button>
+          </div>
+          <p id="stop-server-message" class="form-message">Stop is available only in local launcher mode with admin permission.</p>
+        </article>
+      </div>
+      <div class="startup-detail-grid">
+        <section>
+          <h3>Dependency checks</h3>
+          <div id="startup-check-list" class="startup-list"></div>
+        </section>
+        <section>
+          <h3>Quick-start actions</h3>
+          <div id="startup-action-list" class="startup-list"></div>
+        </section>
+        <section>
+          <h3>Configuration options</h3>
+          <div id="startup-config-list" class="startup-list"></div>
+        </section>
       </div>
     </section>
 
@@ -253,6 +291,7 @@
       <div id="job-history" class="job-history"></div>
     </section>
   </main>
+  <script src="/static/launcher-controls.js" defer></script>
   <script src="/static/app.js" defer></script>
 </body>
 </html>
