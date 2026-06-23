@@ -17,7 +17,7 @@ module.exports = defineConfig({
     },
   ],
   webServer: {
-    command: `python -m webui.hosted_server --host 127.0.0.1 --port ${port} --skip-production-checks`,
+    command: `python scripts/webui_test_server.py --host 127.0.0.1 --port ${port} --skip-production-checks`,
     url: `http://127.0.0.1:${port}/healthz`,
     reuseExistingServer: !process.env.CI,
     timeout: 30_000,
