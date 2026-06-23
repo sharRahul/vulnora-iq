@@ -12,14 +12,19 @@ This checklist must be completed before tagging a production-readiness release c
 
 > Controlled internal enterprise production-readiness gate passed.
 
-Do **not** describe `0.2.0` as public SaaS, multi-tenant, unsupervised internet-facing, or certified VAPT-grade ready.
+GenAI-specific wording may say:
+
+> GenAI Security working-starter readiness gate completed for controlled internal assessment use with safe synthetic `DSGAI01–DSGAI21` scenario coverage.
+
+Do **not** describe `0.2.0` as public SaaS, multi-tenant, unsupervised internet-facing, certified VAPT-grade ready, or independently production-validated for every GenAI category.
 
 ## Pre-release requirements
 
 - [ ] All planned release changes are merged or intentionally deferred.
 - [ ] `README.md`, `SECURITY.md`, `CHANGELOG.md`, and `docs/` are aligned with current maturity.
 - [ ] `docs/PRODUCTION_READINESS_SCORECARD.md` and `docs/PRODUCTION_HARDENING_BACKLOG.md` do not contradict each other.
-- [ ] `docs/AGENTIC_APPLICATIONS_PRODUCTION_READINESS_PLAN.md` reflects the current phase gate status.
+- [ ] `docs/genai/PRODUCTION_READINESS_PLAN.md` reflects the current GenAI Security phase gate status.
+- [ ] `docs/AGENTIC_APPLICATIONS_PRODUCTION_READINESS_PLAN.md` reflects the current Agentic Applications phase gate status.
 - [ ] `docs/ASSESSMENT_ASSURANCE.md` clearly states scanner/evaluator limitations.
 - [ ] No P0/P1 release blockers remain.
 - [ ] Known accepted risks are documented.
@@ -37,7 +42,7 @@ Recommended flow for this release:
 
 1. Tag `v0.2.0-rc1` after a clean local and CI validation pass.
 2. Run one release-candidate validation cycle.
-3. Tag `v0.2.0` only after RC smoke, Docker smoke, backup/restore, and docs review pass.
+3. Tag `v0.2.0` only after RC smoke, Docker smoke, backup/restore, GenAI readiness validation, and docs review pass.
 
 ## Stage 1: version and changelog
 
@@ -50,7 +55,7 @@ Recommended flow for this release:
   - JSON backend is dev/legacy only
   - file auth disabled in production
   - `VULNORAIQ_ADMIN_TOKEN` required in production
-- [ ] Confirm release notes include known limitations.
+- [ ] Confirm release notes include known limitations, including GenAI working-starter limitations.
 
 ## Stage 2: local quality gates
 
@@ -73,13 +78,14 @@ Acceptance:
 - [ ] pip check passes or unrelated environment warnings are documented.
 - [ ] pip-audit has no unaccepted high/critical runtime vulnerabilities.
 
-## Stage 3: package, mapping, and readiness validation
+## Stage 3: package, mapping, GenAI, and readiness validation
 
 Run:
 
 ```bash
 python scripts/validate_package_metadata.py
 python scripts/validate_owasp_atlas_mappings.py
+python scripts/validate_genai_readiness.py
 python scripts/validate_production_testing_readiness.py
 python scripts/validate_runtime_production_config.py
 python scripts/validate_production_testing_readiness.py \
@@ -92,6 +98,7 @@ Acceptance:
 
 - [ ] Package metadata validation passes.
 - [ ] OWASP/ATLAS mapping metadata validation passes.
+- [ ] GenAI readiness validation passes.
 - [ ] Production readiness validation passes all checks.
 - [ ] Runtime production config validation passes under a valid production env.
 - [ ] Functional acceptance passes.
@@ -109,10 +116,22 @@ Manual or scripted checks:
 - [ ] `POST /api/scans` without CSRF returns `403`.
 - [ ] valid CSRF token allows demo scan creation.
 - [ ] artifact download works for completed demo scan.
-- [ ] artifact path traversal attempt is rejected.
+- [ ] artifact path-protection check rejects unsafe artifact paths.
 - [ ] audit logs contain request IDs and do not contain tokens or request bodies.
 
-## Stage 5: Docker and container smoke
+## Stage 5: GenAI Security readiness review
+
+Review:
+
+- [ ] `benchmarks/fixtures/genai/scenarios.yaml` covers `DSGAI01–DSGAI21`.
+- [ ] The manifest preserves the `DSGAI22–DSGAI25` source discrepancy as tracked/map-later.
+- [ ] Each source-confirmed DSGAI category has secure, vulnerable, ambiguous, and edge-case fixture coverage.
+- [ ] Required evidence fields include `genai_id`, `genai_risk_area`, `data_classification`, `data_surface`, `redaction_status`, `manual_review_reason`, and `mitre_atlas_tactics`.
+- [ ] `core/genai_evaluators.py` exposes deterministic safe-fixture evaluators.
+- [ ] `tests/test_genai_readiness_validation.py` passes.
+- [ ] Docs state that GenAI coverage is working starter, not certified assurance.
+
+## Stage 6: Docker and container smoke
 
 Run:
 
@@ -130,7 +149,7 @@ Acceptance:
 - [ ] production mode fails without admin token.
 - [ ] production mode starts with valid admin token.
 
-## Stage 6: backup and restore
+## Stage 7: backup and restore
 
 Run on a temporary/test SQLite DB:
 
@@ -157,32 +176,34 @@ Acceptance:
 - [ ] Restored DB validates.
 - [ ] Restore drill result is recorded.
 
-## Stage 7: documentation review
+## Stage 8: documentation review
 
 - [ ] README quick start is current.
 - [ ] README Web UI instructions include production-mode and Docker Compose path.
 - [ ] `SECURITY.md` reflects `0.2.0` controls and supported versions.
 - [ ] `DEPLOYMENT.md` includes latest env vars and proxy/TLS guidance.
-- [ ] `RUNBOOK.md` uses real `0.2.0` commands, not placeholder PostgreSQL/Redis/JWT commands.
+- [ ] `RUNBOOK.md` uses real `0.2.0` commands and includes GenAI readiness validation in upgrade checks.
 - [ ] `INCIDENT_RESPONSE.md` references current audit events, SQLite, metrics, and token/proxy auth.
 - [ ] `MIGRATION.md` covers `0.0.1.x` to `0.2.0`.
 - [ ] `ASSESSMENT_ASSURANCE.md` warns that findings are framework evidence, not certified VAPT assurance.
-- [ ] `AGENTIC_APPLICATIONS_PRODUCTION_READINESS_PLAN.md` shows the current phase-by-phase gate status.
+- [ ] `docs/genai/PRODUCTION_READINESS_PLAN.md` shows the current GenAI Security phase-by-phase gate status.
+- [ ] `AGENTIC_APPLICATIONS_PRODUCTION_READINESS_PLAN.md` shows the current Agentic Applications phase-by-phase gate status.
 - [ ] `PRODUCTION_HARDENING_BACKLOG.md` documents public/SaaS gaps.
 
-## Stage 8: security review
+## Stage 9: security review
 
 - [ ] No real secrets in repository.
 - [ ] `.env.production.example` contains placeholders only.
 - [ ] Production auth is fail-closed.
 - [ ] `listen_address_safe` check is reachable in `validate_all()`.
 - [ ] OWASP/ATLAS mapping metadata validator passes for active oracles/checks.
+- [ ] GenAI readiness validator passes for source-confirmed GenAI scenario coverage and docs.
 - [ ] Trusted proxy identity spoofing tests pass.
-- [ ] CSRF, rate-limit, request-size, artifact traversal, metrics auth, and audit tests pass.
+- [ ] CSRF, rate-limit, request-size, artifact access, metrics auth, and audit tests pass.
 - [ ] Dependency audit is reviewed.
-- [ ] Security lead or maintainer signs off.
+- [ ] Maintainer signs off.
 
-## Stage 9: release candidate tag
+## Stage 10: release candidate tag
 
 ```bash
 git tag -a v0.2.0-rc1 -m "Release candidate v0.2.0-rc1"
@@ -196,7 +217,7 @@ After tag:
 - [ ] RC deployment smoke is run.
 - [ ] No blocker found during RC observation window.
 
-## Stage 10: final release tag
+## Stage 11: final release tag
 
 Only after RC validation:
 
@@ -226,19 +247,20 @@ Trigger rollback for:
 - repeatable production startup failure
 - broken backup/restore
 - critical/high dependency vulnerability without mitigation
+- GenAI readiness validator regression on release branch
 
 Rollback steps:
 
 1. Stop the service.
 2. Revert to previous image/tag/code revision.
 3. Restore pre-release SQLite backup if needed.
-4. Validate `/healthz`, `/readyz`, `/metrics`, scan history, and artifact access.
+4. Validate `/healthz`, `/readyz`, `/metrics`, scan history, artifact access, and GenAI readiness gates.
 5. Document root cause and create a hotfix issue.
 
 ## Final release decision
 
 | Decision | Criteria |
 | --- | --- |
-| Tag `v0.2.0-rc1` | All local checks pass; docs aligned; Docker/backup smoke planned or passed |
-| Tag `v0.2.0` | RC cycle passed cleanly with Docker smoke, backup/restore, and CI/tag validation |
-| Keep unreleased | Any production-readiness validator failure, doc contradiction, security regression, or broken runtime smoke test |
+| Tag `v0.2.0-rc1` | All local checks pass; docs aligned; GenAI readiness gate passes; Docker/backup smoke planned or passed |
+| Tag `v0.2.0` | RC cycle passed cleanly with Docker smoke, backup/restore, GenAI readiness validation, and CI/tag validation |
+| Keep unreleased | Any production-readiness validator failure, GenAI readiness validator failure, doc contradiction, security regression, or broken runtime smoke test |
