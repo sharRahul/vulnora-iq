@@ -1,5 +1,7 @@
 profiles:
   baseline:
+    category: Assessment suites
+    display_name: Baseline OWASP LLM review
     description: Safe baseline checks across core OWASP LLM 2025 risks.
     modules:
       - owasp_llm01_prompt_injection
@@ -10,6 +12,8 @@ profiles:
       - owasp_llm09_misinformation
 
   rag:
+    category: Assessment suites
+    display_name: RAG and retrieval review
     description: RAG-specific checks for retrieval and embedding weaknesses.
     modules:
       - owasp_llm08_vector_embedding_weaknesses
@@ -18,6 +22,8 @@ profiles:
       - corpus_validation
 
   agent:
+    category: Assessment suites
+    display_name: Agent and orchestration review
     description: Agent and orchestration testing.
     modules:
       - owasp_llm06_excessive_agency
@@ -27,6 +33,8 @@ profiles:
       - multi_agent_abuse
 
   full:
+    category: Assessment suites
+    display_name: Full safe starter assessment
     description: All safe starter checks.
     modules:
       - owasp_llm01_prompt_injection
@@ -39,3 +47,122 @@ profiles:
       - owasp_llm08_vector_embedding_weaknesses
       - owasp_llm09_misinformation
       - owasp_llm10_unbounded_consumption
+
+  test_owasp_llm01_prompt_injection:
+    category: OWASP LLM Top 10 single tests
+    display_name: LLM01 prompt injection
+    description: Run only the prompt and instruction boundary review.
+    modules:
+      - owasp_llm01_prompt_injection
+
+  test_owasp_llm02_sensitive_information_disclosure:
+    category: OWASP LLM Top 10 single tests
+    display_name: LLM02 sensitive information disclosure
+    description: Run only the sensitive information handling review.
+    modules:
+      - owasp_llm02_sensitive_information_disclosure
+
+  test_owasp_llm03_supply_chain:
+    category: OWASP LLM Top 10 single tests
+    display_name: LLM03 supply chain
+    description: Run only the model, data, and dependency supply-chain review.
+    modules:
+      - owasp_llm03_supply_chain
+
+  test_owasp_llm04_data_and_model_poisoning:
+    category: OWASP LLM Top 10 single tests
+    display_name: LLM04 data and model poisoning
+    description: Run only the data and model integrity review.
+    modules:
+      - owasp_llm04_data_and_model_poisoning
+
+  test_owasp_llm05_improper_output_handling:
+    category: OWASP LLM Top 10 single tests
+    display_name: LLM05 improper output handling
+    description: Run only the downstream output handling review.
+    modules:
+      - owasp_llm05_improper_output_handling
+
+  test_owasp_llm06_excessive_agency:
+    category: OWASP LLM Top 10 single tests
+    display_name: LLM06 excessive agency
+    description: Run only the agent autonomy and action constraint review.
+    modules:
+      - owasp_llm06_excessive_agency
+
+  test_owasp_llm07_system_prompt_leakage:
+    category: OWASP LLM Top 10 single tests
+    display_name: LLM07 system prompt leakage
+    description: Run only the protected instruction disclosure review.
+    modules:
+      - owasp_llm07_system_prompt_leakage
+
+  test_owasp_llm08_vector_embedding_weaknesses:
+    category: OWASP LLM Top 10 single tests
+    display_name: LLM08 vector and embedding weaknesses
+    description: Run only the vector and embedding control review.
+    modules:
+      - owasp_llm08_vector_embedding_weaknesses
+
+  test_owasp_llm09_misinformation:
+    category: OWASP LLM Top 10 single tests
+    display_name: LLM09 misinformation
+    description: Run only the grounding and overreliance review.
+    modules:
+      - owasp_llm09_misinformation
+
+  test_owasp_llm10_unbounded_consumption:
+    category: OWASP LLM Top 10 single tests
+    display_name: LLM10 unbounded consumption
+    description: Run only the token, cost, quota, timeout, and rate-limit review.
+    modules:
+      - owasp_llm10_unbounded_consumption
+
+  test_rag_poisoning:
+    category: RAG and vector store tests
+    display_name: RAG corpus integrity
+    description: Run only the RAG corpus integrity readiness review.
+    modules:
+      - rag_poisoning
+
+  test_retrieval_manipulation:
+    category: RAG and vector store tests
+    display_name: Retrieval boundary review
+    description: Run only the retrieval manipulation and access-boundary review.
+    modules:
+      - retrieval_manipulation
+
+  test_corpus_validation:
+    category: RAG and vector store tests
+    display_name: Corpus validation
+    description: Run only the knowledge-base lineage, freshness, and approval review.
+    modules:
+      - corpus_validation
+
+  test_agent_chain_attack:
+    category: Agentic and tool-use tests
+    display_name: Agent chain planning
+    description: Run only the agent chain planning and approval-gate review.
+    modules:
+      - agent_chain_attack
+
+  test_tool_execution_monitor:
+    category: Agentic and tool-use tests
+    display_name: Tool execution monitoring
+    description: Run only the tool execution monitoring and credential-scope review.
+    modules:
+      - tool_execution_monitor
+
+  test_memory_tampering:
+    category: Agentic and tool-use tests
+    display_name: Agent memory integrity
+    description: Run only the agent memory integrity review.
+    modules:
+      - memory_tampering
+
+  test_multi_agent_abuse:
+    category: Agentic and tool-use tests
+    display_name: Multi-agent boundary review
+    description: Run only the multi-agent trust-boundary review.
+    modules:
+      - multi_agent_abuse
