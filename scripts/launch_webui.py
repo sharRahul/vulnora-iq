@@ -133,7 +133,9 @@ def _merge_runtime_targets(config: dict[str, Any], runtime_targets_path: Path) -
     runtime_targets = yaml.safe_load(runtime_targets_path.read_text(encoding="utf-8")) or {}
     if not isinstance(runtime_targets, dict):
         return
-    configured_targets = config.setdefault("targets", {}).setdefault("targets", {})
+    configured_targets = config.setdefault("targets", {})
+    if not ("profiles" in config or "web_auth_enabled" in config):
+        configured_targets = configured_targets.setdefault("targets", {})
     for name, target in (runtime_targets.get("targets") or {}).items():
         if isinstance(target, dict):
             configured_targets[str(name)] = target
