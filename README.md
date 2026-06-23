@@ -57,6 +57,10 @@ The Web UI screenshot below shows the refreshed Sophisticated Muted light theme,
 
 ![VulnoraIQ Web UI light theme dashboard](docs/assets/vulnoraiq-webui-light-theme.svg)
 
+The functional dashboard below is generated from the safe local functional test path and shows the intended reporting workflow.
+
+![VulnoraIQ dashboard example](docs/assets/vulnoraiq-dashboard-example.png)
+
 ---
 
 ## What VulnoraIQ provides today
