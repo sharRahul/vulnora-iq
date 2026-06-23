@@ -8,6 +8,7 @@ dist/
 *.egg-info/
 reports/output/*.md
 reports/output/*.json
+reports/output/webui/
 !reports/output/.gitkeep
 .env
 .env.*
