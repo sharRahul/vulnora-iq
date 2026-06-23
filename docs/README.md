@@ -3,8 +3,8 @@
 This folder contains the operational, security, production-readiness, assurance, OWASP, GenAI, Agentic, and MITRE ATLAS documentation for VulnoraIQ.
 
 > **Current version:** `0.2.0`  
-> **Current posture:** controlled internal enterprise production-readiness gate passed.  
-> **Boundary:** not public internet-facing SaaS, not multi-tenant ready, and not certified VAPT-grade assurance.
+> **Current posture:** self-hosted laptop/server application with controlled internal production-readiness gate passed.  
+> **Boundary:** authorised local or internal-server assessment use; not certified VAPT-grade assurance.
 
 ## Start here
 
@@ -29,15 +29,13 @@ This folder contains the operational, security, production-readiness, assurance,
 
 VulnoraIQ `0.2.0` may be described as:
 
-> Controlled internal enterprise production-readiness gate passed.
+> Self-hosted laptop/server AI security testing application with controlled internal production-readiness gate passed.
 
 It must **not** be described as:
 
-- public SaaS ready
-- multi-tenant ready
-- unsupervised public internet ready
 - certified VAPT-grade assurance
 - a substitute for external penetration testing
+- independently validated real-world GenAI detection assurance
 
 ## Current control summary
 
