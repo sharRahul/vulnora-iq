@@ -7,6 +7,7 @@ from pathlib import Path
 
 import yaml
 
+from scripts.validate_genai_readiness import validate_default as validate_genai_readiness
 from scripts.validate_owasp_atlas_mappings import validate_default_configs
 
 EXPECTED_OWASP_DOCS = [
@@ -37,6 +38,7 @@ EXPECTED_CLI_ENTRY_POINTS = [
     "vulnoraiq-html-export",
     "vulnoraiq-validate-package",
     "vulnoraiq-validate-owasp-atlas-mappings",
+    "vulnoraiq-validate-genai-readiness",
 ]
 EXPECTED_MITRE_ATLAS_DOC = Path("docs/MITRE_ATLAS_AI_MATRIX.md")
 EXPECTED_THIRD_PARTY_NOTICES = Path("THIRD_PARTY_NOTICES.md")
@@ -44,6 +46,8 @@ EXPECTED_DASHBOARD_EXAMPLE = Path("docs/assets/vulnoraiq-dashboard-example.svg")
 EXPECTED_FUNCTIONAL_RUNNER = Path("scripts/run_functional_test.py")
 EXPECTED_PRODUCTION_READINESS_RUNNER = Path("scripts/validate_production_testing_readiness.py")
 EXPECTED_OWASP_ATLAS_MAPPING_RUNNER = Path("scripts/validate_owasp_atlas_mappings.py")
+EXPECTED_GENAI_READINESS_RUNNER = Path("scripts/validate_genai_readiness.py")
+EXPECTED_GENAI_MANIFEST = Path("benchmarks/fixtures/genai/scenarios.yaml")
 
 
 @dataclass(slots=True)
@@ -112,6 +116,15 @@ class PackageMetadataValidator:
             if mapping_result["status"] != "pass":
                 for error in mapping_result["errors"]:
                     errors.append(f"OWASP ATLAS mapping validation failed: {error}")
+        if not EXPECTED_GENAI_READINESS_RUNNER.exists():
+            errors.append(f"Missing GenAI readiness validator: {EXPECTED_GENAI_READINESS_RUNNER}")
+        if not EXPECTED_GENAI_MANIFEST.exists():
+            errors.append(f"Missing GenAI readiness manifest: {EXPECTED_GENAI_MANIFEST}")
+        if EXPECTED_GENAI_READINESS_RUNNER.exists() and EXPECTED_GENAI_MANIFEST.exists():
+            genai_result = validate_genai_readiness()
+            if genai_result["status"] != "pass":
+                for error in genai_result["errors"]:
+                    errors.append(f"GenAI readiness validation failed: {error}")
         if not EXPECTED_DASHBOARD_EXAMPLE.exists():
             errors.append(f"Missing dashboard example image: {EXPECTED_DASHBOARD_EXAMPLE}")
         else:
@@ -122,6 +135,8 @@ class PackageMetadataValidator:
             errors.append("Missing OWASP fixture target file")
         if not Path("core/evaluators.py").exists():
             errors.append("Missing deterministic evaluator suite")
+        if not Path("core/genai_evaluators.py").exists():
+            errors.append("Missing GenAI deterministic evaluator suite")
         return PackageMetadataValidationResult("fail" if errors else "warn" if warnings else "pass", errors, warnings)
 
     @staticmethod
