@@ -53,9 +53,9 @@ The default `demo` target is safe and local. Configured non-demo targets require
 
 ## Dashboard example
 
-The Web UI screenshot below shows the refreshed Sophisticated Muted light theme, including the run-readiness panel, realtime scan progress, completed assessment dashboard, top risks, severity badges, and findings workflow.
+The Web UI screenshot below was captured from the running console on the safe local `demo` target with the `baseline` profile, showing the run-readiness panel, realtime scan progress, completed assessment dashboard, top risks, severity distribution, policy evaluation, and findings workflow.
 
-![VulnoraIQ Web UI light theme dashboard](docs/assets/vulnoraiq-webui-light-theme.svg)
+![VulnoraIQ Web UI dashboard](docs/assets/vulnoraiq-webui-dashboard.png)
 
 The functional dashboard below is generated from the safe local functional test path and shows the intended reporting workflow.
 
