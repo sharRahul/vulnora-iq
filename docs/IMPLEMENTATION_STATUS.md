@@ -15,7 +15,7 @@ This document separates current complete capability from future assurance and ma
 | Phase 3 — Stronger evaluators | Complete for current scope | `core/evaluators.py` adds deterministic local evaluators for text checks, schema checks, source access, provenance, approval, citations, action boundaries, resource limits, and manual review. |
 | Phase 4 — Contract-tested adapters | Complete for current scope | `config/target_contracts.yaml` and `integrations/contract_validation.py` validate configured target adapter shapes before approved testing. |
 | Phase 5 — Web UI hardening | Complete for self-hosted production scope | `webui/hosted_server.py`, `webui/auth.py`, `webui/persistent_jobs.py`, and `webui/production_checks.py` provide the hardened Web UI with env-token auth, trusted proxy identity mode, CSRF, rate limiting, security headers, proxy trust, audit logging, metrics, request IDs, concurrency limits, and startup validation. |
-| Phase 6 — Report quality and presentation | Complete for current scope | Report generation includes structured evidence; `reports/html_export_package.py` builds a branded export bundle; `docs/assets/vulnoraiq-dashboard-example.png` provides a README dashboard example image. |
+| Phase 6 — Report quality and presentation | Complete for current scope | Report generation includes structured evidence; `reports/html_export_package.py` builds a branded export bundle; `docs/assets/vulnoraiq-webui-home.png` provides a README Web UI home screen image. |
 | Phase 7 — Release gates | Complete for self-hosted production scope | Package metadata, GenAI readiness, OWASP/ATLAS mapping, production readiness, runtime config, backup/restore, Docker smoke tooling, and CI gates validate package, runtime, docs, readiness, and functional acceptance. |
 
 ## GenAI Security Production Readiness Plan
@@ -43,7 +43,7 @@ This document separates current complete capability from future assurance and ma
 | Production runtime config validation | Complete for self-hosted production scope | `scripts/validate_runtime_production_config.py` validates runtime environment before startup. |
 | GenAI Security readiness plan | Complete for current scope | `DSGAI01–DSGAI21` safe synthetic scenario coverage, deterministic evaluators, validator, tests, package metadata integration, and CI workflow gates. |
 | Agentic production readiness plan | Complete for self-hosted internal deployment | Agentic readiness gates are complete for the intended local/internal-server application model. |
-| Dashboard example image | Complete | `docs/assets/vulnoraiq-dashboard-example.png` is a real captured Web UI dashboard screenshot referenced in `README.md`. |
+| Web UI home screen image | Complete | `docs/assets/vulnoraiq-webui-home.png` is a real captured Web UI home screen screenshot referenced in `README.md`. |
 | Modern Web UI | Complete for self-hosted production scope | `webui/hosted_server.py` — hardened HTTP server with auth, CSRF, rate limiting, security headers, proxy trust, audit logging, metrics, request IDs, concurrency limits, and structured error handling. |
 | Authentication | Complete for self-hosted production scope | `webui/auth.py` — env-driven token auth with hmac constant-time comparison, production-mode validation, trusted reverse-proxy identity headers, role-based access control. |
 | CSRF protection | Complete for self-hosted production scope | Per-session CSRF tokens with configurable TTL, periodic cleanup, validated on state-changing requests. |

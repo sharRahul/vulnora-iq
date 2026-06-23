@@ -8,7 +8,7 @@ include_paths:
   - docs/module-authoring.md
   - docs/web-ui.md
   - docs/MITRE_ATLAS_AI_MATRIX.md
-  - docs/assets/vulnoraiq-dashboard-example.png
+  - docs/assets/vulnoraiq-webui-home.png
   - docs/owasp/
   - config/default.yaml
   - config/targets.yaml

@@ -42,7 +42,7 @@ EXPECTED_CLI_ENTRY_POINTS = [
 ]
 EXPECTED_MITRE_ATLAS_DOC = Path("docs/MITRE_ATLAS_AI_MATRIX.md")
 EXPECTED_THIRD_PARTY_NOTICES = Path("THIRD_PARTY_NOTICES.md")
-EXPECTED_DASHBOARD_EXAMPLE = Path("docs/assets/vulnoraiq-dashboard-example.png")
+EXPECTED_DASHBOARD_EXAMPLE = Path("docs/assets/vulnoraiq-webui-home.png")
 EXPECTED_FUNCTIONAL_RUNNER = Path("scripts/run_functional_test.py")
 EXPECTED_PRODUCTION_READINESS_RUNNER = Path("scripts/validate_production_testing_readiness.py")
 EXPECTED_OWASP_ATLAS_MAPPING_RUNNER = Path("scripts/validate_owasp_atlas_mappings.py")
@@ -87,8 +87,8 @@ class PackageMetadataValidator:
             warnings.append("README self-hosted laptop/server maturity wording was not found")
         if "certified VAPT-grade assurance" not in readme:
             warnings.append("README assurance limitation wording was not found")
-        if "docs/assets/vulnoraiq-dashboard-example.png" not in readme:
-            errors.append("README must include the dashboard example image")
+        if "docs/assets/vulnoraiq-webui-home.png" not in readme:
+            errors.append("README must include the Web UI home screen image")
         owasp_dir = Path("docs/owasp")
         for expected_doc in EXPECTED_OWASP_DOCS:
             if not (owasp_dir / expected_doc).exists():

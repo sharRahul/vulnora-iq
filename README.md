@@ -51,15 +51,11 @@ The default `demo` target is safe and local. Configured non-demo targets require
 
 ---
 
-## Dashboard example
+## Home screen
 
-The Web UI screenshot below was captured from the running console on the safe local `demo` target with the `baseline` profile, showing the run-readiness panel, realtime scan progress, completed assessment dashboard, top risks, severity distribution, policy evaluation, and findings workflow.
+The screenshot below is the VulnoraIQ Web UI home screen, captured from the running console. It shows the startup and local-server-controls panel, the test selection and run-readiness form, realtime progress, the completed-assessment dashboard area, and recent scan history on a single page.
 
-![VulnoraIQ Web UI dashboard](docs/assets/vulnoraiq-webui-dashboard.png)
-
-The functional dashboard below is generated from the safe local functional test path and shows the intended reporting workflow.
-
-![VulnoraIQ dashboard example](docs/assets/vulnoraiq-dashboard-example.png)
+![VulnoraIQ Web UI home screen](docs/assets/vulnoraiq-webui-home.png)
 
 ---
 
@@ -151,7 +147,7 @@ The startup panel inside the Web UI shows the live results of those checks, the 
 each one, plus a **Stop local server** button so you can shut the server down cleanly from
 the browser without returning to the terminal.
 
-![VulnoraIQ Web UI startup and local server controls](docs/assets/vulnoraiq-webui-launcher.png)
+![VulnoraIQ Web UI startup and local server controls](docs/assets/vulnoraiq-webui-startup.png)
 
 You can override the defaults when launching from a terminal:
 
