@@ -16,14 +16,14 @@ def test_production_hardening_backlog_tracks_critical_blockers():
     for blocker_id in [f"PRD-{index:03d}" for index in range(1, 11)]:
         assert blocker_id in text
     assert "Current operational readiness: 10/10" in text
-    assert "Controlled internal deployment readiness is attested" in text
+    assert "Self-hosted internal deployment readiness is attested" in text
 
 
-def test_public_docs_keep_non_production_maturity_warning():
+def test_public_docs_keep_self_hosted_maturity_warning():
     readme = README.read_text(encoding="utf-8")
     status = IMPLEMENTATION_STATUS.read_text(encoding="utf-8")
-    assert "not recommended for unsupervised public internet exposure" in readme
-    assert "not ready for public internet-facing" in status
+    assert "self-hosted internal application" in readme
+    assert "self-hosted laptop/server use" in status
 
 
 def test_container_and_deployment_baseline_exist():
