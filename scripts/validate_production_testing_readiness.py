@@ -36,9 +36,7 @@ class ProductionTestingReadinessValidator:
     def __init__(self, output_dir: str | Path = "reports/output/production-readiness") -> None:
         self.output_dir = Path(output_dir)
 
-    def validate(
-        self, run_functional: bool = False,
-    ) -> ProductionTestingReadinessSummary:
+    def validate(self, run_functional: bool = False) -> ProductionTestingReadinessSummary:
         self.output_dir.mkdir(parents=True, exist_ok=True)
         checks = [
             self._check_package_metadata(),
@@ -59,10 +57,10 @@ class ProductionTestingReadinessValidator:
             self._check_assessment_assurance_doc(),
             self._check_pip_audit_in_ci(),
             self._check_listen_address_safe_included(),
-            self._check_no_overclaim_saas_readme(),
-            self._check_backlog_no_stale_3_10(),
+            self._check_readme_self_hosted_scope(),
+            self._check_backlog_gate_score(),
             self._check_readme_sqlite_not_json(),
-            self._check_public_saas_limitations_documented(),
+            self._check_self_hosted_docs_aligned(),
             self._check_assessment_assurance_discoverable(),
         ]
         functional_summary: FunctionalTestSummary | None = None
@@ -137,33 +135,20 @@ class ProductionTestingReadinessValidator:
         python_ci_yml = Path(".github/workflows/python-ci.yml")
         details: dict[str, Any] = {"ci_yml_exists": ci_yml.exists(), "python_ci_yml_exists": python_ci_yml.exists()}
         errors: list[str] = []
-        if ci_yml.exists():
-            text = ci_yml.read_text(encoding="utf-8")
-            has_ruff = "ruff check" in text
-            has_mypy = "mypy" in text
-            details["ci_yml_ruff"] = has_ruff
-            details["ci_yml_mypy"] = has_mypy
-            if not has_ruff:
-                errors.append("ci.yml missing ruff check")
-            if not has_mypy:
-                errors.append("ci.yml missing mypy")
-        else:
-            errors.append("ci.yml not found")
-        if python_ci_yml.exists():
-            text = python_ci_yml.read_text(encoding="utf-8")
-            has_ruff = "ruff check" in text
-            has_mypy = "mypy" in text
-            details["python_ci_yml_ruff"] = has_ruff
-            details["python_ci_yml_mypy"] = has_mypy
-            if not has_ruff:
-                errors.append("python-ci.yml missing ruff check")
-            if not has_mypy:
-                errors.append("python-ci.yml missing mypy")
-        else:
-            errors.append("python-ci.yml not found")
-        status = "pass" if not errors else "fail"
-        details["errors"] = errors
-        return ReadinessCheck("ci_lint_type_check", status, "CI lint and type-check configuration.", details)
+        for path, prefix in ((ci_yml, "ci_yml"), (python_ci_yml, "python_ci_yml")):
+            if path.exists():
+                text = path.read_text(encoding="utf-8")
+                has_ruff = "ruff check" in text
+                has_mypy = "mypy" in text
+                details[f"{prefix}_ruff"] = has_ruff
+                details[f"{prefix}_mypy"] = has_mypy
+                if not has_ruff:
+                    errors.append(f"{path.name} missing ruff check")
+                if not has_mypy:
+                    errors.append(f"{path.name} missing mypy")
+            else:
+                errors.append(f"{path.name} not found")
+        return ReadinessCheck("ci_lint_type_check", "pass" if not errors else "fail", "CI lint and type-check configuration.", {**details, "errors": errors})
 
     def _check_legacy_server_absent(self) -> ReadinessCheck:
         server_py = Path("webui/server.py")
@@ -177,27 +162,20 @@ class ProductionTestingReadinessValidator:
     def _check_auth_defaults_enabled(self) -> ReadinessCheck:
         from webui.auth import WebAuthManager
         manager = WebAuthManager()
-        details: dict[str, Any] = {
-            "auth_enabled_by_default": manager.enabled(),
-            "has_production_mode": True,
-            "has_env_token_auth": True,
-        }
         errors: list[str] = []
         if not manager.enabled():
             errors.append("Auth is not enabled by default")
-        details["production_mode_validated"] = True
-        status = "pass" if not errors else "fail"
-        details["errors"] = errors
-        return ReadinessCheck("auth_defaults_enabled", status, "Auth defaults and production mode.", details)
+        return ReadinessCheck(
+            "auth_defaults_enabled", "pass" if not errors else "fail", "Auth defaults and production mode.",
+            {"auth_enabled_by_default": manager.enabled(), "production_mode_validated": True, "errors": errors},
+        )
 
     def _check_security_hardening(self) -> ReadinessCheck:
         details: dict[str, Any] = {}
         errors: list[str] = []
         server_path = Path("webui/hosted_server.py")
         if not server_path.exists():
-            errors.append("hosted_server.py not found")
-            return ReadinessCheck("security_hardening", "fail", "Security hardening checks.", {"errors": errors})
-
+            return ReadinessCheck("security_hardening", "fail", "Security hardening checks.", {"errors": ["hosted_server.py not found"]})
         text = server_path.read_text(encoding="utf-8")
         checks = {
             "request_size_limit": "MAX_REQUEST_BODY" in text,
@@ -212,16 +190,11 @@ class ProductionTestingReadinessValidator:
         for name, found in checks.items():
             if not found:
                 errors.append(f"Missing: {name}")
-
-        # Validate SQLite is default
         from webui.persistent_jobs import create_job_store
-        store = create_job_store()
-        store_type = type(store).__name__
+        store_type = type(create_job_store()).__name__
         details["default_backend"] = store_type
         if store_type != "SqliteJobStore":
             errors.append(f"Default backend is {store_type}, expected SqliteJobStore")
-
-        # Validate deployment docs coverage
         deploy_path = Path("docs/DEPLOYMENT.md")
         if deploy_path.exists():
             deploy_text = deploy_path.read_text(encoding="utf-8")
@@ -231,7 +204,7 @@ class ProductionTestingReadinessValidator:
                 "metrics_section": "healthz" in deploy_text,
                 "audit_section": "audit" in deploy_text.lower(),
                 "backup_section": "backup" in deploy_text.lower(),
-                "retention_section": "retention" in deploy_text.lower() or "retention" in deploy_text.lower(),
+                "retention_section": "retention" in deploy_text.lower(),
                 "production_checklist": "Production Checklist" in deploy_text,
             }
             details["doc_coverage"] = doc_checks
@@ -240,34 +213,20 @@ class ProductionTestingReadinessValidator:
                     errors.append(f"Deployment docs missing: {name}")
         else:
             errors.append("docs/DEPLOYMENT.md not found")
-
-        status = "pass" if not errors else "fail"
-        details["errors"] = errors
-        return ReadinessCheck("security_hardening", status, "Security hardening checks.", details)
+        return ReadinessCheck("security_hardening", "pass" if not errors else "fail", "Security hardening checks.", {**details, "errors": errors})
 
     def _check_production_config_validation(self) -> ReadinessCheck:
         checks_path = Path("webui/production_checks.py")
-        if not checks_path.exists():
-            return ReadinessCheck("production_config_validation", "fail",
-                                  "webui/production_checks.py missing.", {})
         script_path = Path("scripts/validate_runtime_production_config.py")
-        script_exists = script_path.exists()
         test_path = Path("tests/test_production_config_validation.py")
-        test_exists = test_path.exists()
-        details: dict[str, Any] = {
-            "checks_module_exists": checks_path.exists(),
-            "validation_script_exists": script_exists,
-            "test_exists": test_exists,
-        }
-        errors: list[str] = []
-        if not script_exists:
+        errors = []
+        if not checks_path.exists():
+            errors.append("webui/production_checks.py not found")
+        if not script_path.exists():
             errors.append("validate_runtime_production_config.py not found")
-        if not test_exists:
+        if not test_path.exists():
             errors.append("test_production_config_validation.py not found")
-        status = "pass" if not errors else "fail"
-        details["errors"] = errors
-        return ReadinessCheck("production_config_validation", status,
-                              "Production startup validation checks.", details)
+        return ReadinessCheck("production_config_validation", "pass" if not errors else "fail", "Production startup validation checks.", {"errors": errors})
 
     def _check_backup_restore_scripts(self) -> ReadinessCheck:
         backup = Path("scripts/backup_sqlite_store.py")
@@ -280,22 +239,13 @@ class ProductionTestingReadinessValidator:
             errors.append("restore_sqlite_store.py not found")
         if not test.exists():
             errors.append("test_backup_restore.py not found")
-        status = "pass" if not errors else "fail"
-        return ReadinessCheck("backup_restore_scripts", status,
-                              "Backup/restore scripts and tests.",
-                              {"backup_exists": backup.exists(), "restore_exists": restore.exists(),
-                               "test_exists": test.exists(), "errors": errors})
+        return ReadinessCheck("backup_restore_scripts", "pass" if not errors else "fail", "Backup/restore scripts and tests.", {"errors": errors})
 
     def _check_scorecard_and_runbook_docs(self) -> ReadinessCheck:
-        docs = ["PRODUCTION_READINESS_SCORECARD.md", "RUNBOOK.md",
-                "INCIDENT_RESPONSE.md", "RELEASE_CHECKLIST.md"]
+        docs = ["PRODUCTION_READINESS_SCORECARD.md", "RUNBOOK.md", "INCIDENT_RESPONSE.md", "RELEASE_CHECKLIST.md"]
         base = Path("docs")
         missing = [d for d in docs if not (base / d).exists()]
-        status = "pass" if not missing else "fail"
-        return ReadinessCheck("scorecard_and_runbook_docs", status,
-                              "Scorecard, runbook, incident response, release checklist docs.",
-                              {"existing": [d for d in docs if (base / d).exists()],
-                               "missing": missing})
+        return ReadinessCheck("scorecard_and_runbook_docs", "pass" if not missing else "fail", "Scorecard, runbook, incident response, release checklist docs.", {"missing": missing})
 
     def _check_docker_compose(self) -> ReadinessCheck:
         compose = Path("docker-compose.yml")
@@ -305,11 +255,7 @@ class ProductionTestingReadinessValidator:
             errors.append("docker-compose.yml not found")
         if not env_example.exists():
             errors.append(".env.production.example not found")
-        status = "pass" if not errors else "fail"
-        return ReadinessCheck("docker_compose", status,
-                              "Docker Compose and production env example.",
-                              {"compose_exists": compose.exists(),
-                               "env_example_exists": env_example.exists(), "errors": errors})
+        return ReadinessCheck("docker_compose", "pass" if not errors else "fail", "Docker Compose production path.", {"errors": errors})
 
     def _check_container_config(self) -> ReadinessCheck:
         dockerfile = Path("Dockerfile")
@@ -323,52 +269,40 @@ class ProductionTestingReadinessValidator:
             "oci_labels": "org.opencontainers.image" in text,
             "pip_no_cache": "pip install --no-cache-dir" in text,
         }
-        details: dict[str, Any] = {**checks}
-        errors = [k for k, v in checks.items() if not v]
         smoke = Path("scripts/container_smoke_test.py")
-        details["smoke_test_script_exists"] = smoke.exists()
+        errors = [k for k, v in checks.items() if not v]
         if not smoke.exists():
             errors.append("container_smoke_test.py not found")
-        details["errors"] = errors
-        status = "pass" if not errors else "fail"
-        return ReadinessCheck("container_config", status, "Container security hardening.", details)
+        return ReadinessCheck("container_config", "pass" if not errors else "fail", "Container security hardening.", {**checks, "smoke_test_script_exists": smoke.exists(), "errors": errors})
 
     def _check_migration_doc(self) -> ReadinessCheck:
         doc = Path("docs/MIGRATION.md")
-        return ReadinessCheck("migration_doc", "pass" if doc.exists() else "fail",
-                              "Migration guide.", {"exists": doc.exists()})
+        return ReadinessCheck("migration_doc", "pass" if doc.exists() else "fail", "Migration guide.", {"exists": doc.exists()})
 
     def _check_assessment_assurance_doc(self) -> ReadinessCheck:
         doc = Path("docs/ASSESSMENT_ASSURANCE.md")
-        return ReadinessCheck("assessment_assurance_doc", "pass" if doc.exists() else "fail",
-                              "Assessment assurance doc.", {"exists": doc.exists()})
+        return ReadinessCheck("assessment_assurance_doc", "pass" if doc.exists() else "fail", "Assessment assurance doc.", {"exists": doc.exists()})
 
     def _check_pip_audit_in_ci(self) -> ReadinessCheck:
         ci = Path(".github/workflows/ci.yml")
         python_ci = Path(".github/workflows/python-ci.yml")
-        details: dict[str, Any] = {}
         errors: list[str] = []
-        if ci.exists():
-            text = ci.read_text(encoding="utf-8")
-            details["ci_yml_pip_audit"] = "pip_audit" in text or "pip-audit" in text
-            details["ci_yml_pip_check"] = "pip check" in text
-            if not details["ci_yml_pip_audit"]:
-                errors.append("ci.yml missing pip-audit")
-        if python_ci.exists():
-            text = python_ci.read_text(encoding="utf-8")
-            details["python_ci_yml_pip_audit"] = "pip_audit" in text or "pip-audit" in text
-            details["python_ci_yml_pip_check"] = "pip check" in text
-            if not details["python_ci_yml_pip_audit"]:
-                errors.append("python-ci.yml missing pip-audit")
-        details["errors"] = errors
-        status = "pass" if not errors else "fail"
-        return ReadinessCheck("pip_audit_in_ci", status, "Dependency and supply-chain checks in CI.", details)
+        details: dict[str, Any] = {}
+        for path, key in ((ci, "ci_yml"), (python_ci, "python_ci_yml")):
+            if path.exists():
+                text = path.read_text(encoding="utf-8")
+                details[f"{key}_pip_audit"] = "pip_audit" in text or "pip-audit" in text
+                details[f"{key}_pip_check"] = "pip check" in text
+                if not details[f"{key}_pip_audit"]:
+                    errors.append(f"{path.name} missing pip-audit")
+            else:
+                errors.append(f"{path.name} not found")
+        return ReadinessCheck("pip_audit_in_ci", "pass" if not errors else "fail", "Dependency and supply-chain checks in CI.", {**details, "errors": errors})
 
     def _check_listen_address_safe_included(self) -> ReadinessCheck:
         checks_path = Path("webui/production_checks.py")
         if not checks_path.exists():
-            return ReadinessCheck("listen_address_safe_included", "fail",
-                                  "production_checks.py not found.", {})
+            return ReadinessCheck("listen_address_safe_included", "fail", "production_checks.py not found.", {})
         text = checks_path.read_text(encoding="utf-8")
         has_entry = '"listen_address_safe"' in text or "'listen_address_safe'" in text
         has_func = "def check_listen_address_safe" in text
@@ -377,54 +311,32 @@ class ProductionTestingReadinessValidator:
             errors.append("listen_address_safe missing from _ALL_CHECKS")
         if not has_func:
             errors.append("check_listen_address_safe function not found")
-        details: dict[str, Any] = {"entry_in_all_checks": has_entry, "function_defined": has_func, "errors": errors}
-        status = "pass" if has_entry and has_func else "fail"
-        return ReadinessCheck("listen_address_safe_included", status,
-                              "listen_address_safe is reachable in production validation.", details)
+        return ReadinessCheck("listen_address_safe_included", "pass" if not errors else "fail", "listen_address_safe is reachable in production validation.", {"errors": errors})
 
-    def _check_no_overclaim_saas_readme(self) -> ReadinessCheck:
+    def _check_readme_self_hosted_scope(self) -> ReadinessCheck:
         readme = Path("README.md")
         if not readme.exists():
-            return ReadinessCheck("no_overclaim_saas_readme", "fail", "README.md not found.", {})
+            return ReadinessCheck("readme_self_hosted_scope", "fail", "README.md not found.", {})
         text = readme.read_text(encoding="utf-8").lower()
         errors = []
-        # Check it does NOT claim public SaaS readiness
-        overclaim_phrases = [
-            "saas ready", "public internet ready", "fully production ready",
-            "ready for public internet",
-        ]
-        for phrase in overclaim_phrases:
-            if phrase in text:
-                errors.append(f"README contains overclaim: '{phrase}'")
-        # Check it DOES document the controlled-internal scope
-        has_scope = "controlled internal" in text
-        if not has_scope:
-            errors.append("README missing controlled internal scope disclaimer")
-        details = {"has_controlled_internal_scope": has_scope, "overclaim_phrases_found": errors}
-        status = "pass" if not errors else "fail"
-        details["errors"] = errors
-        return ReadinessCheck("no_overclaim_saas_readme", status,
-                              "README does not overclaim SaaS/public readiness.", details)
+        required = ["self-hosted", "laptop", "internal server", "authorised"]
+        for word in required:
+            if word not in text:
+                errors.append(f"README missing self-hosted scope wording: {word}")
+        details = {"errors": errors}
+        return ReadinessCheck("readme_self_hosted_scope", "pass" if not errors else "fail", "README documents the self-hosted laptop/server scope.", details)
 
-    def _check_backlog_no_stale_3_10(self) -> ReadinessCheck:
+    def _check_backlog_gate_score(self) -> ReadinessCheck:
         backlog = Path("docs/PRODUCTION_HARDENING_BACKLOG.md")
         if not backlog.exists():
-            return ReadinessCheck("backlog_no_stale_3_10", "fail",
-                                  "PRODUCTION_HARDENING_BACKLOG.md not found.", {})
+            return ReadinessCheck("backlog_gate_score", "fail", "PRODUCTION_HARDENING_BACKLOG.md not found.", {})
         text = backlog.read_text(encoding="utf-8")
         errors = []
-        # Check no stale "3/10" reference
-        if "3/10" in text and "3.3/10" not in text and "current" not in text.lower():
-            # The "3/10" by itself without "3.3/10" context is stale
-            pass  # Allow 3.3/10 references from scorecard link
-        # Check for "10/10" gate compliance
-        has_gate_score = "10/10" in text
-        if not has_gate_score:
+        if "10/10" not in text:
             errors.append("Backlog missing 10/10 gate compliance score")
-        details = {"has_gate_score": has_gate_score, "errors": errors}
-        status = "pass" if not errors else "fail"
-        return ReadinessCheck("backlog_no_stale_3_10", status,
-                              "Backlog no longer contains stale 3/10 status.", details)
+        if "self-hosted" not in text.lower():
+            errors.append("Backlog missing self-hosted scope")
+        return ReadinessCheck("backlog_gate_score", "pass" if not errors else "fail", "Backlog tracks self-hosted gate compliance.", {"errors": errors})
 
     def _check_readme_sqlite_not_json(self) -> ReadinessCheck:
         readme = Path("README.md")
@@ -432,47 +344,33 @@ class ProductionTestingReadinessValidator:
             return ReadinessCheck("readme_sqlite_not_json", "fail", "README.md not found.", {})
         text = readme.read_text(encoding="utf-8")
         errors = []
-        # Should mention SQLite/WAL as primary persistence
         has_sqlite = "SQLite" in text
         has_wal = "WAL" in text
-        # Should NOT claim JSON as primary storage
         mentions_json_primary = "persistent JSON" in text.lower()
         if mentions_json_primary:
             errors.append("README mentions persistent JSON as primary storage")
         if not has_sqlite:
             errors.append("README does not mention SQLite persistence")
-        details = {"has_sqlite": has_sqlite, "has_wal": has_wal,
-                   "mentions_json_primary": mentions_json_primary, "errors": errors}
-        status = "pass" if not errors else "fail"
-        return ReadinessCheck("readme_sqlite_not_json", status,
-                              "README says SQLite/WAL persistence, not JSON as primary.", details)
+        return ReadinessCheck("readme_sqlite_not_json", "pass" if not errors else "fail", "README says SQLite/WAL persistence, not JSON as primary.", {"has_sqlite": has_sqlite, "has_wal": has_wal, "errors": errors})
 
-    def _check_public_saas_limitations_documented(self) -> ReadinessCheck:
-        readme = Path("README.md")
+    def _check_self_hosted_docs_aligned(self) -> ReadinessCheck:
+        docs = [
+            Path("README.md"),
+            Path("SECURITY.md"),
+            Path("docs/README.md"),
+            Path("docs/DEPLOYMENT.md"),
+            Path("docs/PRODUCTION_READINESS_SCORECARD.md"),
+            Path("docs/PRODUCTION_HARDENING_BACKLOG.md"),
+        ]
         issues: list[str] = []
-        if readme.exists():
-            text = readme.read_text(encoding="utf-8").lower()
-            has_public_limitation = ("not recommended for" in text and
-                                     ("public internet" in text or "multi-tenant" in text))
-            if not has_public_limitation:
-                issues.append("README missing public internet/SaaS limitation")
-        deploy = Path("docs/DEPLOYMENT.md")
-        if deploy.exists():
-            text = deploy.read_text(encoding="utf-8").lower()
-            if "not recommended for production" not in text and "json" in text:
-                pass  # JSON is documented as legacy
-        scorecard = Path("docs/PRODUCTION_READINESS_SCORECARD.md")
-        if scorecard.exists():
-            text = scorecard.read_text(encoding="utf-8").lower()
-            has_saas_section = "public internet / saas" in text
-            if not has_saas_section:
-                issues.append("Scorecard missing public internet/SaaS section")
-        else:
-            issues.append("Scorecard not found")
-        details = {"issues": issues}
-        status = "pass" if not issues else "fail"
-        return ReadinessCheck("public_saas_limitations_documented", status,
-                              "Public/SaaS limitations are documented.", details)
+        for doc in docs:
+            if not doc.exists():
+                issues.append(f"{doc} missing")
+                continue
+            text = doc.read_text(encoding="utf-8").lower()
+            if "self-hosted" not in text:
+                issues.append(f"{doc} missing self-hosted positioning")
+        return ReadinessCheck("self_hosted_docs_aligned", "pass" if not issues else "fail", "Primary docs use the self-hosted deployment model.", {"issues": issues})
 
     def _check_assessment_assurance_discoverable(self) -> ReadinessCheck:
         readme = Path("README.md")
@@ -489,10 +387,7 @@ class ProductionTestingReadinessValidator:
         doc = Path("docs/ASSESSMENT_ASSURANCE.md")
         if not doc.exists():
             issues.append("ASSESSMENT_ASSURANCE.md not found")
-        details = {"issues": issues}
-        status = "pass" if not issues else "fail"
-        return ReadinessCheck("assessment_assurance_discoverable", status,
-                              "Assessment assurance doc is linked and discoverable.", details)
+        return ReadinessCheck("assessment_assurance_discoverable", "pass" if not issues else "fail", "Assessment assurance doc is linked and discoverable.", {"issues": issues})
 
     @staticmethod
     def _overall_status(checks: list[ReadinessCheck]) -> str:
