@@ -1,0 +1,29 @@
+target:
+  name: PLACEHOLDER_CREWAI_AGENT
+  type: agent_tool_loop
+  base_url: https://crewai-runner.internal
+  endpoint_path: /run
+  method: POST
+  auth_token_env: CREWAI_RUNNER_TOKEN
+  auth_header: X-API-Key
+  auth_prefix: ""
+  explicit_authorisation: true
+  dry_run: true
+  allow_live_requests: false
+  allow_external: false
+  allowed_host_pattern: "*.internal|crewai-runner.internal"
+  request_body_template:
+    task: "{{prompt}}"
+    crew: approved-test-crew
+    mode: validation
+  response_extraction_path: result
+  tool_calls_path: steps
+  rate_limit:
+    requests_per_second: 0.5
+  timeout: 90
+  safety_profile: local_lab_safe
+  data_handling_notes: "Approved CrewAI validation only; run against test tools and seeded data."
+  evidence_redaction:
+    redact_headers: [X-API-Key, cookie]
+    redact_body_patterns: ["token=[A-Za-z0-9._-]+", "secret=[A-Za-z0-9._-]+"]
+  example_test_profile: agent
