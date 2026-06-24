@@ -44,12 +44,6 @@ const SCAN_EVENT_TYPES = [
 
 const SEVERITIES: Severity[] = ["critical", "high", "medium", "low", "info"];
 const EMPTY_TREND: VulnerabilityTrendPoint[] = [];
-const REVIEW_STATUSES = new Set<FindingStatus>([
-  "pending_review",
-  "auto_fix_available",
-  "triaged",
-  "in_progress",
-]);
 
 async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
   const response = await fetch(path, { credentials: "same-origin", ...options });
@@ -81,6 +75,10 @@ function normaliseStatus(value: unknown): FindingStatus {
     "wont_fix",
   ];
   return allowed.includes(status as FindingStatus) ? (status as FindingStatus) : "open";
+}
+
+function isPendingReviewStatus(status: FindingStatus): boolean {
+  return status === "pending_review" || status === "auto_fix_available" || status === "triaged" || status === "in_progress";
 }
 
 function riskScoreFromFinding(finding: BackendFinding, severity: Severity): number {
@@ -199,7 +197,7 @@ function dashboardMetrics(findings: Finding[], activeScan: ScanJob | null): Dash
     counts[finding.severity] += 1;
   });
   const fixed = findings.filter((finding) => finding.status === "fixed").length;
-  const pendingReviews = findings.filter((finding) => REVIEW_STATUSES.has(finding.status)).length;
+  const pendingReviews = findings.filter((finding) => isPendingReviewStatus(finding.status)).length;
 
   return {
     totalScanned: activeScan ? 1 : 0,
