@@ -3,11 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
   <title>VulnoraIQ Console</title>
   <link rel="stylesheet" href="/static/styles.css">
   <link rel="stylesheet" href="/static/scan-progress.css">
   <link rel="stylesheet" href="/static/ui-polish.css">
   <link rel="stylesheet" href="/static/launcher-controls.css">
+  <link rel="stylesheet" href="/static/webui-enhancements.css">
 </head>
 <body>
   <header class="topbar">
@@ -16,7 +18,10 @@
         <span class="brand-mark" aria-hidden="true">VIQ</span>
         <span class="brand-name">VulnoraIQ<small>Security Assessment Console</small></span>
       </div>
-      <div id="session-area" class="session-area" aria-live="polite"></div>
+      <div class="topbar-actions">
+        <button type="button" id="theme-toggle" class="topbar-button theme-toggle" aria-label="Switch colour theme" aria-pressed="false">Theme</button>
+        <div id="session-area" class="session-area" aria-live="polite"></div>
+      </div>
     </div>
   </header>
 
@@ -51,8 +56,8 @@
         <article class="startup-card">
           <p class="eyebrow">Quick actions</p>
           <div class="startup-actions">
-            <button type="button" id="startup-refresh" class="secondary compact">Refresh checks</button>
-            <button type="button" id="stop-server" class="danger-button" disabled>Stop local server</button>
+            <button type="button" id="startup-refresh" class="secondary compact" aria-label="Refresh startup dependency checks">Refresh checks</button>
+            <button type="button" id="stop-server" class="danger-button" disabled aria-label="Stop local VulnoraIQ server">Stop local server</button>
           </div>
           <p id="stop-server-message" class="form-message">Stop is available only in local launcher mode with admin permission.</p>
         </article>
@@ -60,36 +65,37 @@
       <div class="startup-detail-grid">
         <section>
           <h3>Dependency checks</h3>
-          <div id="startup-check-list" class="startup-list"></div>
+          <div id="startup-check-list" class="startup-list" aria-busy="true"></div>
         </section>
         <section>
           <h3>Quick-start actions</h3>
-          <div id="startup-action-list" class="startup-list"></div>
+          <div id="startup-action-list" class="startup-list" aria-busy="true"></div>
         </section>
         <section>
           <h3>Configuration options</h3>
-          <div id="startup-config-list" class="startup-list"></div>
+          <div id="startup-config-list" class="startup-list" aria-busy="true"></div>
         </section>
       </div>
     </section>
 
     <section class="grid two">
-      <form id="scan-form" class="panel form-panel">
+      <form id="scan-form" class="panel form-panel" aria-describedby="global-status form-message">
         <div class="section-title">
           <span>01</span>
           <h2>Choose tests and run scan</h2>
         </div>
+        <div id="global-status" class="status-banner hidden" role="status" aria-live="polite"></div>
         <label>
           Target
-          <select id="target-select" name="target"></select>
+          <select id="target-select" name="target" aria-label="Assessment target"></select>
         </label>
         <label>
           Selected test option
-          <select id="profile-select" name="profile"></select>
+          <select id="profile-select" name="profile" aria-label="Selected assessment test option"></select>
         </label>
         <div id="selected-profile-detail" class="selected-profile-detail"></div>
 
-        <section id="run-readiness" class="run-readiness" aria-live="polite">
+        <section id="run-readiness" class="run-readiness" role="status" aria-live="polite">
           <div>
             <p class="eyebrow">Run readiness</p>
             <h3 id="readiness-title">Ready to configure</h3>
@@ -109,44 +115,44 @@
               <h3 id="test-catalog-title">Categorised test options</h3>
               <p>Select a full suite or a single focused test. The selected card controls what the scan runs.</p>
             </div>
-            <button type="button" id="select-full-profile" class="secondary">Select full suite</button>
+            <button type="button" id="select-full-profile" class="secondary" aria-label="Select the full assessment suite">Select full suite</button>
           </div>
           <div class="toolbar catalog-toolbar" aria-label="Filter test catalog">
             <label>
               Search tests
-              <input id="catalog-search" type="search" placeholder="Search by test, module, or description">
+              <input id="catalog-search" type="search" placeholder="Search by test, module, or description" aria-label="Search tests by test, module, or description">
             </label>
             <label>
               Category
-              <select id="catalog-category-filter"></select>
+              <select id="catalog-category-filter" aria-label="Filter test catalog by category"></select>
             </label>
             <label>
               Type
-              <select id="catalog-mode-filter">
+              <select id="catalog-mode-filter" aria-label="Filter test catalog by option type">
                 <option value="all">All options</option>
                 <option value="suite">Suites only</option>
                 <option value="single">Single tests only</option>
               </select>
             </label>
-            <span id="catalog-count" class="filter-count">0 options</span>
+            <span id="catalog-count" class="filter-count" role="status" aria-live="polite">0 options</span>
           </div>
-          <div id="test-catalog" class="test-catalog"></div>
+          <div id="test-catalog" class="test-catalog" aria-busy="true"></div>
         </section>
         <label class="checkbox-row">
           <input id="authorised" type="checkbox" name="authorised">
           <span>I confirm this configured target is owned by me or explicitly authorised for assessment.</span>
         </label>
-        <button type="submit" class="primary">Start selected assessment</button>
-        <p id="form-message" class="form-message"></p>
+        <button type="submit" id="start-scan" class="primary" aria-label="Start selected assessment">Start selected assessment</button>
+        <p id="form-message" class="form-message" role="status" aria-live="polite"></p>
       </form>
 
-      <section class="panel progress-panel">
+      <section class="panel progress-panel" aria-labelledby="progress-title">
         <div class="section-title">
           <span>02</span>
-          <h2>Realtime progress</h2>
+          <h2 id="progress-title">Realtime progress</h2>
         </div>
 
-        <div id="active-scan-card" class="active-scan-card idle" aria-live="polite">
+        <div id="active-scan-card" class="active-scan-card idle" role="status" aria-live="polite">
           <div class="scan-visual" aria-hidden="true">
             <span class="scan-orb"></span>
             <span class="scan-sweep"></span>
@@ -167,10 +173,10 @@
             <circle class="track" cx="60" cy="60" r="52"></circle>
             <circle id="progress-circle" class="meter" cx="60" cy="60" r="52"></circle>
           </svg>
-          <div><strong id="progress-value">0%</strong><span id="scan-status" aria-live="polite">Idle</span></div>
+          <div><strong id="progress-value">0%</strong><span id="scan-status" role="status" aria-live="polite">Idle</span></div>
         </div>
 
-        <div class="progress-bar-shell" aria-label="Scan percentage complete">
+        <div class="progress-bar-shell" role="progressbar" aria-label="Scan percentage complete" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
           <div id="progress-bar" class="progress-bar" style="width: 0%"></div>
         </div>
 
@@ -182,7 +188,7 @@
         </div>
 
         <p id="active-scan-message" class="active-scan-message">Waiting for a scan to start.</p>
-        <ol id="event-list" class="timeline" aria-live="polite" aria-label="Scan progress events"></ol>
+        <ol id="event-list" class="timeline" role="log" aria-live="polite" aria-label="Scan progress events"></ol>
       </section>
     </section>
 
@@ -202,17 +208,20 @@
           <article><span>Policy status</span><strong id="summary-policy">pass</strong></article>
         </div>
 
-        <section class="top-risks-panel">
-          <div class="dashboard-section-header">
-            <div>
-              <h3>Top risks</h3>
-              <p>Highest-severity findings that need review first.</p>
+        <details class="dashboard-accordion" open>
+          <summary>Top risks</summary>
+          <section class="top-risks-panel">
+            <div class="dashboard-section-header">
+              <div>
+                <h3>Top risks</h3>
+                <p>Highest-severity findings that need review first.</p>
+              </div>
+              <button type="button" id="copy-summary" class="secondary compact" aria-label="Copy dashboard summary to clipboard">Copy summary</button>
             </div>
-            <button type="button" id="copy-summary" class="secondary compact">Copy summary</button>
-          </div>
-          <div id="top-risks-list" class="top-risks-list"></div>
-          <p id="copy-summary-message" class="form-message"></p>
-        </section>
+            <div id="top-risks-list" class="top-risks-list"></div>
+            <p id="copy-summary-message" class="form-message" role="status" aria-live="polite"></p>
+          </section>
+        </details>
 
         <div class="grid two dashboard-grid">
           <section>
@@ -225,44 +234,50 @@
           </section>
         </div>
 
-        <section>
-          <div class="dashboard-section-header">
-            <div>
-              <h3>Findings</h3>
-              <p>Filter findings by severity or policy status before reviewing evidence.</p>
+        <details class="dashboard-accordion" open>
+          <summary>Findings</summary>
+          <section>
+            <div class="dashboard-section-header">
+              <div>
+                <h3>Findings</h3>
+                <p>Filter findings by severity or policy status before reviewing evidence.</p>
+              </div>
+              <span id="findings-count" class="filter-count">0 findings</span>
             </div>
-            <span id="findings-count" class="filter-count">0 findings</span>
-          </div>
-          <div class="toolbar findings-toolbar" aria-label="Filter findings">
-            <label>
-              Severity
-              <select id="finding-severity-filter">
-                <option value="all">All severities</option>
-                <option value="critical">Critical</option>
-                <option value="high">High</option>
-                <option value="medium">Medium</option>
-                <option value="low">Low</option>
-                <option value="info">Info</option>
-              </select>
-            </label>
-            <label>
-              Policy status
-              <select id="finding-policy-filter">
-                <option value="all">All policy statuses</option>
-                <option value="fail">Fail</option>
-                <option value="warn">Warn</option>
-                <option value="pass">Pass</option>
-                <option value="manual_review">Manual review</option>
-              </select>
-            </label>
-          </div>
-          <div id="findings-list" class="findings-list"></div>
-        </section>
+            <div class="toolbar findings-toolbar" aria-label="Filter findings">
+              <label>
+                Severity
+                <select id="finding-severity-filter" aria-label="Filter findings by severity">
+                  <option value="all">All severities</option>
+                  <option value="critical">Critical</option>
+                  <option value="high">High</option>
+                  <option value="medium">Medium</option>
+                  <option value="low">Low</option>
+                  <option value="info">Info</option>
+                </select>
+              </label>
+              <label>
+                Policy status
+                <select id="finding-policy-filter" aria-label="Filter findings by policy status">
+                  <option value="all">All policy statuses</option>
+                  <option value="fail">Fail</option>
+                  <option value="warn">Warn</option>
+                  <option value="pass">Pass</option>
+                  <option value="manual_review">Manual review</option>
+                </select>
+              </label>
+            </div>
+            <div id="findings-list" class="findings-list"></div>
+          </section>
+        </details>
 
-        <section>
-          <h3>Outputs for presentation</h3>
-          <div id="artifact-links" class="artifact-links grouped-artifacts"></div>
-        </section>
+        <details class="dashboard-accordion">
+          <summary>Artifacts and outputs</summary>
+          <section>
+            <h3>Outputs for presentation</h3>
+            <div id="artifact-links" class="artifact-links grouped-artifacts"></div>
+          </section>
+        </details>
       </div>
     </section>
 
@@ -271,15 +286,15 @@
         <span>04</span>
         <h2>Recent scans</h2>
       </div>
-      <div id="history-summary" class="history-summary" aria-live="polite"></div>
+      <div id="history-summary" class="history-summary" role="status" aria-live="polite"></div>
       <div class="toolbar history-toolbar" aria-label="Filter scan history">
         <label>
           Search scans
-          <input id="history-search" type="search" placeholder="Search by target or test option">
+          <input id="history-search" type="search" placeholder="Search by target or test option" aria-label="Search scans by target or test option">
         </label>
         <label>
           Status
-          <select id="history-status-filter">
+          <select id="history-status-filter" aria-label="Filter scan history by status">
             <option value="all">All statuses</option>
             <option value="queued">Queued</option>
             <option value="running">Running</option>
@@ -288,11 +303,13 @@
           </select>
         </label>
       </div>
-      <div id="job-history" class="job-history"></div>
+      <div id="job-history" class="job-history" aria-busy="true"></div>
     </section>
   </main>
+  <div id="toast-region" class="toast-region" aria-live="polite" aria-atomic="true"></div>
   <script src="/static/launcher-controls.js" defer></script>
   <script src="/static/agent-runtime.js" defer></script>
   <script src="/static/app.js" defer></script>
+  <script src="/static/webui-enhancements.js" defer></script>
 </body>
 </html>

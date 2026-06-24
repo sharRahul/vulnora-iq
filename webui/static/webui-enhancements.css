@@ -1,0 +1,290 @@
+:root {
+  color-scheme: light dark;
+}
+
+[data-theme="dark"] {
+  --bg: #12161d;
+  --canvas: #151a22;
+  --panel: #1b222c;
+  --panel-soft: #26303b;
+  --panel-strong: #202936;
+  --border: rgba(221, 225, 230, 0.16);
+  --border-strong: rgba(221, 225, 230, 0.28);
+  --text: #edf1f5;
+  --muted: #aab6c2;
+  --accent: #9ec3d2;
+  --accent-2: #e2b477;
+  --success: #b7c99b;
+  --warn: #e2b477;
+  --danger: #ee8e8e;
+  --critical: #ffb4b8;
+  --navy: #f2f5f8;
+  --shadow: 0 18px 52px rgba(0, 0, 0, 0.30);
+}
+
+[data-theme="dark"] body {
+  background:
+    radial-gradient(circle at 10% 0%, rgba(47, 57, 70, 0.78), transparent 28rem),
+    radial-gradient(circle at 92% 2%, rgba(144, 104, 63, 0.20), transparent 24rem),
+    linear-gradient(135deg, #12161d 0%, #151a22 54%, #111923 100%);
+}
+
+[data-theme="dark"] .topbar {
+  background: rgba(18, 22, 29, 0.90);
+}
+
+[data-theme="dark"] .hero,
+[data-theme="dark"] .hero-card,
+[data-theme="dark"] .cards article,
+[data-theme="dark"] .profile-card,
+[data-theme="dark"] .timeline li,
+[data-theme="dark"] .policy-item,
+[data-theme="dark"] .finding-item,
+[data-theme="dark"] .job-item,
+[data-theme="dark"] .artifact-links a,
+[data-theme="dark"] .artifact-group,
+[data-theme="dark"] .readiness-grid article,
+[data-theme="dark"] .history-summary article,
+[data-theme="dark"] select,
+[data-theme="dark"] button,
+[data-theme="dark"] .toolbar input,
+[data-theme="dark"] .toolbar select,
+[data-theme="dark"] .signin-form input,
+[data-theme="dark"] .topbar-button {
+  background-color: #202936;
+  color: var(--text);
+}
+
+[data-theme="dark"] .selected-profile-detail,
+[data-theme="dark"] .test-catalog-wrap,
+[data-theme="dark"] .run-readiness,
+[data-theme="dark"] .top-risks-panel,
+[data-theme="dark"] .finding-meta div,
+[data-theme="dark"] .empty-state,
+[data-theme="dark"] .enhanced-finding pre {
+  background: rgba(38, 48, 59, 0.76);
+}
+
+[data-theme="dark"] .brand-mark,
+[data-theme="dark"] .section-title span,
+[data-theme="dark"] .top-risk-item > span,
+[data-theme="dark"] .primary,
+[data-theme="dark"] .topbar-button.accent {
+  background: #9ec3d2;
+  color: #111923;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.theme-toggle {
+  white-space: nowrap;
+}
+
+:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--accent) 42%, transparent);
+  outline-offset: 3px;
+}
+
+.status-banner {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  color: var(--text);
+  background: rgba(138, 158, 167, 0.14);
+  font-weight: 800;
+}
+
+.status-banner.error {
+  border-color: rgba(184, 74, 74, 0.46);
+  color: var(--danger);
+  background: rgba(184, 74, 74, 0.12);
+}
+
+.status-banner.info {
+  border-color: rgba(138, 158, 167, 0.32);
+}
+
+.primary.is-loading {
+  position: relative;
+  padding-left: 42px;
+}
+
+.primary.is-loading::before {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  left: 18px;
+  top: calc(50% - 8px);
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 999px;
+  animation: viq-spin 680ms linear infinite;
+}
+
+@keyframes viq-spin {
+  to { transform: rotate(360deg); }
+}
+
+.toast-region {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 60;
+  display: grid;
+  gap: 10px;
+  width: min(320px, calc(100vw - 32px));
+}
+
+.toast-message {
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--panel-strong);
+  color: var(--text);
+  box-shadow: var(--shadow);
+  animation: viq-toast-in 180ms ease-out;
+}
+
+.toast-message-out {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+
+@keyframes viq-toast-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dashboard-accordion {
+  margin-bottom: 18px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.34);
+  overflow: hidden;
+}
+
+.dashboard-accordion > summary {
+  cursor: pointer;
+  padding: 14px 16px;
+  color: var(--navy);
+  font-weight: 900;
+  list-style-position: inside;
+}
+
+.dashboard-accordion > section,
+.dashboard-accordion > .top-risks-panel {
+  margin: 0;
+  border-left: 0;
+  border-right: 0;
+  border-bottom: 0;
+  border-radius: 0;
+}
+
+.bar-row {
+  align-items: center;
+}
+
+.bar-row .bar-track {
+  min-width: 80px;
+}
+
+[aria-busy="true"]:empty::before {
+  content: "Loading...";
+  display: block;
+  min-height: 48px;
+  padding: 14px;
+  border-radius: 14px;
+  color: var(--muted);
+  background: linear-gradient(90deg, rgba(138, 158, 167, 0.10), rgba(138, 158, 167, 0.22), rgba(138, 158, 167, 0.10));
+  background-size: 220% 100%;
+  animation: viq-skeleton 1.2s ease-in-out infinite;
+}
+
+@keyframes viq-skeleton {
+  0% { background-position: 0% 0; }
+  100% { background-position: -220% 0; }
+}
+
+@media (max-width: 480px) {
+  .shell {
+    width: min(100% - 16px, 1440px);
+  }
+
+  .topbar-inner,
+  .topbar-actions,
+  .session-area,
+  .signin-form,
+  .hero,
+  .catalog-header,
+  .startup-actions,
+  .job-item,
+  .dashboard-section-header,
+  .finding-heading {
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .brand {
+    min-width: 0;
+  }
+
+  .brand-name small,
+  .session-identity {
+    text-align: left;
+  }
+
+  .hero,
+  .form-panel,
+  .progress-panel,
+  .dashboard-panel,
+  .history-panel,
+  .startup-panel {
+    padding: 14px;
+    border-radius: 18px;
+  }
+
+  .section-title {
+    align-items: start;
+  }
+
+  .progress-ring svg {
+    width: 118px;
+  }
+
+  .progress-ring strong {
+    font-size: 2rem;
+  }
+
+  .scan-stage-grid,
+  .readiness-grid,
+  .cards,
+  .toolbar,
+  .history-toolbar,
+  .grouped-artifacts,
+  .finding-meta {
+    grid-template-columns: 1fr !important;
+  }
+
+  .bar-row {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .secondary,
+  .secondary.compact,
+  .topbar-button,
+  .profile-card button,
+  .job-item button {
+    width: 100%;
+  }
+}
