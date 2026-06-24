@@ -79,9 +79,9 @@ include = ["core*", "integrations*", "modules*", "rag_testing*", "agent_testing*
 
 [tool.setuptools.package-data]
 webui = [
-    "static/*.html",
-    "static/*.css",
-    "static/*.js",
+    "static/*",
+    "static/dist/*",
+    "static/assets/*",
     "static/console/*",
     "static/console/assets/*",
 ]
