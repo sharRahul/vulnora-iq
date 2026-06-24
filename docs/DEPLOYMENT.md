@@ -62,7 +62,7 @@ vulnoraiq-web --host 127.0.0.1 --port 8787
 
 Production mode fails closed when required controls are missing or unsafe.
 
-## 4. Production checklist
+## 4. Production Checklist
 
 Before exposing the service beyond local loopback, confirm:
 
