@@ -89,7 +89,17 @@ vulnoraiq-web --host 127.0.0.1 --port 8787
 
 The supported GUI is the built React console under `webui/static/console/`; the source app lives in `webui/console/`. It is a browser GUI, not a native desktop window.
 
-You can also run the local launcher from a source checkout:
+The existing double-click launchers are part of the supported GUI flow for source checkouts and release packages:
+
+| Platform | Launcher |
+| --- | --- |
+| Windows | `launch-vulnoraiq-webui.bat` |
+| macOS | `launch-vulnoraiq-webui.command` |
+| Linux | `launch-vulnoraiq-webui.sh` |
+
+These launchers call `scripts/bootstrap_launch.py`, create or reuse `.venv`, prepare the local package environment, and start the browser WebUI on loopback.
+
+You can also run the local launcher directly from a source checkout:
 
 ```bash
 python launch-vulnoraiq-webui.py

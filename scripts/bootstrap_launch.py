@@ -27,7 +27,7 @@ def _ensure_virtualenv() -> Path:
         print("Creating local VulnoraIQ virtual environment in .venv ...")
         _run([sys.executable, "-m", "venv", str(VENV_DIR)])
     if not BOOTSTRAP_MARKER.exists():
-        print("Installing VulnoraIQ dependencies into the local virtual environment ...")
+        print("Installing VulnoraIQ into the local launcher environment ...")
         _run([str(python), "-m", "pip", "install", "--upgrade", "pip"])
         _run([str(python), "-m", "pip", "install", "-e", ".[release]"])
         BOOTSTRAP_MARKER.write_text("ok\n", encoding="utf-8")
@@ -38,6 +38,10 @@ def main() -> None:
     os.chdir(ROOT)
     python = _ensure_virtualenv()
     launcher = ROOT / "scripts" / "launch_webui.py"
+    if not launcher.exists():
+        raise SystemExit("Unable to find scripts/launch_webui.py. Use a complete VulnoraIQ source checkout or release package.")
+    os.environ.setdefault("VULNORAIQ_LAUNCH_MODE", "double_click_launcher")
+    print("Starting the VulnoraIQ browser GUI flow on loopback...")
     os.execv(str(python), [str(python), str(launcher), *sys.argv[1:]])
 
 
