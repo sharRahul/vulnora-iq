@@ -14,7 +14,8 @@ def test_double_click_launchers_use_bootstrap() -> None:
     assert '"-m"' in bootstrap
     assert '"venv"' in bootstrap
     assert "pip" in bootstrap
-    assert "scripts/launch_webui.py" in bootstrap
+    assert '"scripts"' in bootstrap
+    assert '"launch_webui.py"' in bootstrap
 
 
 def test_windows_release_package_contains_bootstrap_and_start_here(tmp_path: Path) -> None:
