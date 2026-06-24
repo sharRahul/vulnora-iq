@@ -2,7 +2,7 @@
 
 **VulnoraIQ** is a Docker-first, self-hosted AI security assessment lab for authorised testing of LLM applications, RAG systems, tool-using agents, AI-agent workflows, GenAI data-security controls, target adapters, reports, evidence, and operational guardrails.
 
-The current release claim is scoped: **self-hosted laptop/server AI security testing application with controlled internal production-readiness gate passed**. VulnoraIQ findings are framework evidence for human review; the project does not claim certified VAPT-grade assurance, permission to test third-party systems, or independently validated real-world detection coverage for every category.
+VulnoraIQ is a **self-hosted internal application** for controlled authorised assessment work. The current release claim is scoped: **self-hosted laptop/server AI security testing application with controlled internal production-readiness gate passed**. VulnoraIQ findings are framework evidence for human review; the project does not claim certified VAPT-grade assurance, permission to test third-party systems, or independently validated real-world detection coverage for every category.
 
 ## Current status
 
