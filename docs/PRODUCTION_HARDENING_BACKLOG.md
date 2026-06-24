@@ -6,9 +6,9 @@ Target: Docker-first laptop/workstation/internal-server assessment lab.
 
 ## Current verdict
 
-VulnoraIQ is complete for the current self-hosted internal deployment scope with Docker-first lab startup, authorised target adapters, React WebUI target management, SQLite persistence, auth/security hardening, audit/metrics, OWASP/GenAI/Agentic/MITRE governance, WebUI assistant backend controls, expanded target templates, on-demand signed release packages, and CI gates.
+VulnoraIQ is complete for the current self-hosted internal deployment scope with Docker-first lab startup, authorised target adapters, React WebUI target management, SQLite persistence, auth/security hardening, audit/metrics, OWASP/GenAI/Agentic/MITRE governance, WebUI assistant backend controls, expanded target templates, on-demand signed release packages, supply-chain workflow, and CI gates.
 
-Self-hosted internal deployment readiness is attested by this blocker register, the production-readiness scorecard, the implementation status, the assessment assurance boundary, the release gates, and the CI validators.
+Self-hosted internal deployment readiness is attested by this blocker register, the production-readiness scorecard, the implementation status, the assessment assurance boundary, the release gates, the supply-chain workflow, and the CI validators.
 
 The current release claim remains:
 
@@ -36,6 +36,7 @@ This does not mean certified VAPT-grade assurance or independently validated rea
 | PRD-014 | Target testing | Authorised target adapters and validation. | Target adapters, `config/targets*.yaml`, runtime target APIs. |
 | PRD-015 | Docker-first AI-agent lab | Local deterministic AI-agent/RAG/tool-loop test lab. | Docker Compose, `docker/mock-agent/`, `scripts/docker_smoke_test.py`. |
 | PRD-016 | React WebUI target management | Operator target workspace for real target testing. | React target manager with backend target/scan API wiring. |
+| PRD-017 | Supply-chain workflow | Container image reports, SBOM outputs, and keyless image signing. | `.github/workflows/security-supply-chain.yml`, `docs/SUPPLY_CHAIN_PIPELINE.md`, workflow regression tests. |
 
 ## Current maturity backlog
 
@@ -45,8 +46,6 @@ This does not mean certified VAPT-grade assurance or independently validated rea
 | Real-environment GenAI validation | Continue validating GenAI harness against approved internal environments, provider configs, vector stores, telemetry, and governance workflows. | High |
 | Enterprise identity | Add direct OIDC/JWT support beyond trusted reverse-proxy identity. | Medium |
 | Native installer certificates | Add Authenticode-signed Windows `.exe/.msi`, notarised macOS `.pkg/.app`, and Linux distro packages after certificate/secrets decisions. | Medium |
-| Container supply chain | Add image signing, SBOM, and image vulnerability scanning. | Medium |
-| Security testing pipeline | Add SAST/DAST or equivalent application security scans. | Medium |
 | SIEM integration | Add audit schema, alert rules, and integration guidance. | Medium |
 | Multi-instance operation | Add shared state for CSRF/rate limits and a server database option. | Low |
 | Independent review | External review of the framework, WebUI, scanner, and report claims. | High |
@@ -66,3 +65,7 @@ The previous medium-priority backlog entries for the WebUI assistant backend/mod
 ## Release-packaging item completed on 2026-06-24
 
 The previous packaging backlog entry for on-demand signed release packages is implemented with manual GitHub Actions dispatch, platform packages, self-bootstrapping double-click launchers, SHA256 checksums, GitHub artifact attestations, and optional GPG detached signatures. Native OS certificate-signed installers remain a separate future maturity item.
+
+## Supply-chain workflow items completed on 2026-06-24
+
+The previous container supply-chain and application pipeline backlog entries are implemented with filesystem/image reports, SARIF outputs, SPDX/CycloneDX SBOMs, optional strict manual gates, GHCR publishing, Cosign keyless image signing, signature verification evidence, GitHub job summaries, and downloadable workflow artifacts.
