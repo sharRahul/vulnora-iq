@@ -8,11 +8,11 @@ async function csrfToken(request) {
   return data.csrf_token;
 }
 
-test('hosted server serves the WebUI and creates a demo scan job', async ({ page, request }) => {
-  await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'VulnoraIQ', exact: true })).toBeVisible();
-  await expect(page.locator('#active-scan-elapsed')).toBeVisible();
-  await expect(page.locator('#active-scan-eta')).toBeVisible();
+test('hosted server serves the console and creates a demo scan job', async ({ page, request }) => {
+  // The hosted server now serves the React SecOps console at /.
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await expect(page).toHaveTitle(/VulnorAIQ/i);
+  await expect(page.locator('#root')).toBeAttached();
 
   const token = await csrfToken(request);
   const response = await request.post('/api/scans', {
