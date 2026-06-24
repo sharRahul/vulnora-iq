@@ -1,90 +1,79 @@
-# GenAI Security Production Readiness Plan
+# GenAI Security production readiness plan
 
-**Plan status: Completed** for `0.2.0` self-hosted internal deployment.
+**Plan status:** Completed for the current `0.2.0` controlled internal scenario-harness scope.  
+**Current deployment model:** Docker-first local AI security testing lab plus self-hosted internal server mode.  
+**Assurance boundary:** not certified VAPT-grade assurance and not independent real-world GenAI detection assurance.
 
-This is the controlled internal enterprise deployment gate for the self-hosted laptop/server application model.
+## Current readiness claim
 
-**Scenario harness status:** production-grade scenario harness for controlled internal validation.
+VulnoraIQ has a production-grade controlled internal GenAI Security scenario harness for the source-confirmed `DSGAI01–DSGAI21` range.
 
-**Scope:** GenAI data-security and governance assessment readiness for authorised internal LLM, RAG, vector-store, provider, tool, telemetry, multimodal, and model-artifact assessments.
+The current harness expands the 21 source-confirmed categories into 84 concrete scenario cases covering expected-control, control-gap, ambiguous-review, and boundary-condition examples.
 
-**Readiness claim:** VulnoraIQ has a **production-grade scenario harness** for controlled internal GenAI Security validation. The harness expands the source-confirmed `DSGAI01–DSGAI21` taxonomy into **84 concrete scenario cases**: secure, vulnerable, ambiguous-review, and edge-case-boundary coverage for every source-confirmed category.
-
-**Assurance boundary:** this is **not independent real-world detection assurance**. It means the scenario matrix, evidence contract, evaluator chain, confidence floors, manual-review routing, source-discrepancy tracking, tests, and CI gates are production-grade for controlled internal validation. Certified VAPT-grade assurance and independent real-world GenAI detection validation remain outside this claim.
+This validates the scenario matrix, evidence contract, evaluator chain, confidence floors, manual-review routing, source-discrepancy tracking, tests, documentation, and CI gates for controlled internal use.
 
 ## Source-confirmed baseline
 
-VulnoraIQ tracks the OWASP GenAI Data Security categories `DSGAI01–DSGAI21` from the reviewed source material.
+VulnoraIQ tracks the OWASP GenAI Data Security categories `DSGAI01–DSGAI21` from reviewed source material.
 
-> **Source discrepancy:** the GenAI document narrative references `DSGAI01–DSGAI25`, while the accessible table of contents confirms `DSGAI01–DSGAI21`. `DSGAI22–DSGAI25` remain explicitly preserved as unresolved source discrepancy / map-later items in `benchmarks/fixtures/genai/scenarios.yaml`.
+> **Source discrepancy:** the reviewed source narrative references `DSGAI01–DSGAI25`, while the accessible table of contents confirms `DSGAI01–DSGAI21`. `DSGAI22–DSGAI25` remain preserved as unresolved source-discrepancy / map-later items in `benchmarks/fixtures/genai/scenarios.yaml`.
 
 ## Phase status
 
 | Phase | Area | Status | Release gate |
 | --- | --- | --- | --- |
-| GENAI-0 | Boundary and source confirmation | Complete | Docs preserve the `DSGAI01–DSGAI21` source-confirmed range and the `DSGAI22–DSGAI25` discrepancy. |
-| GENAI-1 | Scenario manifests | Complete | `benchmarks/fixtures/genai/scenarios.yaml` now defines a v2 production-grade matrix with 84 concrete scenario cases. |
-| GENAI-2 | Evaluator composition | Complete | `core/genai_evaluators.py` provides deterministic evaluators, confidence-floor checks, acceptance criteria checks, and aggregate-result handling. |
+| GENAI-0 | Boundary and source confirmation | Complete | Docs preserve the confirmed range and source discrepancy. |
+| GENAI-1 | Scenario manifests | Complete | `benchmarks/fixtures/genai/scenarios.yaml` defines the v2 scenario matrix with 84 concrete cases. |
+| GENAI-2 | Evaluator composition | Complete | `core/genai_evaluators.py` provides deterministic evaluators, confidence-floor checks, acceptance criteria checks, and aggregate result handling. |
 | GENAI-3 | Evidence schema contract | Complete | `genai-production-v2` requires evidence, confidence, evaluator, acceptance, severity, false-positive, and false-negative fields. |
-| GENAI-4 | Reports and dashboard language | Complete | GenAI findings must state the assessed surface, synthetic evidence basis, manual-review requirement, and assurance limitation. |
+| GENAI-4 | Reports and dashboard language | Complete | GenAI findings must state assessed surface, synthetic evidence basis, manual-review requirement, and assurance limitation. |
 | GENAI-5 | COMPASS workflow integration | Complete | Observe, Orient, Decide, Act workflow is mapped to inventory, mapping, prioritisation, and report/retest actions. |
-| GENAI-6 | CI and release gates | Complete | `scripts/validate_genai_readiness.py`, tests, package validation, and both CI workflows validate the harness. |
-| GENAI-7 | Independent assurance maturity | Future maturity item | Requires approved-environment validation, independent assurance, SIEM/SOAR integration, and stronger identity/governance integrations. |
+| GENAI-6 | CI and release gates | Complete | `scripts/validate_genai_readiness.py`, tests, package validation, and CI workflows validate the harness. |
+| GENAI-7 | Independent assurance maturity | Future maturity | Requires approved-environment validation, provider/data inventory integrations, SIEM/SOAR integration, and independent assessment. |
 
 ## Production-grade scenario harness
 
 The v2 manifest defines:
 
-- `21` source-confirmed GenAI categories.
-- `4` required fixture types per category: `secure`, `vulnerable`, `ambiguous`, `edge_case`.
-- `84 concrete scenario cases` generated from the category × fixture matrix.
-- Required evidence contract version `genai-production-v2`.
-- Required evaluator chain:
-  - `data_classification_present`
-  - `data_surface_allowed`
-  - `evidence_fields_present`
-  - `restricted_marker_leakage`
-  - `scenario_expectation`
-  - `confidence_floor_met`
-  - `acceptance_criteria_present`
-- Confidence floors for each fixture type.
-- Severity requirements, including high/critical severity for vulnerable production cases.
-- Required manual review for every GenAI scenario case.
-- Safe-fixture enforcement to avoid live sensitive data in CI.
-- Real-world validation flag preserved to prevent overclaiming.
+- `21` source-confirmed GenAI categories;
+- `4` required fixture types per category;
+- `84` concrete scenario cases;
+- required evidence contract version `genai-production-v2`;
+- deterministic evaluator chain;
+- confidence floors for each fixture type;
+- required manual review for every GenAI scenario case;
+- safe-fixture enforcement to avoid live sensitive data in CI;
+- real-world validation flag preserved to prevent overclaiming.
 
 ## Required evidence contract
 
-Every scenario case expands into a result requiring:
+Every scenario case expands into a result requiring fields such as:
 
-- `genai_id`
-- `genai_risk_area`
-- `scenario_id`
-- `fixture_type`
-- `data_classification`
-- `data_surface`
-- `control_objective`
-- `production_signal`
-- `redaction_status`
-- `manual_review_reason`
-- `evaluator_chain`
-- `acceptance_criteria`
-- `severity`
-- `confidence_floor`
-- `mitre_atlas_tactics`
-- `false_positive_notes`
-- `false_negative_notes`
+- `genai_id`;
+- `genai_risk_area`;
+- `data_classification`;
+- `data_surface`;
+- `redaction_status`;
+- `manual_review_required`;
+- `manual_review_reason`;
+- `mitre_atlas_tactics`;
+- evaluator output;
+- confidence;
+- acceptance criteria;
+- false-positive and false-negative notes.
 
-The validator fails the release if any of these required controls drift.
+## Current codebase integration
 
-## Validation
+| Integration point | Status |
+| --- | --- |
+| Scenario manifest | Complete. |
+| Deterministic evaluators | Complete. |
+| GenAI readiness validator | Complete. |
+| CI validation | Complete. |
+| Reports/assurance wording | Complete for current scope. |
+| Docker-first lab compatibility | Complete through scanner/report/evidence paths. |
+| React WebUI deep GenAI dashboarding | Future maturity item beyond current target-management work. |
 
-```bash
-python scripts/validate_genai_readiness.py
-pytest tests/test_genai_readiness_validation.py -q
-python scripts/validate_package_metadata.py
-```
+## Not claimed
 
-## Completion decision
-
-**Completed for `0.2.0` self-hosted internal GenAI Security readiness.** The scenario harness is now production-grade for controlled internal validation with 84 concrete scenario cases, strict evidence contract validation, deterministic evaluator checks, and CI/release gates. This remains **not independent real-world detection assurance** and does not support certified claims without independent validation work.
+This plan does not claim that VulnoraIQ can independently detect every real GenAI data-security issue in production environments. That stronger claim requires approved real-environment validation, provider/data inventory connectors, governance evidence, privacy/legal review, and independent assurance.
