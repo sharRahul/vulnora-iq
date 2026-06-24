@@ -44,6 +44,12 @@ const SCAN_EVENT_TYPES = [
 
 const SEVERITIES: Severity[] = ["critical", "high", "medium", "low", "info"];
 const EMPTY_TREND: VulnerabilityTrendPoint[] = [];
+const REVIEW_STATUSES = new Set<FindingStatus>([
+  "pending_review",
+  "auto_fix_available",
+  "triaged",
+  "in_progress",
+]);
 
 async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
   const response = await fetch(path, { credentials: "same-origin", ...options });
@@ -183,7 +189,7 @@ function scanTime(scan: ScanJob): number {
   return Date.parse(scan.completed_at || scan.started_at || scan.created_at || "") || 0;
 }
 
-function latestScan(scans: ScanJob[]): ScanJob | null {
+function selectLatestScan(scans: ScanJob[]): ScanJob | null {
   return [...scans].sort((a, b) => scanTime(b) - scanTime(a))[0] || null;
 }
 
@@ -193,9 +199,7 @@ function dashboardMetrics(findings: Finding[], activeScan: ScanJob | null): Dash
     counts[finding.severity] += 1;
   });
   const fixed = findings.filter((finding) => finding.status === "fixed").length;
-  const pendingReviews = findings.filter((finding) =>
-    ["pending_review", "auto_fix_available", "triaged", "in_progress"].includes(finding.status),
-  ).length;
+  const pendingReviews = findings.filter((finding) => REVIEW_STATUSES.has(finding.status)).length;
 
   return {
     totalScanned: activeScan ? 1 : 0,
@@ -258,7 +262,9 @@ function ConsoleInner() {
 
   useEffect(() => {
     void loadExistingScanState();
-    return () => scanSourceRef.current?.close();
+    return () => {
+      scanSourceRef.current?.close();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -276,11 +282,11 @@ function ConsoleInner() {
 
   async function refreshScanFindings(scanId: string, scan?: ScanJob | null, preferredFindingId?: string): Promise<void> {
     const findingsPayload = await api<{ findings: BackendFinding[] }>(`/api/scans/${encodeURIComponent(scanId)}/findings`);
-    const latestScan = scan || activeScan || (await api<ScanJob>(`/api/scans/${encodeURIComponent(scanId)}`));
+    const scanRecord = scan || activeScan || (await api<ScanJob>(`/api/scans/${encodeURIComponent(scanId)}`));
     const nextFindings = (findingsPayload.findings || []).map((finding, index) =>
       backendFindingToConsoleFinding(finding, scanId, index),
     );
-    setActiveScan(latestScan);
+    setActiveScan(scanRecord);
     setRuntimeFindings(nextFindings);
     if (nextFindings.length) {
       const nextSelected = nextFindings.find((finding) => finding.id === preferredFindingId) || nextFindings[0];
@@ -296,7 +302,7 @@ function ConsoleInner() {
     setDashboardLoading(true);
     try {
       const data = await api<{ jobs: ScanJob[] }>("/api/scans");
-      const scan = latestScan(data.jobs || []);
+      const scan = selectLatestScan(data.jobs || []);
       if (scan) {
         await refreshScanFindings(scan.id, scan);
       } else {
