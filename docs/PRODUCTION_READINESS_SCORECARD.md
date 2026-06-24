@@ -1,50 +1,51 @@
-# Production Readiness Scorecard
+# Production readiness scorecard
 
-**Assessment date:** 2026-06-23  
-**Scope:** VulnoraIQ `0.2.0` self-hosted laptop/server deployment for authorised LLM, RAG, tool-using, agentic, and GenAI data-security assessments.  
+**Assessment date:** 2026-06-24  
+**Scope:** VulnoraIQ `0.2.0` Docker-first/self-hosted laptop-server deployment for authorised LLM, RAG, tool-using, AI-agent, and GenAI data-security assessments.  
 **Rating scale:** 0-10, where 10 means fully hardened for the stated scope.
 
 ## Verdict
 
-VulnoraIQ is **complete for the self-hosted internal deployment scope** when deployed with production configuration validation, strong environment-backed tokens or trusted reverse-proxy identity, reverse-proxy/TLS controls where remote internal access is required, SQLite persistence, and the documented runbook/incident-response process.
+VulnoraIQ is complete for the current **self-hosted internal deployment scope** when deployed with the documented Docker lab or production-mode server controls: explicit authorisation, safety profiles, auth for shared deployments, SQLite persistence, audit logs, metrics, reports/evidence path controls, and CI validation.
 
-The local standalone launcher is **complete for laptop/workstation use**: cross-platform launchers start the local Web UI, run dependency/startup checks, prepare the local SQLite/output paths, open the browser, and provide a loopback launcher-mode stop control. Launcher mode is not the shared/production deployment path.
+The current codebase is no longer demo/static-WebUI-first. It is now:
 
-The GenAI Security readiness gate is now **complete for the current controlled-internal scenario-harness scope**: `DSGAI01–DSGAI21` have safe synthetic scenario coverage, deterministic evaluator primitives, required evidence fields, source discrepancy tracking, package metadata validation, tests, and CI workflow gates.
+- Docker-first for real local AI-agent/RAG/tool-loop lab testing;
+- React-console-first for the WebUI;
+- backend-wired for target inventory, runtime target save/delete, target validation, scan launch, and recent job refresh;
+- still limited to framework evidence requiring human review.
 
-VulnoraIQ does **not** claim production-validated real-environment GenAI detection assurance or certified VAPT-grade assurance. Findings remain framework evidence requiring human review.
+VulnoraIQ does **not** claim certified VAPT-grade assurance or independent real-world GenAI detection assurance.
 
-## Self-hosted deployment scorecard
+## Scorecard
 
-| Area | Score | Evidence | Remaining maturity item | Blocking for self-hosted internal? |
+| Area | Score | Current evidence | Remaining maturity item | Blocking? |
 | --- | ---: | --- | --- | --- |
-| 1. Authentication and authorisation | 9/10 | `webui/auth.py`, `webui/production_checks.py`, `tests/test_webui_auth_production.py`, `tests/test_webui_auth_and_persistence.py` | Token revocation service or direct OIDC/SSO. | No |
-| 2. CSRF / session protection | 9/10 | `webui/hosted_server.py`, `tests/test_webui_csrf.py`, `tests/test_webui_auth_and_persistence.py` | Shared CSRF state for multi-instance designs. | No |
-| 3. Request hardening | 9/10 | `webui/hosted_server.py`, `webui/production_checks.py`, `tests/test_webui_request_errors.py` | Formal request model library or Content-Type schema enforcement. | No |
-| 4. Rate limiting and abuse controls | 8/10 | `webui/hosted_server.py`, `tests/test_webui_rate_limit.py`, `.env.production.example` | Per-user/shared limiter. | No |
-| 5. Security headers | 9/10 | `webui/hosted_server.py`, `tests/test_webui_security_headers.py` | CSP reporting endpoint, COOP/COEP, or HSTS preload. | No |
-| 6. Reverse proxy and TLS | 9/10 | `docs/DEPLOYMENT.md`, `docs/RUNBOOK.md`, `webui/production_checks.py`, `tests/test_webui_proxy_ip.py` | Organisation-specific TLS/proxy deployment validation. | No |
-| 7. Persistence and migrations | 9/10 | `webui/persistent_jobs.py`, `tests/test_sqlite_job_store.py`, `docs/MIGRATION.md` | Alembic-style migration framework or PostgreSQL backend. | No |
-| 8. Audit logging | 9/10 | `webui/hosted_server.py`, `tests/test_webui_audit_logging.py`, `docs/RUNBOOK.md` | Shipped SIEM schema/rotation package. | No |
-| 9. Observability and monitoring | 9/10 | `/healthz`, `/readyz`, `/metrics`, `tests/test_metrics.py`, Docker healthcheck | Alert rules, SLOs, or distributed tracing. | No |
-| 10. Backup and restore | 9/10 | `scripts/backup_sqlite_store.py`, `scripts/restore_sqlite_store.py`, `tests/test_backup_restore.py`, `docs/RUNBOOK.md` | Automated backup scheduler or backup-age metric. | No |
-| 11. Containerisation | 9/10 | `Dockerfile`, `.dockerignore`, `docker-compose.yml`, `.env.production.example`, `tests/test_container_config.py` | Container image signing or container scanner workflow. | No |
-| 12. CI/CD and quality gates | 9/10 | `.github/workflows/ci.yml`, `.github/workflows/python-ci.yml`, `pyproject.toml`, `tests/`, `scripts/validate_package_metadata.py`, `scripts/validate_production_testing_readiness.py`, `scripts/validate_owasp_atlas_mappings.py`, `scripts/validate_genai_readiness.py` | Build/publish release workflow, SAST/DAST pipeline, or image scan gate. | No |
-| 13. Secrets management | 8/10 | `webui/auth.py`, `.env.production.example`, `webui/production_checks.py`, `docs/RUNBOOK.md` | Direct Vault/AWS/Azure/GCP secrets-manager integration or automated rotation. | No |
-| 14. Operational runbooks | 8/10 | `docs/RUNBOOK.md`, `docs/DEPLOYMENT.md`, backup/restore scripts, launcher startup/shutdown docs | Environment-specific contacts, alert thresholds, and capacity planning. | No |
-| 15. Incident response | 6/10 | `docs/INCIDENT_RESPONSE.md`, audit logs, metrics, rollback guidance | Organisation-specific escalation contacts, breach-notification process, SIEM rules, and tabletop validation. | No |
-| 16. Release management | 7/10 | `docs/RELEASE_CHECKLIST.md`, `CHANGELOG.md`, `scripts/build_release_package.py`, `scripts/validate_package_metadata.py` | Signed artifacts, staged release workflow, or automated release publishing. | No |
-| 17. Scanner / evaluator assurance | 9/10 | `docs/ASSESSMENT_ASSURANCE.md`, `core/production_detection.py`, `core/evaluators.py`, `core/genai_evaluators.py`, `config/owasp_oracles.yaml`, `tests/test_production_detection.py`, `tests/test_genai_readiness_validation.py` | Independent validation against approved real environments or certified VAPT assurance. | No |
-| 18. Single-instance limitations | 8/10 | Single-instance deployment boundary, SQLite WAL persistence, reverse-proxy docs | Shared CSRF/rate-limit state or horizontally scalable database. | No |
-| 19. OWASP / MITRE ATLAS mapping governance | 9/10 | `scripts/validate_owasp_atlas_mappings.py`, `tests/test_owasp_atlas_mapping_validation.py`, `.github/workflows/ci.yml`, `.github/workflows/python-ci.yml` | Manual security review before stronger assurance claims. | No |
-| 20. GenAI Security readiness governance | 8/10 | `benchmarks/fixtures/genai/scenarios.yaml`, `core/genai_evaluators.py`, `scripts/validate_genai_readiness.py`, `tests/test_genai_readiness_validation.py`, CI workflows, `docs/genai/PRODUCTION_READINESS_PLAN.md` | Approved-environment validation, provider inventory connectors, dashboard/report depth, and independent assurance. | No |
-| 21. Standalone local app startup | 8/10 | `launch-vulnoraiq-webui.*`, `scripts/launch_webui.py`, `webui/static/launcher-controls.*`, README launcher docs | Signed installers/native packages and broader OS-level QA. | No |
+| Authentication and authorisation | 9/10 | `webui/auth.py`, production checks, token/trusted-proxy modes, role controls. | Direct OIDC/JWT, token revocation. | No |
+| CSRF/session protection | 9/10 | Hosted server CSRF validation and tests. | Shared CSRF state for multi-instance deployments. | No |
+| Request hardening | 9/10 | Request-size limits, malformed JSON handling, structured errors. | Formal schema/model validation. | No |
+| Rate limiting | 8/10 | IP-based rate limits and scan concurrency/queue controls. | Shared per-user limiter. | No |
+| Security headers | 9/10 | CSP, HSTS conditional behaviour, frame/content/referrer/permissions headers. | CSP reporting and broader browser isolation policy. | No |
+| Reverse proxy/TLS | 8/10 | Deployment/runbook guidance and trusted proxy CIDR checks. | Environment-specific TLS validation. | No |
+| Persistence | 9/10 | SQLite WAL, foreign keys, busy timeout, schema versioning. | HA database backend or migration framework. | No |
+| Audit logging | 9/10 | Structured JSON audit logs with request correlation. | SIEM schema/rule pack. | No |
+| Observability | 9/10 | `/healthz`, `/readyz`, auth-protected `/metrics`, Docker healthcheck. | Alert rules/SLOs/tracing. | No |
+| Backup/restore | 9/10 | SQLite online backup/restore scripts. | Automated scheduler and backup-age metrics. | No |
+| Containerisation | 9/10 | Dockerfile, Compose, non-root app, private lab network, mock agent. | Image signing/scanning. | No |
+| Real target testing | 8/10 | Target adapters, Docker target config, runtime target APIs, validation, safety profile. | More target templates and approved-environment validation. | No |
+| WebUI | 8/10 | React console, target workspace, backend target/scan API wiring, built package data. | SSE progress, finding mutation APIs, assistant backend. | No |
+| CI/CD and quality gates | 9/10 | Python matrix, lint, mypy, pytest, pip check/audit, validation scripts, Playwright hosted flow, demo/functional acceptance. | SAST/DAST/image scan gates. | No |
+| Secrets management | 8/10 | Env-backed tokens/secrets and redaction requirements. | Vault/cloud secrets-manager integration. | No |
+| Operational docs | 8/10 | Deployment, runbook, incident response, release, migration docs. | Org-specific contacts and alert thresholds. | No |
+| Scanner/evaluator assurance | 7/10 | OWASP/GenAI/Agentic/MITRE coverage, safe fixtures, validators. | Independent validation against approved real environments. | No for current scope |
+| GenAI Security harness | 8/10 | `DSGAI01–DSGAI21`, 84 scenario cases, deterministic evaluators, evidence contract, CI. | Provider/data inventory connectors and real-environment validation. | No |
+| Release packaging | 7/10 | Release-only platform artifacts and Python package publishing docs. | Signed/notarised installers and distribution channels. | No |
 
 **Overall self-hosted internal score:** **8.5/10**
 
-The gate-compliance register scores **10/10** because all self-hosted internal blockers are closed and all current-scope items are complete. The scorecard remains lower because it includes non-blocking maturity items such as SIEM integration, OIDC, signed releases, SAST/DAST, image scanning, GenAI approved-environment validation, native installers, and independent assurance.
+The blocker register can remain closed for current self-hosted/internal scope, but the numeric score is not 10/10 because it includes future maturity items such as direct OIDC, signed installers, image scanning, SAST/DAST, SIEM integration, multi-instance state, approved-environment GenAI validation, and independent assurance.
 
-## Current release claim
+## Allowed release wording
 
 Use:
 
@@ -54,43 +55,16 @@ Allowed GenAI-specific wording:
 
 > GenAI Security readiness gate completed for controlled internal assessment use with safe synthetic `DSGAI01–DSGAI21` scenario coverage.
 
-Allowed standalone-app wording:
+Allowed Docker/WebUI wording:
 
-> Local standalone launcher available for laptop/workstation self-hosted use with startup checks, browser launch, and loopback stop control.
+> Docker-first local AI-agent testing lab with a React SecOps console, backend target-management APIs, deterministic mock-agent targets, and explicit authorisation gates.
 
-Do not use:
+## Disallowed wording
 
-- certified VAPT-grade ready
-- production pentest replacement
-- independently validated real-environment GenAI detection coverage
-- launcher mode as a shared production service
+Do not describe VulnoraIQ as:
 
-## Validation commands
-
-```bash
-python -m pip install -e .[dev]
-ruff check .
-mypy .
-pytest -q
-python -m pip check
-pip-audit
-python scripts/validate_package_metadata.py
-python scripts/validate_owasp_atlas_mappings.py
-python scripts/validate_genai_readiness.py
-python scripts/validate_production_testing_readiness.py \
-  --run-functional \
-  --output-dir reports/output/production-readiness
-```
-
-## Related documents
-
-- [`genai/PRODUCTION_READINESS_PLAN.md`](genai/PRODUCTION_READINESS_PLAN.md)
-- [`AGENTIC_APPLICATIONS_PRODUCTION_READINESS_PLAN.md`](AGENTIC_APPLICATIONS_PRODUCTION_READINESS_PLAN.md)
-- [`PRODUCTION_HARDENING_BACKLOG.md`](PRODUCTION_HARDENING_BACKLOG.md)
-- [`DEPLOYMENT.md`](DEPLOYMENT.md)
-- [`RUNBOOK.md`](RUNBOOK.md)
-- [`INCIDENT_RESPONSE.md`](INCIDENT_RESPONSE.md)
-- [`RELEASE_CHECKLIST.md`](RELEASE_CHECKLIST.md)
-- [`ASSESSMENT_ASSURANCE.md`](ASSESSMENT_ASSURANCE.md)
-
-*This scorecard is a living document. Update it whenever a control is added, downgraded, deferred, or independently validated.*
+- certified VAPT-grade;
+- independently validated real-world GenAI detection assurance;
+- safe to use against systems without written authorisation;
+- a replacement for independent penetration testing;
+- horizontally scalable production SaaS.
