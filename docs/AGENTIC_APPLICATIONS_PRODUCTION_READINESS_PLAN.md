@@ -1,236 +1,65 @@
-# Agentic Applications Production Readiness Plan
+# Agentic Applications production readiness plan
 
-**Plan status:** Completed for `0.2.0` self-hosted internal deployment.
+**Plan status:** Completed for the current `0.2.0` self-hosted internal deployment scope.  
+**Current deployment model:** Docker-first local AI-agent testing lab plus production-mode hosted server for internal self-hosted use.  
+**Version target:** `0.2.0`.
 
-**Scope:** VulnoraIQ self-hosted laptop/server deployment for authorised LLM, RAG, tool-using, and agentic application assessments.
+## Production boundary
 
-**Version target:** `0.2.0`
+This plan completes the repo-level self-hosted readiness tranche for authorised LLM, RAG, tool-using, and agentic application assessments.
 
-**Production boundary:** This plan finishes the self-hosted production-readiness tranche. It does **not** claim certified VAPT-grade assurance, independent assurance, or permission to assess systems without written authorisation.
+It does **not** claim:
 
-## Readiness definition
+- certified VAPT-grade assurance;
+- independent assurance for every agentic risk category;
+- authorisation to assess systems without written permission;
+- production SaaS readiness.
 
-VulnoraIQ is production-ready for self-hosted internal assessment use when all phase gates below are implemented, documented, and enforced by tests or CI.
+## Current release language
 
-Required release language:
+Allowed:
 
 > Self-hosted laptop/server AI security testing application with controlled internal production-readiness gate passed.
 
-Disallowed release language:
+Also allowed:
 
-- certified VAPT-grade assurance
-- independently validated assurance for every category
-- authorised to test systems without written permission
+> Docker-first local AI-agent testing lab with deterministic mock-agent targets, safety profiles, explicit authorisation gates, and a React target-management console.
 
 ## Phase status
 
-| Phase | Area | Status | Release gate |
+| Phase | Area | Status | Current evidence |
 | --- | --- | --- | --- |
-| 0 | Scope and responsible-use boundary | Complete | README, SECURITY policy, and assessment assurance docs must state authorised-use boundaries. |
-| 1 | Agentic threat mapping governance | Complete | Active oracles and production checks must include OWASP family, OWASP ID, MITRE ATLAS tactic, mapping status, evidence surface, and manual-review flag. |
-| 2 | Authentication and authorisation | Complete | Web UI auth enabled by default; production mode fails closed without strong env-backed token or trusted proxy configuration. |
-| 3 | Request and browser hardening | Complete | CSRF, request-size limits, malformed JSON handling, security headers, artifact path protection, and rate limits enforced. |
-| 4 | Persistence and migrations | Complete | SQLite is the default production job store, with WAL, foreign keys, busy timeout, and schema version tracking. |
-| 5 | Auditability and observability | Complete | Structured audit logs, health, readiness, metrics, and request correlation are available. |
-| 6 | Deployment and containerisation | Complete | Dockerfile, Compose, production env example, healthcheck, non-root user, `/data` volume, and reverse-proxy guidance exist. |
-| 7 | Operations and incident response | Complete | Runbook, incident response plan, backup/restore, rollback, and migration guidance exist. |
-| 8 | Release and CI quality gates | Complete | CI runs lint, typing, tests, package validation, OWASP/ATLAS mapping validation, production-readiness validation, and functional acceptance. |
+| 0 | Scope and responsible-use boundary | Complete | README, SECURITY, safety model, assessment assurance docs. |
+| 1 | Agentic threat mapping governance | Complete | OWASP/MITRE mapping validator, docs, matrix/crosswalk. |
+| 2 | Authentication and authorisation | Complete | Production auth fail-closed, token/trusted-proxy modes, role-aware endpoints. |
+| 3 | Request and browser hardening | Complete | CSRF, request limits, malformed JSON handling, security headers, artifact path protection, rate limits. |
+| 4 | Persistence and migrations | Complete | SQLite job store, WAL, schema versioning, backup/restore. |
+| 5 | Auditability and observability | Complete | Audit logs, request IDs, health/readiness/metrics. |
+| 6 | Deployment and containerisation | Complete | Dockerfile, Compose, mock-agent, Docker targets, non-root container, healthchecks. |
+| 7 | Operations and incident response | Complete | Deployment guide, runbook, incident response, migration, release checklist. |
+| 8 | Release and CI quality gates | Complete | Ruff, mypy, pytest, dependency audit, validators, hosted WebUI flow, demo scan, functional acceptance. |
+| 9 | Real authorised target testing | Complete for current local/internal scope | Target adapters, runtime target APIs, target validation, Docker lab targets. |
+| 10 | React WebUI target management | Complete for current backend APIs | Search/filter, readiness metrics, safety checklist, target CRUD, validation, scan launch, recent jobs. |
 
-## Phase 0: Scope and responsible-use boundary
+## Current implemented agentic testing support
 
-**Objective:** prevent overclaiming and unsafe usage.
+- `agent` and `ai_agent_foundation` profiles.
+- Docker `local_agent_tool_loop` target with dry-run workflow behaviour.
+- Host-native `agent_tool_loop` template.
+- Agency-oriented modules and policy/evidence output.
+- WebUI target readiness checklist and explicit authorisation guard.
+- Reports and findings requiring human review.
 
-Implemented controls:
+## Remaining agentic maturity work
 
-- README maturity banner limits `0.2.0` to self-hosted laptop/server deployment.
-- SECURITY policy requires authorised use only.
-- Assessment assurance documentation states that findings are framework evidence requiring human review, not certified VAPT assurance.
+| Area | Future work |
+| --- | --- |
+| Tool-use depth | More realistic permission, approval, and state-transition fixtures. |
+| Agent memory | Stronger memory poisoning, retrieval, and persistence scenarios. |
+| Multi-agent workflows | More explicit inter-agent trust boundary and delegation tests. |
+| Runtime telemetry | Optional collection of tool-call logs, trace events, and workflow decisions from approved targets. |
+| Independent assurance | Third-party validation of agentic evaluator thresholds and report claims. |
 
-Gate:
+## Completion rule
 
-```bash
-python scripts/validate_production_testing_readiness.py
-```
-
-## Phase 1: Agentic threat mapping governance
-
-**Objective:** make coverage traceable across OWASP and MITRE ATLAS before any oracle/check becomes active.
-
-Required metadata for every active oracle or production check:
-
-- `owasp_family`
-- `owasp_id`
-- `mitre_atlas_tactics`
-- `mapping_status`
-- `evidence_surface`
-- `manual_review_required`
-
-Implemented controls:
-
-- `config/owasp_oracles.yaml` contains metadata for active safe local oracles.
-- `config/production_owasp_detection.yaml` contains metadata for production-oriented deterministic checks.
-- `scripts/validate_owasp_atlas_mappings.py` validates required fields, allowed families, OWASP ID shape, MITRE ATLAS tactic shape, mapping status, evidence surface values, and boolean manual-review flags.
-- `tests/test_owasp_atlas_mapping_validation.py` validates positive and negative cases and checks repository configs.
-- CI now runs the validator explicitly in both workflow paths.
-
-Gate:
-
-```bash
-python scripts/validate_owasp_atlas_mappings.py
-pytest tests/test_owasp_atlas_mapping_validation.py -q
-```
-
-## Phase 2: Authentication and authorisation
-
-**Objective:** prevent unauthenticated or unauthorised scan control.
-
-Implemented controls:
-
-- Token auth enabled by default.
-- Production mode rejects disabled auth, short or default/demo tokens, unsafe file-auth configuration, and internal dev-token use.
-- Trusted reverse-proxy identity mode requires explicit trusted proxy CIDRs.
-- Viewer, analyst, and admin roles limit scan, metrics, artifact, and config access.
-- Non-demo scan targets require explicit authorisation.
-
-Gate:
-
-```bash
-pytest tests/test_webui_auth_production.py tests/test_scanner_authorisation.py -q
-python scripts/validate_runtime_production_config.py
-```
-
-## Phase 3: Request and browser hardening
-
-**Objective:** harden web request handling for self-hosted internal deployment.
-
-Implemented controls:
-
-- CSRF tokens for state-changing scan creation.
-- Request body size limit.
-- Malformed JSON and unsupported method handling.
-- Artifact traversal protection.
-- Security headers, including CSP, frame denial, MIME sniffing prevention, referrer policy, permissions policy, and conditional HSTS.
-- Per-IP rate limiting and scan queue/concurrency limits.
-
-Gate:
-
-```bash
-pytest tests/test_webui_csrf.py tests/test_webui_request_errors.py tests/test_webui_security_headers.py tests/test_webui_rate_limit.py -q
-```
-
-## Phase 4: Persistence and migrations
-
-**Objective:** replace demo-style persistence with controlled internal job persistence.
-
-Implemented controls:
-
-- SQLite job store is the default backend.
-- WAL, foreign keys, busy timeout, normalized jobs/events tables, and schema versioning are enabled.
-- JSON backend is retained only for development/legacy compatibility.
-- Backup and restore scripts validate schema and counts.
-
-Gate:
-
-```bash
-pytest tests/test_sqlite_job_store.py tests/test_backup_restore.py -q
-python scripts/backup_sqlite_store.py /data/jobs.db /data/backups/jobs-test.db --compress --validate --retention 90
-```
-
-## Phase 5: Auditability and observability
-
-**Objective:** give operators evidence for health, incidents, and accountability.
-
-Implemented controls:
-
-- `/healthz` liveness endpoint.
-- `/readyz` readiness endpoint.
-- Auth-protected `/metrics` endpoint by default.
-- Structured JSON audit logging with request IDs and security event types.
-- Audit logs avoid tokens, CSRF tokens, request bodies, secrets, and full report contents.
-
-Gate:
-
-```bash
-pytest tests/test_metrics.py tests/test_webui_audit_logging.py -q
-```
-
-## Phase 6: Deployment and containerisation
-
-**Objective:** provide a repeatable self-hosted deployment path.
-
-Implemented controls:
-
-- Non-root Dockerfile.
-- `/data` volume for reports and SQLite.
-- Docker healthcheck.
-- Docker Compose file.
-- `.env.production.example` with placeholders only.
-- Reverse proxy/TLS guidance for nginx and Caddy.
-- Runtime production-config validation.
-
-Gate:
-
-```bash
-docker build -t vulnoraiq:0.2.0-rc .
-python scripts/container_smoke_test.py
-python scripts/validate_runtime_production_config.py
-```
-
-## Phase 7: Operations and incident response
-
-**Objective:** make the service supportable after deployment.
-
-Implemented controls:
-
-- `docs/RUNBOOK.md` covers service management, health, metrics, logs, token rotation, backup/restore, stuck scans, proxy checks, troubleshooting, upgrade, and rollback.
-- `docs/INCIDENT_RESPONSE.md` covers severity, evidence sources, containment, recovery, post-incident review, and communication guidance.
-- `docs/MIGRATION.md` covers migration from `0.0.1.x` to `0.2.0`.
-- `docs/RELEASE_CHECKLIST.md` defines staged release verification.
-
-Gate:
-
-```bash
-python scripts/validate_production_testing_readiness.py --output-dir reports/output/production-readiness
-```
-
-## Phase 8: Release and CI quality gates
-
-**Objective:** prevent regression before release or merge.
-
-Implemented CI gates:
-
-- `python -m pip check`
-- `pip-audit` review signal
-- `ruff check .`
-- `mypy` / `mypy --explicit-package-bases .`
-- `pytest`
-- package metadata validation
-- OWASP/MITRE mapping metadata validation
-- target contract validation
-- benchmark fixture validation
-- functional acceptance path
-- baseline/RAG/agent scan smoke tests
-- report diff and trend smoke tests
-- benchmark regression gate
-- release package smoke test
-- production-readiness validation
-
-Release candidate gate:
-
-```bash
-python -m pip install -e .[dev]
-ruff check .
-mypy .
-pytest -q
-python -m pip check
-pip-audit
-python scripts/validate_package_metadata.py
-python scripts/validate_owasp_atlas_mappings.py
-python scripts/validate_production_testing_readiness.py \
-  --run-functional \
-  --output-dir reports/output/production-readiness
-```
-
-## Completion decision
-
-**Completed for `0.2.0` self-hosted internal deployment.** Phases 0-8 are complete, documented, and backed by repository checks or CI gates for the intended laptop/server application model.
+This plan remains complete only for the current self-hosted/internal readiness scope. Any stronger wording must wait for approved-environment validation and independent assurance.
