@@ -37,13 +37,20 @@ console.
   Remediation, ChatMessage, DashboardMetrics, VulnerabilityTrendPoint, …).
 - `src/data/mock.ts` — realistic demo data. Replace with live API wiring.
 - `src/components/` — `AppShell`, `HeaderBar`, `WorkspaceLayout`, navigation,
-  workspace, intelligence, dashboard, and shared UI primitives.
+  workspace, intelligence, dashboard, target management, and shared UI primitives.
 
-## Backend integration TODOs
+## Backend integration status
 
-Search the source for `TODO(api)`:
+The target-management workspace is wired to the hosted backend for:
 
-- `POST /api/scans` + SSE `/api/scans/{id}/events` — live scan progress.
+- `GET /api/targets` — load configured and runtime targets.
+- `POST /api/targets/save` and `POST /api/targets/delete` — runtime target CRUD.
+- `POST /api/targets/{id}/validate` — target connectivity checks.
+- `GET /api/scans` and `POST /api/scans` — scan history refresh and authorised scan launch.
+
+Remaining backend integration TODOs:
+
+- SSE `/api/scans/{id}/events` — live scan progress streaming.
 - `POST /api/findings/{id}/apply-fix` — persist an applied remediation.
 - `PATCH /api/findings/{id}` — status transitions (e.g. mark for review).
 - `POST /api/assistant/chat` — back the "Ask VulnorAIQ" panel with the real model.

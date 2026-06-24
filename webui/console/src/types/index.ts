@@ -178,3 +178,19 @@ export interface ConnectivityResult {
   request?: unknown;
   response_preview?: unknown;
 }
+
+
+export type ScanJobStatus = "queued" | "running" | "completed" | "failed";
+
+export interface ScanJob {
+  id: string;
+  target: string;
+  profile: string;
+  authorised: boolean;
+  status: ScanJobStatus | string;
+  created_by?: string;
+  created_at?: string;
+  started_at?: string | null;
+  completed_at?: string | null;
+  error?: string | null;
+}
