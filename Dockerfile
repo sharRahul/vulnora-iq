@@ -1,5 +1,9 @@
 FROM python:3.12-slim
 
+LABEL org.opencontainers.image.title="VulnoraIQ" \
+      org.opencontainers.image.source="https://github.com/sharRahul/vulnoraiq" \
+      org.opencontainers.image.licenses="Apache-2.0"
+
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     VULNORAIQ_CONFIG_DIR=/app/config \
@@ -19,5 +23,5 @@ RUN mkdir -p /data/reports /data/evidence /data/audit && chown -R vulnoraiq:vuln
 USER vulnoraiq
 VOLUME ["/data"]
 EXPOSE 8787
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8787/healthz', timeout=3).read()"
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 CMD python -c "import http.client; c=http.client.HTTPConnection('127.0.0.1',8787,timeout=3); c.request('GET','/healthz'); r=c.getresponse(); raise SystemExit(0 if r.status < 500 else 1)"
 CMD ["vulnoraiq-web", "--host", "0.0.0.0", "--port", "8787"]
