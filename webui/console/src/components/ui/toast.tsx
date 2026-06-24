@@ -1,8 +1,8 @@
 import * as React from "react";
-import { CheckCircle2, Info, X } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Info, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type ToastKind = "success" | "info";
+type ToastKind = "success" | "info" | "error";
 interface Toast {
   id: number;
   message: string;
@@ -55,6 +55,8 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
           >
             {t.kind === "success" ? (
               <CheckCircle2 className="mt-0.5 size-4 text-[var(--accent-sage)]" />
+            ) : t.kind === "error" ? (
+              <AlertTriangle className="mt-0.5 size-4 text-severity-high" />
             ) : (
               <Info className="mt-0.5 size-4 text-[var(--accent-slate)]" />
             )}

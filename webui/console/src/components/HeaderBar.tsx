@@ -19,6 +19,9 @@ interface HeaderBarProps {
   theme: "light" | "dark";
   onToggleTheme: () => void;
   scanning: boolean;
+  scanStatusLabel?: string;
+  scanProgressPercent?: number;
+  scanFindingCount?: number;
   onToggleScan: () => void;
 }
 
@@ -28,8 +31,15 @@ export function HeaderBar({
   theme,
   onToggleTheme,
   scanning,
+  scanStatusLabel,
+  scanProgressPercent = 0,
+  scanFindingCount = 0,
   onToggleScan,
 }: HeaderBarProps) {
+  const scanLabel = scanning
+    ? `${scanStatusLabel || "Scan running"} · ${Math.round(scanProgressPercent)}% · ${scanFindingCount} findings`
+    : "Idle";
+
   return (
     <header className="flex h-14 shrink-0 items-center gap-3 border-b border-border bg-card px-3 sm:px-4">
       <div className="flex items-center gap-2">
@@ -68,17 +78,17 @@ export function HeaderBar({
       </nav>
 
       <div className="ml-auto flex items-center gap-2">
-        <span className="hidden items-center gap-1.5 rounded-md border border-border bg-canvas px-2 py-1 text-[11px] font-semibold text-muted-foreground md:inline-flex">
+        <span className="hidden max-w-[340px] items-center gap-1.5 truncate rounded-md border border-border bg-canvas px-2 py-1 text-[11px] font-semibold text-muted-foreground md:inline-flex">
           <span
             className={cn(
-              "size-1.5 rounded-full",
+              "size-1.5 shrink-0 rounded-full",
               scanning ? "animate-pulse bg-[var(--accent-sage)]" : "bg-muted-foreground/50",
             )}
           />
-          {scanning ? "Scan running" : "Idle"}
+          <span className="truncate">{scanLabel}</span>
         </span>
 
-        <Button variant="primary" size="sm" onClick={onToggleScan}>
+        <Button variant="primary" size="sm" onClick={onToggleScan} disabled={scanning}>
           {scanning ? (
             <>
               <Loader2 className="size-4 animate-spin" /> Scanning…

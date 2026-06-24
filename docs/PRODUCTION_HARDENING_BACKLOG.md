@@ -41,12 +41,10 @@ This does not mean certified VAPT-grade assurance or independently validated rea
 
 | Area | Future maturity item | Priority |
 | --- | --- | --- |
-| WebUI live progress | Implement SSE `/api/scans/{id}/events` backend and wire React progress views to real events. | High |
-| WebUI finding actions | Persist finding status transitions and remediation actions. | High |
 | WebUI assistant | Replace typed demo assistant panel with real backend API and model integration controls. | Medium |
-| Full OWASP AI Testing Guide | Implement the full 32-test AITG manifest, runtime/evidence modules, reporting, and CI coverage. | High |
-| Real-environment GenAI validation | Validate GenAI harness against approved internal environments, provider configs, vector stores, telemetry, and governance workflows. | High |
-| Target templates | Add documented templates for common LLM APIs, RAG systems, local model servers, agent frameworks, and provider gateways. | Medium |
+| Full OWASP AI Testing Guide | Extend beyond safe synthetic coverage with reviewer-approved real-target evidence modules and reporting. | High |
+| Real-environment GenAI validation | Continue validating GenAI harness against approved internal environments, provider configs, vector stores, telemetry, and governance workflows. | High |
+| Target templates | Expand documented templates for common LLM APIs, RAG systems, local model servers, agent frameworks, and provider gateways. | Medium |
 | Enterprise identity | Add direct OIDC/JWT support beyond trusted reverse-proxy identity. | Medium |
 | Packaging | Add signed Windows, Linux, and notarised macOS installers. | Medium |
 | Container supply chain | Add image signing, SBOM, and image vulnerability scanning. | Medium |

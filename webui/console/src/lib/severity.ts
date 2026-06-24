@@ -91,9 +91,34 @@ export const statusStyles: Record<
     className:
       "bg-[color-mix(in_srgb,var(--accent-slate)_16%,transparent)] text-slate border-slate",
   },
+  triaged: {
+    label: "Triaged",
+    className:
+      "bg-[color-mix(in_srgb,var(--sev-medium)_14%,transparent)] text-severity-medium border-severity-medium",
+  },
+  in_progress: {
+    label: "In Progress",
+    className:
+      "bg-[color-mix(in_srgb,var(--accent-slate)_16%,transparent)] text-slate border-slate",
+  },
+  accepted_risk: {
+    label: "Accepted Risk",
+    className:
+      "bg-[color-mix(in_srgb,var(--sev-low)_14%,transparent)] text-severity-low border-severity-low",
+  },
+  false_positive: {
+    label: "False Positive",
+    className:
+      "bg-[color-mix(in_srgb,var(--sev-info)_16%,transparent)] text-severity-info border-severity-info",
+  },
   fixed: {
     label: "Fixed",
     className:
       "bg-[color-mix(in_srgb,var(--sev-low)_14%,transparent)] text-severity-low border-severity-low",
+  },
+  wont_fix: {
+    label: "Won't Fix",
+    className:
+      "bg-[color-mix(in_srgb,var(--muted)_22%,transparent)] text-muted-foreground border-border",
   },
 };

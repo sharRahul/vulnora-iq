@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { MousePointerSquareDashed, ScanSearch } from "lucide-react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ToastProvider, useToast } from "@/components/ui/toast";
@@ -13,72 +13,342 @@ import { IntelligencePanel } from "@/components/intelligence/IntelligencePanel";
 import { TargetsManager } from "@/components/targets/TargetsManager";
 import { useTheme } from "@/hooks/useTheme";
 import {
-  assets,
+  assets as demoAssets,
   dashboardMetrics,
-  findings,
+  findings as demoFindings,
   severityDistribution,
   trendData,
 } from "@/data/mock";
-import type { Finding } from "@/types";
+import type {
+  Asset,
+  BackendFinding,
+  Finding,
+  FindingHistoryEntry,
+  FindingMutationState,
+  FindingStatus,
+  ScanEvent,
+  ScanJob,
+  Severity,
+} from "@/types";
+
+const SCAN_EVENT_TYPES = [
+  "scan_queued",
+  "scan_started",
+  "target_validated",
+  "phase_started",
+  "check_started",
+  "check_completed",
+  "finding_created",
+  "evidence_saved",
+  "report_written",
+  "scan_completed",
+  "scan_failed",
+  "heartbeat",
+];
+
+async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const response = await fetch(path, { credentials: "same-origin", ...options });
+  if (!response.ok) throw new Error(await response.text());
+  return response.json() as Promise<T>;
+}
+
+async function csrfToken(): Promise<string> {
+  const data = await api<{ csrf_token: string }>("/api/csrf-token");
+  return data.csrf_token;
+}
+
+function normaliseSeverity(value: unknown): Severity {
+  const severity = String(value || "info").toLowerCase();
+  return ["critical", "high", "medium", "low", "info"].includes(severity) ? (severity as Severity) : "info";
+}
+
+function normaliseStatus(value: unknown): FindingStatus {
+  const status = String(value || "open").toLowerCase();
+  const allowed: FindingStatus[] = [
+    "open",
+    "pending_review",
+    "auto_fix_available",
+    "triaged",
+    "in_progress",
+    "accepted_risk",
+    "false_positive",
+    "fixed",
+    "wont_fix",
+  ];
+  return allowed.includes(status as FindingStatus) ? (status as FindingStatus) : "open";
+}
+
+function riskScoreFromFinding(finding: BackendFinding, severity: Severity): number {
+  if (typeof finding.score === "number") {
+    const score = finding.score <= 1 ? finding.score * 100 : finding.score;
+    return Math.max(0, Math.min(100, Math.round(score)));
+  }
+  return { critical: 95, high: 82, medium: 58, low: 32, info: 10 }[severity];
+}
+
+function liveAssetId(scanId: string): string {
+  return `scan-${scanId}`;
+}
+
+function backendFindingId(finding: BackendFinding, index: number): string {
+  return String(finding.id || finding.owasp_id || `finding-${index + 1}`);
+}
+
+function formatEvidence(evidence: unknown): string {
+  if (!evidence || (typeof evidence === "object" && Object.keys(evidence as Record<string, unknown>).length === 0)) {
+    return "No structured evidence was returned for this finding. Review the generated report artifacts for additional context.";
+  }
+  return JSON.stringify(evidence, null, 2);
+}
+
+function backendFindingToConsoleFinding(finding: BackendFinding, scanId: string, index: number): Finding {
+  const id = backendFindingId(finding, index);
+  const severity = normaliseSeverity(finding.severity);
+  const state = finding.remediation_state;
+  const affectedComponent = finding.affected_component || "assessment target";
+  const recommendation = finding.recommendation || "Review the evidence, confirm applicability, and record the remediation decision.";
+  const owaspLabel = finding.owasp_id || "AITG";
+  const mitreAtlas = Array.isArray(finding.mitre_atlas) ? finding.mitre_atlas.join(", ") : "";
+
+  return {
+    id,
+    assetId: liveAssetId(scanId),
+    title: finding.title || `${id} finding`,
+    severity,
+    riskScore: riskScoreFromFinding(finding, severity),
+    status: normaliseStatus(state?.status || finding.status || "open"),
+    affectedPath: affectedComponent,
+    aiSummary: finding.description || recommendation,
+    vulnerableCode: {
+      language: "json",
+      filename: `${id}-evidence.json`,
+      code: formatEvidence(finding.evidence),
+    },
+    remediation: {
+      summary: recommendation,
+      rationale: recommendation,
+      confidence: state?.status === "fixed" ? 95 : 70,
+      secureCode: {
+        language: "text",
+        filename: `${id}-remediation.txt`,
+        code: recommendation,
+      },
+    },
+    cve: { id: null, description: "Framework finding generated from the active VulnoraIQ scan." },
+    cwe: {
+      id: "N/A",
+      name: "AI security assessment finding",
+      description: "Review the mapped OWASP/MITRE context and generated evidence before closure.",
+    },
+    intelligence: {
+      owaspLlm: owaspLabel,
+      mitreAtlas,
+      exploitability: "theoretical",
+      affectedComponent,
+      recommendedPriority: severity,
+      policyStatus: state?.status === "fixed" ? "pass" : "manual_review",
+      complianceTags: [],
+    },
+    report: [
+      { title: "Evidence", body: formatEvidence(finding.evidence) },
+      { title: "Recommendation", body: recommendation },
+      {
+        title: "Review status",
+        body: state
+          ? `Status: ${state.status}. Updated by ${state.updated_by || "unknown"} at ${state.updated_at || "unknown"}.`
+          : "No remediation state has been recorded yet.",
+      },
+    ],
+  };
+}
+
+function scanAsset(scan: ScanJob, findings: Finding[]): Asset {
+  const highest = findings.reduce<Severity>((current, finding) => {
+    const order: Record<Severity, number> = { critical: 4, high: 3, medium: 2, low: 1, info: 0 };
+    return order[finding.severity] > order[current] ? finding.severity : current;
+  }, "info");
+  return {
+    id: liveAssetId(scan.id),
+    name: `${scan.target} · ${scan.profile}`,
+    type: "ai_agent",
+    locator: `scan:${scan.id}`,
+    vulnerabilityCount: findings.length,
+    highestSeverity: highest,
+    riskScore: findings.reduce((max, finding) => Math.max(max, finding.riskScore), 0),
+    lastScanned: scan.completed_at || scan.started_at || scan.created_at || new Date().toISOString(),
+    findingIds: findings.map((finding) => finding.id),
+  };
+}
 
 function ConsoleInner() {
   const { theme, toggleTheme } = useTheme();
   const { notify } = useToast();
+  const scanSourceRef = useRef<EventSource | null>(null);
 
   const [view, setView] = useState<ConsoleView>("overview");
   const [selectedFindingId, setSelectedFindingId] = useState<string | null>(null);
-  const [appliedFindingIds, setAppliedFindingIds] = useState<Set<string>>(new Set());
   const [scanning, setScanning] = useState(false);
-  const [dashboardLoading, setDashboardLoading] = useState(true);
+  const [dashboardLoading, setDashboardLoading] = useState(false);
+  const [activeScan, setActiveScan] = useState<ScanJob | null>(null);
+  const [runtimeFindings, setRuntimeFindings] = useState<Finding[]>([]);
+  const [findingHistories, setFindingHistories] = useState<Record<string, FindingHistoryEntry[]>>({});
+  const [liveScanEvents, setLiveScanEvents] = useState<ScanEvent[]>([]);
+  const [scanProgressPercent, setScanProgressPercent] = useState(0);
+  const [scanPhase, setScanPhase] = useState("Idle");
+  const [liveFindingCount, setLiveFindingCount] = useState(0);
+
+  const displayFindings = runtimeFindings.length ? runtimeFindings : demoFindings;
+  const displayAssets = activeScan && runtimeFindings.length ? [scanAsset(activeScan, runtimeFindings)] : demoAssets;
 
   const findingsById = useMemo<Record<string, Finding>>(
-    () => Object.fromEntries(findings.map((f) => [f.id, f])),
-    [],
+    () => Object.fromEntries(displayFindings.map((f) => [f.id, f])),
+    [displayFindings],
   );
 
-  // Initial dashboard load — skeleton then data.
-  useEffect(() => {
-    const t = window.setTimeout(() => setDashboardLoading(false), 900);
-    return () => window.clearTimeout(t);
-  }, []);
+  useEffect(() => () => scanSourceRef.current?.close(), []);
 
   const selectedFinding = selectedFindingId ? findingsById[selectedFindingId] : null;
   const selectedAsset = selectedFinding
-    ? assets.find((a) => a.id === selectedFinding.assetId)
+    ? displayAssets.find((a) => a.id === selectedFinding.assetId)
     : undefined;
+  const selectedFindingHistory = selectedFindingId ? findingHistories[selectedFindingId] || [] : [];
 
   const handleSelectFinding = (id: string) => {
     setSelectedFindingId(id);
     setView("workspace");
   };
 
-  // TODO(api): wire to POST /api/scans + SSE /api/scans/{id}/events for live progress.
-  const handleToggleScan = () => {
+  async function refreshFindingHistory(scanId: string, findingId: string): Promise<void> {
+    const data = await api<{ history: FindingHistoryEntry[] }>(
+      `/api/scans/${encodeURIComponent(scanId)}/findings/${encodeURIComponent(findingId)}/history`,
+    );
+    setFindingHistories((prev) => ({ ...prev, [findingId]: data.history || [] }));
+  }
+
+  async function refreshScanFindings(scanId: string, scan?: ScanJob | null, preferredFindingId?: string): Promise<void> {
+    const findingsPayload = await api<{ findings: BackendFinding[] }>(`/api/scans/${encodeURIComponent(scanId)}/findings`);
+    const latestScan = scan || activeScan || (await api<ScanJob>(`/api/scans/${encodeURIComponent(scanId)}`));
+    const nextFindings = (findingsPayload.findings || []).map((finding, index) =>
+      backendFindingToConsoleFinding(finding, scanId, index),
+    );
+    setActiveScan(latestScan);
+    setRuntimeFindings(nextFindings);
+    if (nextFindings.length) {
+      const nextSelected = nextFindings.find((finding) => finding.id === preferredFindingId) || nextFindings[0];
+      setSelectedFindingId(nextSelected.id);
+      setView("workspace");
+      await refreshFindingHistory(scanId, nextSelected.id);
+    }
+  }
+
+  function connectScanEvents(scan: ScanJob) {
+    scanSourceRef.current?.close();
+    setLiveScanEvents([]);
+    setLiveFindingCount(0);
+    setScanProgressPercent(0);
+    setScanPhase("Queued");
+    const source = new EventSource(`/api/scans/${encodeURIComponent(scan.id)}/events`, { withCredentials: true });
+    scanSourceRef.current = source;
+
+    const onEvent = (event: MessageEvent) => {
+      const payload = JSON.parse(event.data) as ScanEvent;
+      setLiveScanEvents((prev) => {
+        const next = [...prev.slice(-49), payload];
+        setLiveFindingCount(next.filter((item) => item.type === "finding_created").length);
+        return next;
+      });
+      setScanPhase(payload.phase || payload.type);
+      setScanProgressPercent(payload.progress?.percent || 0);
+
+      if (payload.type === "scan_completed" || payload.type === "scan_failed") {
+        setScanning(false);
+        setDashboardLoading(false);
+        source.close();
+        scanSourceRef.current = null;
+        if (payload.type === "scan_completed") {
+          notify("Scan complete — findings refreshed from backend");
+          void refreshScanFindings(scan.id, { ...scan, status: "completed" });
+        } else {
+          notify("Scan failed — check backend logs and scan artifacts", "error");
+        }
+      }
+    };
+
+    SCAN_EVENT_TYPES.forEach((type) => source.addEventListener(type, onEvent));
+    source.onerror = () => {
+      if (scanSourceRef.current === source) {
+        setScanPhase("SSE connection interrupted");
+      }
+    };
+  }
+
+  async function handleToggleScan() {
     if (scanning) return;
     setScanning(true);
-    if (view === "overview") setDashboardLoading(true);
-    notify("Scan queued — analysing assets", "info");
-    window.setTimeout(() => {
+    setDashboardLoading(true);
+    setScanPhase("Creating scan");
+    setScanProgressPercent(0);
+    setLiveFindingCount(0);
+    setRuntimeFindings([]);
+    setFindingHistories({});
+    try {
+      const token = await csrfToken();
+      const job = await api<ScanJob>("/api/scans", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-CSRF-Token": token },
+        body: JSON.stringify({ target: "demo", profile: "baseline", authorised: false }),
+      });
+      setActiveScan(job);
+      notify(`Scan ${job.id} queued — streaming live backend progress`, "info");
+      connectScanEvents(job);
+    } catch (exc) {
       setScanning(false);
       setDashboardLoading(false);
-      notify("Scan complete — findings updated");
-    }, 2400);
-  };
+      setScanPhase("Scan start failed");
+      notify(exc instanceof Error ? exc.message : String(exc), "error");
+    }
+  }
 
-  const handleApplyFix = (finding: Finding) => {
-    // TODO(api): POST /api/findings/{id}/apply-fix to persist the remediation.
-    setAppliedFindingIds((prev) => new Set(prev).add(finding.id));
-    notify(`Fix applied to ${finding.affectedPath}`);
-  };
+  async function persistFindingState(finding: Finding, patch: Partial<FindingMutationState> & { note?: string }) {
+    if (!activeScan) {
+      notify("Run a backend scan first, then update findings from the refreshed scan results.", "info");
+      return;
+    }
+    try {
+      const token = await csrfToken();
+      await api<{ finding_state: FindingMutationState }>(
+        `/api/scans/${encodeURIComponent(activeScan.id)}/findings/${encodeURIComponent(finding.id)}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json", "X-CSRF-Token": token },
+          body: JSON.stringify(patch),
+        },
+      );
+      await refreshScanFindings(activeScan.id, activeScan, finding.id);
+      await refreshFindingHistory(activeScan.id, finding.id);
+      notify(`Finding ${finding.id} updated and persisted`);
+    } catch (exc) {
+      notify(exc instanceof Error ? exc.message : String(exc), "error");
+    }
+  }
 
-  const handleMarkForReview = (finding: Finding) => {
-    // TODO(api): PATCH /api/findings/{id} { status: "pending_review" }.
-    notify(`"${finding.title}" marked for review`, "info");
-  };
+  const handleApplyFix = (finding: Finding) =>
+    persistFindingState(finding, {
+      status: "fixed",
+      remediation_note: "Fix applied from the WebUI remediation panel.",
+      note: "Fix applied from WebUI.",
+    });
+
+  const handleMarkForReview = (finding: Finding) =>
+    persistFindingState(finding, {
+      status: "triaged",
+      remediation_note: "Marked for reviewer validation from the WebUI remediation panel.",
+      note: "Marked for review from WebUI.",
+    });
 
   const navPane = (
     <AssetNavigationPane
-      assets={assets}
+      assets={displayAssets}
       findingsById={findingsById}
       selectedFindingId={selectedFindingId}
       onSelectFinding={handleSelectFinding}
@@ -89,7 +359,8 @@ function ConsoleInner() {
     <AnalysisWorkspace
       finding={selectedFinding}
       asset={selectedAsset}
-      applied={appliedFindingIds.has(selectedFinding.id)}
+      applied={selectedFinding.status === "fixed"}
+      history={selectedFindingHistory}
       onApplyFix={() => handleApplyFix(selectedFinding)}
       onMarkForReview={() => handleMarkForReview(selectedFinding)}
     />
@@ -118,6 +389,9 @@ function ConsoleInner() {
       theme={theme}
       onToggleTheme={toggleTheme}
       scanning={scanning}
+      scanStatusLabel={scanPhase}
+      scanProgressPercent={scanProgressPercent}
+      scanFindingCount={liveFindingCount}
       onToggleScan={handleToggleScan}
     >
       {view === "targets" ? (
@@ -131,6 +405,27 @@ function ConsoleInner() {
               distribution={severityDistribution}
               loading={dashboardLoading}
             />
+            {liveScanEvents.length ? (
+              <section className="mt-4 rounded-xl border border-border bg-card p-4 shadow-card" aria-live="polite">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Live backend scan</p>
+                    <h2 className="mt-1 text-lg font-extrabold">{scanPhase}</h2>
+                  </div>
+                  <p className="text-sm font-semibold text-muted-foreground">
+                    {Math.round(scanProgressPercent)}% · {liveFindingCount} findings
+                  </p>
+                </div>
+                <div className="mt-3 h-2 overflow-hidden rounded bg-muted">
+                  <div className="h-full bg-[var(--accent-sage)]" style={{ width: `${scanProgressPercent}%` }} />
+                </div>
+                <ol className="mt-3 max-h-48 space-y-1 overflow-auto text-xs text-muted-foreground">
+                  {liveScanEvents.slice(-10).map((event, index) => (
+                    <li key={`${event.event_id}-${index}`}>{event.type}: {event.message}</li>
+                  ))}
+                </ol>
+              </section>
+            ) : null}
           </div>
         </div>
       ) : (

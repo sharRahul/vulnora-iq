@@ -6,7 +6,12 @@ export type FindingStatus =
   | "open"
   | "pending_review"
   | "auto_fix_available"
-  | "fixed";
+  | "triaged"
+  | "in_progress"
+  | "accepted_risk"
+  | "false_positive"
+  | "fixed"
+  | "wont_fix";
 
 export type AssetType =
   | "repository"
@@ -179,7 +184,6 @@ export interface ConnectivityResult {
   response_preview?: unknown;
 }
 
-
 export type ScanJobStatus = "queued" | "running" | "completed" | "failed";
 
 export interface ScanEvent {
@@ -211,7 +215,38 @@ export interface ScanJob {
 export interface FindingMutationState {
   status: "open" | "triaged" | "in_progress" | "accepted_risk" | "false_positive" | "fixed" | "wont_fix";
   owner?: string;
+  severity?: string | null;
+  triage_state?: string | null;
   remediation_note?: string;
+  due_date?: string | null;
+  false_positive_reason?: string | null;
+  accepted_risk_reason?: string | null;
   updated_at?: string;
   updated_by?: string;
+}
+
+export interface BackendFinding {
+  id?: string;
+  title?: string;
+  description?: string;
+  severity?: Severity | string;
+  owasp_id?: string;
+  affected_component?: string;
+  evidence?: Record<string, unknown>;
+  recommendation?: string;
+  mitre_atlas?: string[];
+  score?: number | null;
+  status?: FindingStatus | string;
+  remediation_state?: FindingMutationState;
+}
+
+export interface FindingHistoryEntry {
+  id?: number;
+  scan_id?: string;
+  finding_id?: string;
+  previous_state: string | Record<string, unknown>;
+  new_state: string | Record<string, unknown>;
+  actor: string;
+  timestamp: string;
+  note?: string | null;
 }

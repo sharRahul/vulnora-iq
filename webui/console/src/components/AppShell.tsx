@@ -6,6 +6,9 @@ interface AppShellProps {
   theme: "light" | "dark";
   onToggleTheme: () => void;
   scanning: boolean;
+  scanStatusLabel?: string;
+  scanProgressPercent?: number;
+  scanFindingCount?: number;
   onToggleScan: () => void;
   children: React.ReactNode;
 }

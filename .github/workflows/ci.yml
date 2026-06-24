@@ -77,6 +77,13 @@ jobs:
         with:
           node-version: "20"
 
+      - name: Build React console for hosted WebUI tests
+        if: matrix.python-version == '3.12'
+        run: |
+          cd webui/console
+          npm ci
+          npm run build
+
       - name: Install WebUI browser test dependencies
         if: matrix.python-version == '3.12'
         run: |
