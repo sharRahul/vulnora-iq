@@ -6,7 +6,7 @@ Target: Docker-first laptop/workstation/internal-server assessment lab.
 
 ## Current verdict
 
-VulnoraIQ is complete for the current self-hosted internal deployment scope with Docker-first lab startup, authorised target adapters, React WebUI target management, SQLite persistence, auth/security hardening, audit/metrics, OWASP/GenAI/Agentic/MITRE governance, WebUI assistant backend controls, expanded target templates, on-demand signed release packages, supply-chain workflow, and CI gates.
+VulnoraIQ is complete for the current self-hosted internal deployment scope with Docker-first lab startup, loopback-only local WebUI publishing, authorised target adapters, React WebUI target management, SQLite persistence, auth/security hardening, audit/metrics, OWASP/GenAI/Agentic/MITRE governance, WebUI assistant backend controls, expanded target templates, on-demand signed release packages, supply-chain workflow, and CI gates.
 
 Self-hosted internal deployment readiness is attested by this blocker register, the production-readiness scorecard, the implementation status, the assessment assurance boundary, the release gates, the supply-chain workflow, and the CI validators.
 
@@ -37,6 +37,7 @@ This does not mean certified VAPT-grade assurance or independently validated rea
 | PRD-015 | Docker-first AI-agent lab | Local deterministic AI-agent/RAG/tool-loop test lab. | Docker Compose, `docker/mock-agent/`, `scripts/docker_smoke_test.py`. |
 | PRD-016 | React WebUI target management | Operator target workspace for real target testing. | React target manager with backend target/scan API wiring. |
 | PRD-017 | Supply-chain workflow | Container image reports, SBOM outputs, and keyless image signing. | `.github/workflows/security-supply-chain.yml`, `docs/SUPPLY_CHAIN_PIPELINE.md`, workflow regression tests. |
+| PRD-018 | Local network boundary | Docker WebUI publishes only to host loopback for local lab use. | `docker-compose.yml`, `tests/test_loopback_docs_cleanup.py`, Docker docs. |
 
 ## Current maturity backlog
 
@@ -44,7 +45,7 @@ This does not mean certified VAPT-grade assurance or independently validated rea
 | --- | --- | --- |
 | Full OWASP AI Testing Guide | Extend beyond safe synthetic coverage with reviewer-approved real-target evidence modules and reporting. | High |
 | Real-environment GenAI validation | Continue validating GenAI harness against approved internal environments, provider configs, vector stores, telemetry, and governance workflows. | High |
-| Enterprise identity | Add direct OIDC/JWT support beyond trusted reverse-proxy identity. | Medium |
+| Enterprise identity | Add direct OIDC/JWT support beyond trusted reverse-proxy identity; detailed plan is in `docs/future-plans/OIDC_JWT_AUTH_PLAN.md`. | Medium |
 | Native installer certificates | Add Authenticode-signed Windows `.exe/.msi`, notarised macOS `.pkg/.app`, and Linux distro packages after certificate/secrets decisions. | Medium |
 | SIEM integration | Add audit schema, alert rules, and integration guidance. | Medium |
 | Multi-instance operation | Add shared state for CSRF/rate limits and a server database option. | Low |
