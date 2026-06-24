@@ -45,7 +45,7 @@ Delete local jobs, reports, evidence, audit data, and Docker volumes only when y
 docker compose down -v
 ```
 
-## 3. Understand the clean-state dashboard
+## 3. Clean workspace dashboard
 
 A clean workspace shows:
 
