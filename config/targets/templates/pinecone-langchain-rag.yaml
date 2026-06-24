@@ -1,0 +1,31 @@
+target:
+  name: PLACEHOLDER_PINECONE_LANGCHAIN_RAG
+  type: rag_query
+  base_url: https://rag-gateway.internal
+  endpoint_path: /query
+  method: POST
+  auth_token_env: RAG_GATEWAY_TOKEN
+  auth_header: X-API-Key
+  auth_prefix: ""
+  explicit_authorisation: true
+  dry_run: true
+  allow_live_requests: false
+  allow_external: false
+  allowed_host_pattern: "*.internal|rag-gateway.internal"
+  request_body_template:
+    query: "{{prompt}}"
+    include_context: true
+    retriever:
+      provider: pinecone
+      namespace: approved-test-namespace
+  response_extraction_path: answer
+  retrieval_context_path: context
+  rate_limit:
+    requests_per_second: 0.5
+  timeout: 45
+  safety_profile: local_lab_safe
+  data_handling_notes: "Approved RAG validation only; use test namespace and redact retrieved context evidence."
+  evidence_redaction:
+    redact_headers: [X-API-Key, cookie]
+    redact_body_patterns: ["pinecone-[A-Za-z0-9._-]+", "token=[A-Za-z0-9._-]+"]
+  example_test_profile: rag
