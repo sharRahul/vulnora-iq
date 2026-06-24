@@ -1,0 +1,31 @@
+target:
+  name: PLACEHOLDER_ANTHROPIC_CLAUDE
+  type: chat_completions
+  base_url: https://api.anthropic.com
+  endpoint_path: /v1/messages
+  method: POST
+  auth_token_env: ANTHROPIC_API_KEY
+  auth_header: x-api-key
+  auth_prefix: ""
+  explicit_authorisation: true
+  dry_run: true
+  allow_live_requests: false
+  allow_external: true
+  allowed_host_pattern: "api.anthropic.com"
+  model: claude-3-5-sonnet-latest
+  request_body_template:
+    model: "{{model}}"
+    max_tokens: 512
+    messages:
+      - role: user
+        content: "{{prompt}}"
+  response_extraction_path: content.0.text
+  rate_limit:
+    requests_per_second: 0.5
+  timeout: 30
+  safety_profile: local_lab_safe
+  data_handling_notes: "Approved internal validation only; use non-sensitive prompts and retain redacted evidence."
+  evidence_redaction:
+    redact_headers: [x-api-key, cookie]
+    redact_body_patterns: ["sk-ant-[A-Za-z0-9._-]+", "Bearer [A-Za-z0-9._-]+"]
+  example_test_profile: baseline
