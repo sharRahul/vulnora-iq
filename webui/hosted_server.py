@@ -268,10 +268,12 @@ def load_config() -> dict[str, Any]:
             return {}
         return yaml.safe_load(path.read_text(encoding="utf-8")) or {}
 
-    targets = read_yaml(os.getenv("VULNORAIQ_TARGET_CONFIG", "targets.yaml")).get("targets", {})
+    raw_targets = read_yaml(os.getenv("VULNORAIQ_TARGET_CONFIG", "targets.yaml")).get("targets") or {}
     runtime_targets = _load_runtime_targets().get("targets", {})
     if isinstance(runtime_targets, dict):
-        targets = {**targets, **runtime_targets}
+        targets = {**raw_targets, **runtime_targets}
+    else:
+        targets = raw_targets
     return {
         "targets": targets,
         "profiles": read_yaml("attack_profiles.yaml").get("profiles", {}),

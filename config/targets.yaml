@@ -5,7 +5,7 @@
 # Test fixture targets are not allowed in normal runtime;
 # set VULNORAIQ_ALLOW_TEST_FIXTURE_TARGETS=true to enable them.
 
-targets:
+targets: {}
   # Example: OpenAI-compatible chat completions endpoint
   # my_llm_endpoint:
   #   name: My LLM Endpoint
