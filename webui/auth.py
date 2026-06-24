@@ -164,7 +164,7 @@ class WebAuthManager:
 
     def authenticate_token(self, token: str | None) -> AuthPrincipal | None:
         if not self.enabled():
-            return AuthPrincipal("anonymous", "analyst", _DEFAULT_PERMISSIONS["analyst"], authenticated=False)
+            return AuthPrincipal("anonymous", "admin", _DEFAULT_PERMISSIONS["admin"], authenticated=False)
 
         if not token:
             return None
@@ -199,7 +199,7 @@ class WebAuthManager:
     ) -> AuthPrincipal | None:
         """Authenticate via trusted reverse-proxy identity headers."""
         if not self.enabled():
-            return AuthPrincipal("anonymous", "analyst", _DEFAULT_PERMISSIONS["analyst"], authenticated=False)
+            return AuthPrincipal("anonymous", "admin", _DEFAULT_PERMISSIONS["admin"], authenticated=False)
 
         if not trusted:
             return None
