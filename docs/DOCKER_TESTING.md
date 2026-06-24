@@ -14,6 +14,8 @@ docker compose ps
 
 Open <http://localhost:8787>.
 
+The WebUI is published as `127.0.0.1:8787:8787`. Keep this loopback binding for normal laptop/workstation use. Do not change it to `8787:8787` unless you are intentionally moving to a shared/internal-server deployment with production auth, reverse proxy, TLS, and documented network controls.
+
 ## Services
 
 | Service | Purpose |
@@ -22,7 +24,7 @@ Open <http://localhost:8787>.
 | `local-mock-agent` | Deterministic mock target with chat-completions, Ollama-generate, RAG, webhook, and dry-run tool-loop endpoints. |
 | `test-runner` | Optional Docker-only utility service under the `test` profile. |
 
-All services run on the private `vulnoraiq-lab` bridge network. The network is marked internal, containers drop capabilities, and the Compose file does not use host networking, privileged mode, or Docker socket mounting.
+All services run on the private `vulnoraiq-lab` bridge network. The network is marked internal, containers drop capabilities, and the Compose file does not use host networking, privileged mode, or Docker socket mounting. The mock agent is exposed only inside the lab network.
 
 ## Current Docker target configuration
 
@@ -59,9 +61,10 @@ docker compose exec vulnoraiq-web vulnoraiq jobs show --job-id <job-id>
 5. Confirm the authorisation checklist for non-demo targets.
 6. Select a profile such as `ai_agent_foundation`, `baseline`, `rag`, `agent`, `full`, or a single focused profile.
 7. Start the scan.
-8. Review findings, policy status, recent jobs, and report outputs.
+8. Review live progress, findings, policy status, recent jobs, and report outputs.
+9. Update finding status/remediation actions when needed.
 
-The React target workspace is wired to backend APIs for target inventory, runtime target save/delete, target validation, scan launch, and recent job refresh. Live SSE progress and finding-remediation persistence remain future backend API work.
+The React target workspace is wired to backend APIs for target inventory, runtime target save/delete, target validation, scan launch, recent job refresh, authenticated SSE progress, and persisted finding state/history.
 
 ## Smoke and acceptance checks
 
@@ -97,6 +100,7 @@ docker compose down -v
 | Symptom | Check |
 | --- | --- |
 | WebUI does not open | `docker compose ps`, then `docker compose logs vulnoraiq-web` |
+| WebUI is not reachable from another device | Expected for the local lab; it is bound to `127.0.0.1` on the host |
 | Target validation fails | `docker compose logs local-mock-agent`; confirm the target uses `local-mock-agent:9090` inside Docker |
 | No reports appear | Check `/data/reports` in the container and `VULNORAIQ_WEB_OUTPUT_ROOT` |
 | Jobs are missing | Check `/data/jobs.db` and whether the Docker volume was reset |

@@ -2,24 +2,23 @@
 
 This folder documents the current VulnoraIQ `0.2.0` codebase.
 
-> **Current posture:** Docker-first, self-hosted AI security testing lab for authorised local or internal-server assessment.  
-> **Current WebUI:** React 18 + TypeScript + Vite console served by `webui/hosted_server.py`; the legacy static console has been removed.  
+> **Current posture:** Docker-first, self-hosted AI security testing lab for approved local or internal-server assessment.  
+> **Current WebUI:** React 18 + TypeScript + Vite console served by `webui/hosted_server.py`.  
+> **Default network boundary:** the Docker WebUI is published on host loopback only at `127.0.0.1:8787`.  
 > **Assessment boundary:** findings are structured internal evidence requiring human review. VulnoraIQ is not certified VAPT-grade assurance.
 
 ## Current status snapshot
 
 | Area | Status |
 | --- | --- |
-| Docker lab | Complete for current safe local AI-agent/RAG/tool-loop testing scope. `docker-compose.yml` starts `vulnoraiq-web`, `local-mock-agent`, and optional `test-runner` on a private Docker network. |
-| Real target support | Complete for current authorised local/internal scope. Target adapters support HTTP JSON, chat-completions, Ollama generate, RAG query, webhook JSON, and dry-run tool-loop contracts. |
-| Target safety | Complete for current scope. Non-demo targets require authorisation, safety profiles, rate/time/size bounds, host allowlists, and redaction before evidence persistence. |
+| Docker lab | Complete for the current local lab scope. `docker-compose.yml` starts `vulnoraiq-web`, `local-mock-agent`, and optional `test-runner` on a private Docker network with loopback-only WebUI publishing. |
+| Target support | Complete for current approved local/internal scope with HTTP JSON, chat-completions, Ollama generate, RAG query, webhook JSON, and dry-run tool-loop contracts. |
 | WebUI | Current supported UI is the React SecOps console in `webui/console/`, built to `webui/static/console/`. |
-| WebUI target workspace | Current code includes target search/filtering, readiness metrics, health/status pills, safety checklist, target save/delete, target validation, scan launch, and recent job refresh through backend APIs. |
+| WebUI backend | Target management, scan launch, SSE progress, finding actions/history, and assistant model controls are implemented. |
 | CLI | `vulnoraiq` supports `targets list`, `targets validate`, `scan`, `reports list`, `jobs list`, and `jobs show`. |
-| Persistence | SQLite job store with WAL, foreign keys, busy timeout, and schema versioning. |
-| Security hardening | Auth, trusted proxy mode, CSRF, request limits, rate limiting, security headers, audit logs, metrics, artifact path protection, and production startup validation. |
-| CI | Python 3.10/3.11/3.12 checks plus lint, typing, tests, dependency checks/audit, metadata validation, OWASP/ATLAS validation, GenAI validation, production-readiness validation, hosted WebUI Playwright flow, demo scan, functional acceptance path, supply-chain scans, SBOMs, and image signing workflow. |
-| Release/packaging | Release-only platform artifact and Python package workflows are documented; signed/native installers remain future maturity work. |
+| Security hardening | Auth, trusted proxy mode, CSRF, request limits, rate limiting, security headers, audit logs, metrics, artifact path protection, production startup validation, and loopback-only local Docker publishing. |
+| CI | Python matrix checks plus lint, typing, tests, dependency checks, validators, hosted WebUI flow, functional acceptance, supply-chain reports, SBOMs, and image signing workflow. |
+| Release/packaging | Release-only platform artifact and Python package workflows are documented; native OS certificate-signed installers remain future maturity work. |
 
 ## Start here
 
@@ -45,6 +44,7 @@ This folder documents the current VulnoraIQ `0.2.0` codebase.
 | Production scorecard | [`PRODUCTION_READINESS_SCORECARD.md`](PRODUCTION_READINESS_SCORECARD.md) |
 | Hardening backlog | [`PRODUCTION_HARDENING_BACKLOG.md`](PRODUCTION_HARDENING_BACKLOG.md) |
 | Assessment assurance limitations | [`ASSESSMENT_ASSURANCE.md`](ASSESSMENT_ASSURANCE.md) |
+| Future OIDC/JWT auth plan | [`future-plans/OIDC_JWT_AUTH_PLAN.md`](future-plans/OIDC_JWT_AUTH_PLAN.md) |
 
 ## Security-framework documentation
 
@@ -63,15 +63,13 @@ This folder documents the current VulnoraIQ `0.2.0` codebase.
 | MITRE ATLAS mapping notes | [`mitre-atlas-mapping.md`](mitre-atlas-mapping.md) |
 | Source document review index | [`owasp-documents/`](owasp-documents/) |
 
-## WebUI planning and history
+## WebUI and future planning
 
 | Document | Current meaning |
 | --- | --- |
-| [`WEBUI_VALIDATED_IMPLEMENTATION_PLAN.md`](WEBUI_VALIDATED_IMPLEMENTATION_PLAN.md) | Historical validated plan for the WebUI improvement series; the original no-build/static direction has now been superseded by the React console. |
-| [`WEBUI_IMPROVEMENT_SERIES_SUMMARY.md`](WEBUI_IMPROVEMENT_SERIES_SUMMARY.md) | Historical summary of PRs #29-#44 plus later WebUI changes. |
-| [`WEBUI_LAYOUT_PLAN.md`](WEBUI_LAYOUT_PLAN.md) | Future layout direction. Parts are now implemented by the React SecOps console and target-management workspace. |
+| [`WEBUI_LAYOUT_PLAN.md`](WEBUI_LAYOUT_PLAN.md) | Future layout direction. Parts are implemented by the React SecOps console and target-management workspace. |
 | [`WEBUI_RELEASE_HARDENING.md`](WEBUI_RELEASE_HARDENING.md) | Release checks for package-data static assets, browser tests, and production WebUI hardening. |
-| [`DOCKER_RUNTIME_DEPENDENCIES.md`](DOCKER_RUNTIME_DEPENDENCIES.md) | Historical Docker-optional dependency notes. Current real AI-agent lab usage is Docker-first. |
+| [`future-plans/OIDC_JWT_AUTH_PLAN.md`](future-plans/OIDC_JWT_AUTH_PLAN.md) | Future enterprise identity plan. OIDC/JWT is not required for current local single-user use. |
 
 ## Maintenance rule
 

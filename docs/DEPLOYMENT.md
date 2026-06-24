@@ -2,13 +2,13 @@
 
 This guide describes the supported VulnoraIQ `0.2.0` deployment posture.
 
-> **Supported posture:** self-hosted laptop/workstation/internal-server AI security testing lab for authorised assessments.  
-> **Safe default:** Docker Compose lab for real local AI-agent, RAG, webhook, Ollama-style, and tool-loop testing.  
+> **Supported posture:** self-hosted laptop/workstation/internal-server AI security testing lab for approved assessments.  
+> **Safe default:** Docker Compose lab with loopback-only WebUI publishing and a deterministic local mock target.  
 > **Not claimed:** certified VAPT-grade assurance or permission to test systems without explicit approval.
 
 ## 1. Recommended Docker-first lab
 
-Use this path for real local AI-agent testing and demonstrations of target validation, scan execution, evidence capture, reports, and WebUI target management.
+Use this path for local AI-agent testing and demonstrations of target validation, scan execution, evidence capture, reports, and WebUI target management.
 
 ```bash
 docker compose build
@@ -17,6 +17,8 @@ docker compose ps
 ```
 
 Open <http://localhost:8787>.
+
+The WebUI is published on host loopback only through `127.0.0.1:8787:8787`. The mock target remains reachable only on the internal Docker lab network. Keep this posture for single-user laptop/workstation operation.
 
 The Docker lab sets:
 
@@ -71,11 +73,10 @@ Before exposing the service beyond local loopback, confirm:
 - `/healthz`, `/readyz`, and `/metrics` are reachable only as intended;
 - audit logs are stored under a controlled path;
 - backup and restore procedures for SQLite, reports, and evidence are tested;
-- retention policy is defined for reports, evidence, audit logs, and backups;
-- `/metrics` access is protected by auth or network controls;
-- only authorised targets and safety profiles are configured.
+- retention policy is defined;
+- only approved targets and safety profiles are configured.
 
-## 5. Reverse proxy and TLS
+## 5. Reverse proxy, identity, and TLS
 
 For remote internal access:
 
@@ -85,6 +86,8 @@ For remote internal access:
 - use strong environment-backed tokens or trusted reverse-proxy identity;
 - protect `/healthz`, `/readyz`, and `/metrics` according to your internal monitoring model;
 - store logs, reports, and backups in controlled locations with retention rules.
+
+Trusted proxy identity is currently the enterprise identity bridge. Direct OIDC/JWT support is intentionally deferred and documented in `docs/future-plans/OIDC_JWT_AUTH_PLAN.md`.
 
 ## 6. Local standalone launcher
 
@@ -99,18 +102,7 @@ python launch-vulnoraiq-webui.py
 
 Launcher mode is loopback/local. Do not use launcher-mode auth-disabled defaults for shared deployments.
 
-## 7. WebUI deployment details
-
-The supported WebUI is the React console:
-
-- source: `webui/console/`;
-- built static assets: `webui/static/console/`;
-- runtime server: `webui/hosted_server.py`;
-- Python package data: `webui/static/console/*` and `webui/static/console/assets/*`.
-
-Node is required only to develop or rebuild the console. The Python server serves the built bundle at runtime.
-
-## 8. Validation gates
+## 7. Validation and data paths
 
 Run before release or shared deployment:
 
@@ -141,8 +133,6 @@ For Docker validation:
 python scripts/docker_smoke_test.py
 ```
 
-## 9. Data paths
-
 | Path | Purpose |
 | --- | --- |
 | `/data/jobs.db` | SQLite job persistence. |
@@ -152,10 +142,8 @@ python scripts/docker_smoke_test.py
 
 Back up SQLite and report/evidence paths according to the runbook before upgrades or release validation.
 
-## 10. Deployment limitations
+## 8. Deployment limitations
 
-The current codebase is suitable for self-hosted internal use with documented controls. Remaining maturity items include signed/notarised installers, OIDC/JWT integration, image signing/scanning, SAST/DAST pipeline, SIEM-specific rule packs, multi-instance shared state, and independent assurance validation.
+The current codebase is suitable for self-hosted local/internal use with documented controls. Remaining maturity items include direct OIDC/JWT, SIEM-specific rule packs, native OS certificate-signed installers, multi-instance shared state, external independent review, and stronger approved-environment validation.
 
-## Real-environment target deployment note
-
-For approved internal GenAI validation, start from `config/targets/templates/`, keep `dry_run: true` until change approval, reference credentials only via environment variables, configure host allow-lists and rate limits, and review audit/evidence redaction before retaining reports.
+For approved internal GenAI validation, start from `config/targets/templates/`, keep `dry_run: true` until change approval, reference credentials only via environment variables, configure host allow-lists and rate limits, and review evidence handling before retaining reports.

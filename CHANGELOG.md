@@ -18,18 +18,15 @@ All notable changes to this project will be documented in this file.
 - Release artifact documentation in `docs/RELEASE_ARTIFACTS.md`.
 - Python package build workflow for wheel/source distributions, with manual TestPyPI/PyPI publishing using trusted publishing.
 - PyPI package publishing documentation in `docs/PYPI_PACKAGE.md`.
-- Cross-platform local Web UI launchers for standalone laptop/workstation use:
-  - `launch-vulnoraiq-webui.bat`
-  - `launch-vulnoraiq-webui.command`
-  - `launch-vulnoraiq-webui.sh`
-  - `launch-vulnoraiq-webui.py`
+- Cross-platform local Web UI launchers for standalone laptop/workstation use.
 - Local launcher startup checks for Python runtime, required dependencies, core modules, target/profile config, Web UI assets, output directory, and SQLite job-store readiness.
 - Web UI startup and local-server-controls panel with dependency checks, quick-start actions, runtime options, refresh checks, and loopback launcher-mode **Stop local server** control.
-- Quick-start guidance for stopping the Web UI in foreground, background, launcher, Docker, and Docker Compose runs.
 - Docker-first AI-agent lab with deterministic mock agent, Docker target config, safety profile, and smoke tooling.
 - React target-management workspace with target search/filtering, readiness metrics, validation, authorisation checklist, scan creation controls, and recent job refresh.
 - WebUI assistant backend API with CSRF-protected chat requests, server-side model controls, and React model/temperature/instruction controls.
 - Expanded real-environment target templates for Anthropic Claude, Google Gemini, Cohere, Ollama, vLLM, LocalAI, Pinecone/LangChain RAG, LangGraph, CrewAI, LiteLLM, Portkey, and AWS Bedrock gateway patterns.
+- Future OIDC/JWT authentication implementation plan under `docs/future-plans/`.
+- Regression tests that ensure Docker WebUI publishing stays loopback-only and removed archival docs are not re-linked.
 
 ### Changed
 
@@ -41,23 +38,31 @@ All notable changes to this project will be documented in this file.
 - Current-scope readiness items are now consistently marked **Complete** for the self-hosted/internal assessment scope.
 - README, docs index, deployment guide, security policy, implementation status, readiness scorecard, backlog, release checklist, assurance, runbook, incident response, GenAI readiness plan, and Agentic Applications readiness plan were aligned to the same product positioning and completion vocabulary.
 - Local standalone launcher mode is documented as a loopback-only convenience path, separate from the hardened hosted/production `vulnoraiq-web` path.
+- Docker Compose now publishes the WebUI only on host loopback through `127.0.0.1:8787:8787` for the default local lab.
 - WebUI docs now identify the React console as the supported UI and mark the legacy static console direction as superseded.
 - `vulnoraiq-web` now starts the assistant-enabled hosted WebUI wrapper.
 - Release packaging now rebuilds React assets before packaging and publishes final release bundles from a signing/attestation job.
+- README and SECURITY were rewritten to reflect the current loopback-local, self-hosted internal scope.
 
 ### Fixed
 
 - Web UI catalog toolbar overflow where the `Showing ... options` badge could clip into the neighbouring panel in narrow columns.
 - `scripts/run_scan.py` jobs-show typing issue that could fail `mypy` by reusing a loop variable for an optional job lookup.
+- Stale documentation index entries that pointed readers toward superseded planning notes.
+
+### Removed
+
+- Superseded archival WebUI and Docker planning notes whose useful content is now covered by the current README, Docker, deployment, WebUI, and future-plan docs.
 
 ### Notes
 
 - VulnoraIQ findings remain framework evidence requiring human review.
 - This release does not claim certified VAPT-grade assurance or independently validated real-environment GenAI detection coverage.
-- Launcher mode is intended for local laptop/workstation use only; exposed or shared deployments must use production mode with auth enabled and production configuration validation.
+- Launcher and default Docker Compose modes are intended for local laptop/workstation use only; exposed or shared deployments must use production mode with auth enabled and production configuration validation.
 - Platform release artifacts use native formats where practical: Windows `.zip`, Linux `.tar.gz`, and macOS `.dmg`.
 - Release packages include checksums and GitHub artifact attestations by default; detached GPG signatures are produced when signing secrets are configured.
 - Native OS certificate-signed installers remain future maturity items.
+- Direct OIDC/JWT remains future work and is not required for current local single-user use.
 - PyPI publication is opt-in and should be tested on TestPyPI before publishing to PyPI.
 
 ## [0.2.0] - 2026-06-22

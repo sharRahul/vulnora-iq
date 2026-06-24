@@ -1,40 +1,24 @@
 # VulnoraIQ
 
-**VulnoraIQ** is a self-hosted AI security assessment lab for authorised testing of LLM applications, RAG systems, tool-using agents, AI-agent workflows, GenAI data-security controls, target adapters, evidence pipelines, reports, and operational guardrails.
+**VulnoraIQ** is a Docker-first, self-hosted AI testing lab for authorised local or internal use. It supports LLM, RAG, AI-agent, target-adapter, evidence, reporting, WebUI, and CI validation workflows.
 
-The current codebase is **Docker-first for real AI-agent testing** and **React-console-first for the WebUI**. The safe default path starts the WebUI, scanner, job store, reports, evidence capture, and deterministic mock AI-agent target through Docker Compose. Host-native launchers still exist for local laptop/workstation development and demo use, but Docker Compose is the recommended path for real local lab testing.
-
-VulnoraIQ is a **self-hosted internal application** for controlled authorised assessment work. It may be described as a self-hosted laptop/server AI security testing application with controlled internal production-readiness gate passed. The same scope also covers an internal server deployment when production auth, reverse proxy, TLS, audit, and backup controls are configured.
-
-> **Responsible-use boundary:** run VulnoraIQ only against systems you own or are explicitly authorised to assess. Non-demo targets require explicit authorisation. Findings are framework evidence requiring human review, not certified VAPT-grade assurance.
-
----
+VulnoraIQ is a **self-hosted internal application**. The same scope covers an **internal server** deployment when production auth, reverse proxy, TLS, audit, and backup controls are configured. The current release claim is scoped: **self-hosted laptop/server AI security testing application with controlled internal production-readiness gate passed**. Findings are framework evidence for human review, not certified VAPT-grade assurance.
 
 ## Current status
 
 | Area | Current status |
 | --- | --- |
 | Version | `0.2.0` beta |
-| Supported posture | Self-hosted laptop/workstation/internal-server AI security testing lab |
-| Safe default | Docker Compose lab with private network, deterministic mock agent, SQLite job store, evidence/reports under `/data`, and bounded target safety profiles |
-| WebUI | React 18 + TypeScript + Vite SecOps console built into `webui/static/console/` and served by `webui/hosted_server.py` |
-| Target management | Current React target workspace is wired to backend target and scan APIs for target listing, runtime target save/delete, connectivity validation, scan launch, and recent job refresh |
-| CLI | `vulnoraiq` command supports target listing, target validation, authorised scans, report listing, and persisted job inspection |
-| Coverage | OWASP LLM 2025 current-scope checks, OWASP AI Testing Guide foundation profile, Agentic readiness gates, GenAI `DSGAI01–DSGAI21` scenario harness, and MITRE ATLAS mapping governance |
-| CI gates | Ruff, mypy, pytest on Python 3.10/3.11/3.12, pip check, pip-audit, metadata validation, OWASP/ATLAS validation, GenAI readiness validation, production-readiness validation, hosted WebUI Playwright flow, demo scan, and functional acceptance path |
-| Release claim | Self-hosted laptop/server AI security testing application with controlled internal production-readiness gate passed |
-| Not claimed | Certified VAPT-grade assurance, independent real-world GenAI detection assurance, or permission to test third-party systems |
+| Default posture | Local laptop/workstation Docker Compose lab with loopback-only WebUI publishing |
+| WebUI | React 18 + TypeScript + Vite SecOps console served by `webui/hosted_server.py` |
+| Local targets | Deterministic mock AI-agent target for chat-completions, Ollama-generate, RAG, webhook, and dry-run tool-loop contracts |
+| Target support | Authorised local/internal adapters, target validation, dry-run defaults, allow-lists, rate limits, and evidence capture |
+| Persistence | SQLite job store with WAL mode, foreign keys, busy timeout, and schema versioning |
+| Security controls | Token auth, trusted reverse-proxy identity, CSRF, rate limits, request limits, security headers, metrics, audit logs, production startup checks |
+| CI/release | Python matrix, lint/type/tests, dependency checks, WebUI browser flow, functional acceptance, release packaging, SBOMs, Trivy reports, and Cosign image-signing path |
+| Future identity | Direct OIDC/JWT is intentionally deferred; see `docs/future-plans/OIDC_JWT_AUTH_PLAN.md` |
 
-Recent mainline changes now included in the documentation baseline:
-
-- PR #45 removed the legacy static WebUI console; the React console is the supported WebUI.
-- PR #46 added real authorised target testing with target adapters, scanner wiring, runtime target management, and mock-agent support.
-- PR #47 made the safe lab Docker-first, with `targets.docker.yaml`, mock-agent service, safety profiles, smoke tooling, and Docker docs.
-- PR #49 enhanced the React target-management workspace with search/filtering, readiness metrics, target validation, scan launch guardrails, and recent job display.
-
----
-
-## Quick start: Docker-first safe lab
+## Quick start
 
 ```bash
 docker compose build
@@ -46,13 +30,11 @@ Open <http://localhost:8787>.
 
 The Compose lab starts:
 
-- `vulnoraiq-web` — hosted WebUI, CLI, scanner, SQLite job store, report/evidence/audit paths.
-- `local-mock-agent` — deterministic mock target exposing chat-completions, Ollama-generate, RAG, webhook, and dry-run tool-loop contracts.
-- `test-runner` — optional profile service for Docker-only checks.
+- `vulnoraiq-web` — hosted WebUI, CLI, scanner, SQLite job store, reports, evidence, and audit paths.
+- `local-mock-agent` — deterministic local target reachable only inside the Docker lab network.
+- `test-runner` — optional test-profile container.
 
-The lab network is private and internal. The WebUI is published on port `8787`; the mock agent is only reachable by the lab network.
-
-### Docker CLI examples
+The WebUI is published on host loopback only: `127.0.0.1:8787:8787`. Keep this binding for normal local use.
 
 ```bash
 docker compose exec vulnoraiq-web vulnoraiq targets list
@@ -62,33 +44,13 @@ docker compose exec vulnoraiq-web vulnoraiq reports list
 docker compose exec vulnoraiq-web vulnoraiq jobs list
 ```
 
-Reports are written under `/data/reports`, evidence under `/data/evidence`, audit logs under `/data/audit`, and persisted jobs in `/data/jobs.db`.
+## WebUI and CLI
 
----
+The supported WebUI is the built React console under `webui/static/console/`; the source app lives in `webui/console/`.
 
-## WebUI overview
+Current WebUI capabilities include target inventory, runtime target save/delete, target validation, scan launch, SSE scan progress, finding status/remediation actions, assistant backend model controls, dashboards, findings, and workflow panels.
 
-The current WebUI is the built React console under `webui/static/console/`, served by the Python hosted server. The source app lives in `webui/console/`.
-
-Current WebUI capabilities:
-
-- target inventory and runtime target management;
-- search and environment filtering;
-- target readiness metrics and health/status indicators;
-- target connectivity validation through `POST /api/targets/{id}/validate`;
-- runtime target save/delete through `POST /api/targets/save` and `POST /api/targets/delete`;
-- scan history refresh through `GET /api/scans`;
-- authorised scan launch through `POST /api/scans`;
-- readiness checklist for authorisation, owner contact, rate limits, and safety profile;
-- dashboard, findings, intelligence, and mock-assisted workflow panels.
-
-Backend integration now includes authenticated live SSE scan progress and persisted finding remediation/status transitions. The assistant chat backend remains intentionally mocked/typed UI state.
-
----
-
-## Local standalone launcher
-
-For laptop/workstation development or demo use outside Docker:
+For host-native demo/development outside Docker:
 
 ```bash
 python -m venv .venv
@@ -97,22 +59,11 @@ pip install -e .[dev]
 python launch-vulnoraiq-webui.py
 ```
 
-Or double-click from the repository root:
+Launcher mode is loopback-only and intended for local laptop/workstation use. For shared or internal-server deployments, use production mode and follow `docs/DEPLOYMENT.md`.
 
-| Platform | Launcher |
-| --- | --- |
-| Windows | `launch-vulnoraiq-webui.bat` |
-| macOS | `launch-vulnoraiq-webui.command` |
-| Linux | `launch-vulnoraiq-webui.sh` |
-| Any platform | `launch-vulnoraiq-webui.py` |
+## Deployment and security boundary
 
-Launcher mode is for loopback local use. For shared/internal-server deployment, enable auth and follow `docs/DEPLOYMENT.md`.
-
----
-
-## Self-hosted production-mode startup
-
-Production mode fails closed when required controls are missing or unsafe.
+Local Docker and launcher paths are for single-user controlled use. Shared/internal-server deployment requires production configuration validation, real secrets, TLS at a trusted reverse proxy, protected metrics/health endpoints, audit retention, backups, and authorised target governance.
 
 ```bash
 export VULNORAIQ_ENV=production
@@ -126,11 +77,9 @@ python scripts/validate_runtime_production_config.py
 vulnoraiq-web --host 127.0.0.1 --port 8787
 ```
 
-Use a reverse proxy for TLS, remote internal access, and organisation-specific identity controls.
+Use trusted reverse-proxy identity only when the proxy authenticates users and strips spoofed identity headers. Direct OIDC/JWT remains future work, not a blocker for current local single-user usage.
 
----
-
-## Functional acceptance and release gates
+## Validation and release gates
 
 ```bash
 ruff check .
@@ -154,50 +103,22 @@ npx playwright install chromium --with-deps
 npm run test:webui:hosted
 ```
 
-Docker checks:
+Docker and supply-chain checks are covered by Docker smoke tests and the security supply-chain workflow.
 
-```bash
-docker build -t vulnoraiq:0.2.0-rc .
-python scripts/docker_smoke_test.py
-```
-
----
-
-## Documentation map
+## Documentation and roadmap
 
 | Need | Document |
 | --- | --- |
-| Documentation index and current status | [`docs/README.md`](docs/README.md) |
-| Docker-first lab usage | [`docs/DOCKER_TESTING.md`](docs/DOCKER_TESTING.md) |
-| Safety and target boundaries | [`docs/SAFETY_MODEL.md`](docs/SAFETY_MODEL.md), [`docs/TARGET_CONFIGURATION.md`](docs/TARGET_CONFIGURATION.md) |
-| WebUI usage | [`docs/WEBUI_GUIDE.md`](docs/WEBUI_GUIDE.md), [`docs/WEB_UI_TEST_CATALOG.md`](docs/WEB_UI_TEST_CATALOG.md) |
-| CLI usage | [`docs/CLI_GUIDE.md`](docs/CLI_GUIDE.md) |
+| Documentation index and status | [`docs/README.md`](docs/README.md), [`docs/IMPLEMENTATION_STATUS.md`](docs/IMPLEMENTATION_STATUS.md) |
+| Docker lab | [`docs/DOCKER_TESTING.md`](docs/DOCKER_TESTING.md) |
 | Deployment and operations | [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md), [`docs/RUNBOOK.md`](docs/RUNBOOK.md), [`docs/INCIDENT_RESPONSE.md`](docs/INCIDENT_RESPONSE.md) |
-| Release and packaging | [`docs/RELEASE_CHECKLIST.md`](docs/RELEASE_CHECKLIST.md), [`docs/RELEASE_ARTIFACTS.md`](docs/RELEASE_ARTIFACTS.md), [`docs/PYPI_PACKAGE.md`](docs/PYPI_PACKAGE.md) |
-| Migration | [`docs/MIGRATION.md`](docs/MIGRATION.md) |
-| Implementation status | [`docs/IMPLEMENTATION_STATUS.md`](docs/IMPLEMENTATION_STATUS.md) |
-| Readiness and hardening | [`docs/PRODUCTION_READINESS_SCORECARD.md`](docs/PRODUCTION_READINESS_SCORECARD.md), [`docs/PRODUCTION_HARDENING_BACKLOG.md`](docs/PRODUCTION_HARDENING_BACKLOG.md), [`docs/ASSESSMENT_ASSURANCE.md`](docs/ASSESSMENT_ASSURANCE.md) |
-| OWASP AI Testing Guide | [`docs/AI_TESTING_GUIDE_INTEGRATION.md`](docs/AI_TESTING_GUIDE_INTEGRATION.md), [`docs/AI_TESTING_GUIDE_IMPLEMENTATION_PLAN.md`](docs/AI_TESTING_GUIDE_IMPLEMENTATION_PLAN.md) |
-| OWASP LLM mapping roadmap | [`docs/OWASP_LLM_TOP10_MAPPING_IMPLEMENTATION_PLAN.md`](docs/OWASP_LLM_TOP10_MAPPING_IMPLEMENTATION_PLAN.md) |
-| GenAI readiness | [`docs/genai/PRODUCTION_READINESS_PLAN.md`](docs/genai/PRODUCTION_READINESS_PLAN.md) |
-| Agentic readiness | [`docs/AGENTIC_APPLICATIONS_PRODUCTION_READINESS_PLAN.md`](docs/AGENTIC_APPLICATIONS_PRODUCTION_READINESS_PLAN.md) |
-| MITRE ATLAS | [`docs/MITRE_ATLAS_AI_MATRIX.md`](docs/MITRE_ATLAS_AI_MATRIX.md), [`docs/mitre-atlas-mapping.md`](docs/mitre-atlas-mapping.md) |
+| WebUI and CLI | [`docs/WEBUI_GUIDE.md`](docs/WEBUI_GUIDE.md), [`docs/WEB_UI_TEST_CATALOG.md`](docs/WEB_UI_TEST_CATALOG.md), [`docs/CLI_GUIDE.md`](docs/CLI_GUIDE.md) |
+| Safety and targets | [`docs/SAFETY_MODEL.md`](docs/SAFETY_MODEL.md), [`docs/TARGET_CONFIGURATION.md`](docs/TARGET_CONFIGURATION.md) |
+| Release and supply chain | [`docs/RELEASE_CHECKLIST.md`](docs/RELEASE_CHECKLIST.md), [`docs/RELEASE_ARTIFACTS.md`](docs/RELEASE_ARTIFACTS.md), [`docs/SUPPLY_CHAIN_PIPELINE.md`](docs/SUPPLY_CHAIN_PIPELINE.md), [`docs/PYPI_PACKAGE.md`](docs/PYPI_PACKAGE.md) |
+| Readiness and assurance | [`docs/PRODUCTION_READINESS_SCORECARD.md`](docs/PRODUCTION_READINESS_SCORECARD.md), [`docs/PRODUCTION_HARDENING_BACKLOG.md`](docs/PRODUCTION_HARDENING_BACKLOG.md), [`docs/ASSESSMENT_ASSURANCE.md`](docs/ASSESSMENT_ASSURANCE.md) |
+| Future identity plan | [`docs/future-plans/OIDC_JWT_AUTH_PLAN.md`](docs/future-plans/OIDC_JWT_AUTH_PLAN.md) |
 
----
-
-## Roadmap
-
-Current post-`0.2.0` maturity priorities:
-
-- implement the full 32-test OWASP AI Testing Guide roadmap beyond the current foundation profile;
-- deepen evaluator logic and thresholds for real approved environments;
-- continue maturing the assistant chat backend and reviewer integrations;
-- add richer target templates for AI agents, LLM APIs, RAG systems, local model servers, and provider/data inventories;
-- add signed/notarised installers and release artifacts;
-- add optional OIDC/JWT support for enterprise deployments;
-- add stronger image scanning, SAST/DAST, SIEM integration, and complete external independent review using the implemented assurance workflow.
-
----
+Current future maturity priorities are direct OIDC/JWT support for enterprise deployments, native OS certificate-signed installers, SIEM rule packs, multi-instance shared state, approved-environment validation, and external independent review.
 
 ## License and notices
 
