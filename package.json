@@ -4,7 +4,8 @@
   "version": "0.2.0",
   "scripts": {
     "build:webui": "vite build",
-    "test:webui": "playwright test"
+    "test:webui": "playwright test",
+    "test:webui:hosted": "playwright test --config=playwright.hosted.config.js"
   },
   "devDependencies": {
     "@playwright/test": "^1.49.0",

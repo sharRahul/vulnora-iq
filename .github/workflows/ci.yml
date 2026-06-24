@@ -85,6 +85,10 @@ jobs:
         if: matrix.python-version == '3.12'
         run: npm run test:webui
 
+      - name: Run hosted WebUI scan flow
+        if: matrix.python-version == '3.12'
+        run: npm run test:webui:hosted
+
       - name: Run demo scan
         run: |
           python scripts/run_scan.py \
