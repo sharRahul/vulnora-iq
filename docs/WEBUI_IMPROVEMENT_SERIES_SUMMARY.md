@@ -1,47 +1,58 @@
-# WebUI Improvement Series Summary
+# WebUI improvement series summary
 
-This document summarizes the stacked WebUI improvement PRs.
+This document summarises the WebUI changes and clarifies which older plan items have been superseded by the current React console.
 
-## Stacked PR order
+## Current WebUI baseline
 
-| Order | PR | Branch | Theme |
-| --- | --- | --- | --- |
-| 1 | #29 | `webui-pr1-polish-accessibility` | Responsive layout, dark mode, accessibility, loading/error feedback, dashboard accordions, toasts. |
-| 2 | #30 | `webui-pr2-structure` | Lightweight no-build WebUI helper module and architecture guide. |
-| 3 | #31 | `webui-pr3-tests-ci` | Playwright browser smoke tests and CI integration. |
-| 4 | #32 | `webui-pr4-build-pipeline` | Optional Vite build path and package-data support. |
-| 5 | #33 | `webui-pr5-auth-session` | Session storage hardening direction and production auth guidance. |
-| 6 | #39 | `webui-pr6-docker-deps-v2` | Docker runtime availability check and Docker dependency documentation. |
-| 7 | #40 | `webui-pr7-release-v3` | Docker image license metadata and release hardening documentation. |
-| 8 | current | `webui-pr8-final-docs-layout-v3` | Final documentation consolidation and future layout plan. |
+The supported WebUI is now the React 18 + TypeScript console in `webui/console/`, built into `webui/static/console/` and served by `webui/hosted_server.py`.
 
-## Documentation added
+The legacy static console has been removed. Historical no-build/static-console plan items should be treated as completed, superseded, or archival depending on the item.
 
-- `docs/WEBUI_VALIDATED_IMPLEMENTATION_PLAN.md`
-- `docs/WEBUI_ARCHITECTURE.md`
-- `docs/WEBUI_TESTING.md`
-- `docs/WEBUI_BUILD_PIPELINE.md`
-- `docs/WEBUI_AUTH_SESSION_HARDENING.md`
-- `docs/DOCKER_RUNTIME_DEPENDENCIES.md`
-- `docs/WEBUI_RELEASE_HARDENING.md`
+## Major PR history
+
+| PR | Theme | Current result |
+| --- | --- | --- |
+| #29 | Initial polish/accessibility | Historical baseline improvements. |
+| #30 | Frontend structure cleanup | Superseded by React console structure. |
+| #31 | WebUI tests/CI | Browser flow remains part of current CI direction. |
+| #32 | Optional Vite path | Superseded by current React/Vite console becoming the supported WebUI source. |
+| #33 | Auth/session direction | Production auth is handled by hosted server controls and docs. |
+| #39 | Docker runtime checks | Docker dependency guidance remains useful; real AI-agent lab is now Docker-first. |
+| #40 | WebUI release metadata | Release-hardening guidance remains relevant. |
+| #41/#44 | Final docs/layout plan | Historical final docs, now refreshed to reflect React console and Docker-first lab. |
+| #42 | WebUI interactions | Historical interaction improvements before the React overhaul. |
+| #43 | React SecOps console overhaul | Current supported UI architecture. |
+| #45 | Remove legacy static WebUI | Legacy static console removed from supported path. |
+| #46 | Real target testing UI/backend | Target adapters, runtime target APIs, mock-agent, and docs added. |
+| #47 | Docker-first AI-agent lab | Current safe lab baseline. |
+| #49 | Enhanced target-management workspace | Current production-facing target workspace with backend target/scan API wiring. |
+
+## Current implemented WebUI state
+
+- React app shell and dashboard panels.
+- Target-management workspace with search/filtering and readiness metrics.
+- Backend target inventory, runtime target save/delete, target validation, scan creation, and recent job refresh.
+- Built static assets committed under `webui/static/console/`.
+- Hosted WebUI browser flow in CI.
+- Security posture remains handled by the Python hosted server: auth, CSRF, rate limits, headers, metrics, audit logs, and path controls.
+
+## Deferred/current gaps
+
+- SSE-backed live progress in React.
+- Persisted finding status/remediation APIs.
+- Real assistant chat backend.
+- Deeper GenAI/OWASP dashboard drill-downs.
+- Signed/native release installers.
+
+## Documentation rule
+
+When WebUI behaviour changes, update:
+
+- `README.md`
+- `docs/README.md`
+- `docs/WEBUI_GUIDE.md`
 - `docs/WEBUI_LAYOUT_PLAN.md`
-
-## Deferred and discarded decisions
-
-The validated implementation plan records ideas that were deferred or discarded and the reasons. The most important decisions are:
-
-- Full React/Vue migration is deferred until modular vanilla JS extraction is complete.
-- D3 is discarded for current severity bars because it adds unnecessary complexity.
-- HTTP/2 server push is discarded in favor of normal caching/build output.
-- Production auth tokens in local storage are rejected.
-- Silent Docker installation is rejected; Docker remains explicit and optional.
-
-## Future layout direction
-
-The future layout plan moves VulnoraIQ toward a workspace model:
-
-- top bar for identity, environment, auth, theme, and health;
-- desktop navigation rail;
-- dedicated catalog, run, progress, dashboard, history, artifacts, and settings workspaces;
-- single-column mobile flow at `480px` and below;
-- reusable status, toast, readiness, progress, finding, artifact, and filter components.
+- `docs/WEB_UI_TEST_CATALOG.md`
+- `docs/IMPLEMENTATION_STATUS.md`
+- `docs/PRODUCTION_READINESS_SCORECARD.md`
+- `webui/console/README.md`
