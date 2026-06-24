@@ -1,9 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { Bot, Loader2, SendHorizonal, Settings2, ShieldQuestion } from "lucide-react";
 import type { ChatMessage as ChatMessageType, Finding } from "@/types";
-import { starterPrompts } from "@/data/mock";
 import { Button } from "@/components/ui/button";
 import { ChatMessage } from "./ChatMessage";
+
+const starterPrompts: string[] = [
+  "Explain this finding in plain language.",
+  "What evidence should I review before closing this finding?",
+  "Suggest safe validation steps for this authorised assessment.",
+];
 
 let idCounter = 0;
 const nextId = () => `m-${++idCounter}`;
@@ -167,9 +172,9 @@ export function AskVulnorAIQChat({ finding }: { finding: Finding }) {
               <ShieldQuestion className="size-3.5" /> Try asking
             </p>
             <div className="flex flex-col gap-1.5">
-              {starterPrompts.map((p) => (
-                <button key={p} onClick={() => void send(p)} className="rounded-md border border-border bg-card px-2.5 py-1.5 text-left text-xs font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                  {p}
+              {starterPrompts.map((prompt) => (
+                <button key={prompt} onClick={() => void send(prompt)} className="rounded-md border border-border bg-card px-2.5 py-1.5 text-left text-xs font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                  {prompt}
                 </button>
               ))}
             </div>

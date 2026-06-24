@@ -27,6 +27,10 @@ All notable changes to this project will be documented in this file.
 - Expanded real-environment target templates for Anthropic Claude, Google Gemini, Cohere, Ollama, vLLM, LocalAI, Pinecone/LangChain RAG, LangGraph, CrewAI, LiteLLM, Portkey, and AWS Bedrock gateway patterns.
 - Future OIDC/JWT authentication implementation plan under `docs/future-plans/`.
 - Regression tests that ensure Docker WebUI publishing stays loopback-only and removed archival docs are not re-linked.
+- README prerequisites for Docker, launcher, source/package, wheel-build, and WebUI development run paths.
+- WebUI visual alignment utilities and regression coverage for icon/text wrapping in the header, cards, and target workspace.
+- `docs/USER_GUIDE.md` with an end-to-end operating guide for startup, clean-state behaviour, target setup, scan execution, finding review, evidence, and safe operation.
+- Regression tests that prevent reintroducing WebUI dummy data and verify the user guide remains linked.
 
 ### Changed
 
@@ -43,16 +47,20 @@ All notable changes to this project will be documented in this file.
 - `vulnoraiq-web` now starts the assistant-enabled hosted WebUI wrapper.
 - Release packaging now rebuilds React assets before packaging and publishes final release bundles from a signing/attestation job.
 - README and SECURITY were rewritten to reflect the current loopback-local, self-hosted internal scope.
+- WebUI header, target manager, KPI cards, action buttons, and asset cards now use responsive alignment/wrapping rules so icons and labels stay together across narrow layouts.
+- WebUI overview/workspace state now comes from backend scans only; clean installs show zero/empty state and previously run scans are loaded from `/api/scans`.
 
 ### Fixed
 
 - Web UI catalog toolbar overflow where the `Showing ... options` badge could clip into the neighbouring panel in narrow columns.
 - `scripts/run_scan.py` jobs-show typing issue that could fail `mypy` by reusing a loop variable for an optional job lookup.
 - Stale documentation index entries that pointed readers toward superseded planning notes.
+- WebUI icon/text placement issues caused by fixed-width target panes, non-wrapping button labels, and long target/job labels.
 
 ### Removed
 
 - Superseded archival WebUI and Docker planning notes whose useful content is now covered by the current README, Docker, deployment, WebUI, and future-plan docs.
+- WebUI mock/demo data module and fallback dashboard/assets/findings so clean startup no longer displays dummy information.
 
 ### Notes
 

@@ -28,19 +28,19 @@ export function KpiCard({
   const TrendIcon = !hasTrend ? Minus : trend! > 0 ? ArrowUpRight : ArrowDownRight;
 
   return (
-    <Card className="group p-4 transition-shadow hover:shadow-card-hover">
-      <div className="flex items-start justify-between">
-        <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+    <Card className="group min-w-0 p-4 transition-shadow hover:shadow-card-hover">
+      <div className="flex min-w-0 items-start justify-between gap-3">
+        <span className="break-anywhere text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           {label}
         </span>
         <span
-          className="flex size-8 items-center justify-center rounded-md border border-border"
+          className="ui-icon size-8 rounded-md border border-border"
           style={{ color: accent, background: `color-mix(in srgb, ${accent} 12%, transparent)` }}
         >
           <Icon className="size-4" />
         </span>
       </div>
-      <div className="mt-3 flex items-end gap-2">
+      <div className="mt-3 flex min-w-0 flex-wrap items-end gap-2">
         <span className="font-sans text-3xl font-extrabold leading-none tabular-nums text-foreground">
           {value}
           {suffix && <span className="text-lg font-bold text-muted-foreground">{suffix}</span>}
@@ -52,7 +52,7 @@ export function KpiCard({
               positive ? "text-severity-low" : "text-severity-high",
             )}
           >
-            <TrendIcon className="size-3" />
+            <TrendIcon className="size-3 shrink-0" />
             {Math.abs(trend!)}
             {suffix === "%" ? "pts" : ""}
           </span>

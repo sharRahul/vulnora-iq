@@ -80,9 +80,22 @@ jobs:
       - name: Build React console for hosted WebUI tests
         if: matrix.python-version == '3.12'
         run: |
+          mkdir -p reports/output/ci-logs
           cd webui/console
-          npm ci
-          npm run build
+          npm ci 2>&1 | tee ../../reports/output/ci-logs/webui-npm-ci.log
+          test ${PIPESTATUS[0]} -eq 0
+          npm run build 2>&1 | tee ../../reports/output/ci-logs/webui-build.log
+          test ${PIPESTATUS[0]} -eq 0
+
+      - name: Upload WebUI build logs
+        if: always() && matrix.python-version == '3.12'
+        uses: actions/upload-artifact@v4
+        with:
+          name: vulnoraiq-webui-build-log
+          path: |
+            reports/output/ci-logs/webui-npm-ci.log
+            reports/output/ci-logs/webui-build.log
+          if-no-files-found: ignore
 
       - name: Install WebUI browser test dependencies
         if: matrix.python-version == '3.12'

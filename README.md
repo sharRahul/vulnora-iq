@@ -15,6 +15,20 @@ VulnoraIQ is a **self-hosted internal application**. The same scope covers an **
 | Persistence | SQLite job store with WAL mode, foreign keys, busy timeout, and schema versioning. |
 | Future identity | Direct OIDC/JWT is deferred; see `docs/future-plans/OIDC_JWT_AUTH_PLAN.md`. |
 
+## Prerequisites
+
+Choose the path you want to run.
+
+| Run path | Required before starting |
+| --- | --- |
+| Recommended Docker GUI lab | Docker Engine or Docker Desktop with Docker Compose v2, internet access for the first image/dependency build, and a modern browser such as Chrome, Edge, Firefox, or Safari. |
+| Double-click launchers | Python 3.10 or newer on `PATH`, internet access for first-time `.venv` dependency installation, and a modern browser. Use `launch-vulnoraiq-webui.bat`, `launch-vulnoraiq-webui.command`, or `launch-vulnoraiq-webui.sh`. |
+| Source/package install | Python 3.10 or newer, `pip`, `venv`, Git for source checkouts, and a modern browser. |
+| Local wheel build | Python 3.10 or newer plus the release extra: `pip install -e .[release]`. |
+| WebUI development/tests | Node.js 20 or newer, npm, and Playwright browser dependencies. End users do not need Node.js when using Docker, release packages, or the Python package. |
+
+Before running a real non-demo target, also prepare explicit authorisation, target credentials through environment variables, owner/contact details, and an approved safety profile. The default Docker GUI lab binds the WebUI to `127.0.0.1:8787` and is intended for local single-user use.
+
 ## Quick start
 
 Recommended local GUI path with Docker Compose. This does not install VulnoraIQ into your host Python environment.
@@ -151,6 +165,7 @@ npm run test:webui:hosted
 
 | Need | Document |
 | --- | --- |
+| User guide | [`docs/USER_GUIDE.md`](docs/USER_GUIDE.md) |
 | Documentation index and status | [`docs/README.md`](docs/README.md), [`docs/IMPLEMENTATION_STATUS.md`](docs/IMPLEMENTATION_STATUS.md) |
 | Docker lab | [`docs/DOCKER_TESTING.md`](docs/DOCKER_TESTING.md) |
 | Deployment and operations | [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md), [`docs/RUNBOOK.md`](docs/RUNBOOK.md), [`docs/INCIDENT_RESPONSE.md`](docs/INCIDENT_RESPONSE.md) |

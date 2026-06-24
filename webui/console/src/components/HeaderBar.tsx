@@ -41,22 +41,22 @@ export function HeaderBar({
     : "Idle";
 
   return (
-    <header className="flex h-14 shrink-0 items-center gap-3 border-b border-border bg-card px-3 sm:px-4">
-      <div className="flex items-center gap-2">
-        <span className="flex size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
+    <header className="flex min-h-14 shrink-0 flex-wrap items-center gap-2 border-b border-border bg-card px-3 py-2 sm:gap-3 sm:px-4">
+      <div className="ui-title-row min-w-[150px] shrink-0">
+        <span className="ui-icon size-8 rounded-md bg-primary text-primary-foreground">
           <ShieldHalf className="size-5" />
         </span>
-        <div className="leading-none">
-          <p className="font-sans text-sm font-extrabold tracking-tight text-foreground">
+        <div className="min-w-0 leading-none">
+          <p className="truncate font-sans text-sm font-extrabold tracking-tight text-foreground">
             VulnorAIQ
           </p>
-          <p className="hidden text-[10px] font-medium uppercase tracking-wide text-muted-foreground sm:block">
+          <p className="hidden truncate text-[10px] font-medium uppercase tracking-wide text-muted-foreground sm:block">
             AI Security Operations
           </p>
         </div>
       </div>
 
-      <nav className="ml-2 flex items-center gap-1 rounded-md border border-border bg-muted p-0.5">
+      <nav className="order-3 flex max-w-full items-center gap-1 overflow-x-auto rounded-md border border-border bg-muted p-0.5 scrollbar-thin sm:order-none sm:ml-2" aria-label="Console views">
         <ViewTab
           active={view === "overview"}
           onClick={() => onChangeView("overview")}
@@ -77,8 +77,8 @@ export function HeaderBar({
         />
       </nav>
 
-      <div className="ml-auto flex items-center gap-2">
-        <span className="hidden max-w-[340px] items-center gap-1.5 truncate rounded-md border border-border bg-canvas px-2 py-1 text-[11px] font-semibold text-muted-foreground md:inline-flex">
+      <div className="ml-auto flex min-w-0 flex-wrap items-center justify-end gap-2">
+        <span className="hidden max-w-[340px] items-center gap-1.5 rounded-md border border-border bg-canvas px-2 py-1 text-[11px] font-semibold text-muted-foreground md:inline-flex">
           <span
             className={cn(
               "size-1.5 shrink-0 rounded-full",
@@ -88,14 +88,14 @@ export function HeaderBar({
           <span className="truncate">{scanLabel}</span>
         </span>
 
-        <Button variant="primary" size="sm" onClick={onToggleScan} disabled={scanning}>
+        <Button variant="primary" size="sm" onClick={onToggleScan} disabled={scanning} className="shrink-0">
           {scanning ? (
             <>
-              <Loader2 className="size-4 animate-spin" /> Scanning…
+              <Loader2 className="size-4 animate-spin" /> <span>Scanning…</span>
             </>
           ) : (
             <>
-              <Play className="size-4" /> Run Scan
+              <Play className="size-4" /> <span>Run Scan</span>
             </>
           )}
         </Button>
@@ -129,13 +129,13 @@ function ViewTab({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded px-2.5 py-1.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        "inline-flex shrink-0 items-center justify-center gap-1.5 rounded px-2.5 py-1.5 text-xs font-semibold leading-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
         active
           ? "bg-card text-foreground shadow-card"
           : "text-muted-foreground hover:text-foreground",
       )}
     >
-      {icon}
+      <span className="ui-icon">{icon}</span>
       <span className="hidden sm:inline">{label}</span>
     </button>
   );

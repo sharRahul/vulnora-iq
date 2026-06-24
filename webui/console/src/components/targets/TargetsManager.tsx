@@ -95,7 +95,15 @@ export function TargetsManager() {
     const q = query.trim().toLowerCase();
     return targets.filter((target) => {
       const envMatch = environmentFilter === "all" || (target.config.environment || "local") === environmentFilter;
-      const searchText = [target.id, target.config.name, target.config.type, target.config.base_url, target.config.endpoint, target.config.owner?.contact, ...(target.config.tags || [])]
+      const searchText = [
+        target.id,
+        target.config.name,
+        target.config.type,
+        target.config.base_url,
+        target.config.endpoint,
+        target.config.owner?.contact,
+        ...(target.config.tags || []),
+      ]
         .filter(Boolean)
         .join(" ")
         .toLowerCase();
@@ -272,14 +280,17 @@ export function TargetsManager() {
   ];
 
   return (
-    <div className="grid h-full grid-cols-[380px_minmax(0,1fr)] overflow-hidden bg-canvas">
-      <aside className="overflow-y-auto border-r border-border bg-card p-4 scrollbar-thin">
-        <div className="mb-4 flex items-center justify-between gap-2">
-          <div>
+    <div className="grid h-full grid-cols-1 overflow-hidden bg-canvas lg:grid-cols-[minmax(300px,380px)_minmax(0,1fr)]">
+      <aside className="max-h-[42vh] overflow-y-auto border-b border-border bg-card p-4 scrollbar-thin lg:max-h-none lg:border-b-0 lg:border-r">
+        <div className="mb-4 flex flex-wrap items-start justify-between gap-2">
+          <div className="min-w-0">
             <h2 className="text-lg font-extrabold">Targets</h2>
-            <p className="text-xs text-muted-foreground">Manage authorised AI systems and scan readiness.</p>
+            <p className="break-anywhere text-xs text-muted-foreground">Manage authorised AI systems and scan readiness.</p>
           </div>
-          <Button size="sm" variant="primary" onClick={newTarget}><Plus className="size-4" /> Add</Button>
+          <Button size="sm" variant="primary" onClick={newTarget} className="shrink-0">
+            <Plus className="size-4" />
+            <span>Add</span>
+          </Button>
         </div>
         <div className="mb-4 grid grid-cols-3 gap-2 text-center text-xs">
           <Metric label="Total" value={targets.length} />
@@ -287,8 +298,17 @@ export function TargetsManager() {
           <Metric label="Jobs" value={jobs.length} />
         </div>
         <div className="mb-3 space-y-2">
-          <div className="relative"><Search className="pointer-events-none absolute left-2 top-2.5 size-4 text-muted-foreground" /><input value={query} onChange={(e) => setQuery(e.target.value)} className="input pl-8 text-sm" placeholder="Search targets, owners, tags…" /></div>
-          <div className="relative"><Filter className="pointer-events-none absolute left-2 top-2.5 size-4 text-muted-foreground" /><select value={environmentFilter} onChange={(e) => setEnvironmentFilter(e.target.value)} className="input pl-8 text-sm"><option value="all">All environments</option>{ENVIRONMENTS.map((env) => <option key={env}>{env}</option>)}</select></div>
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-2 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <input value={query} onChange={(e) => setQuery(e.target.value)} className="input pl-8 text-sm" placeholder="Search targets, owners, tags…" />
+          </div>
+          <div className="relative">
+            <Filter className="pointer-events-none absolute left-2 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <select value={environmentFilter} onChange={(e) => setEnvironmentFilter(e.target.value)} className="input pl-8 text-sm">
+              <option value="all">All environments</option>
+              {ENVIRONMENTS.map((env) => <option key={env}>{env}</option>)}
+            </select>
+          </div>
         </div>
         {loading ? <p className="text-sm text-muted-foreground">Loading targets…</p> : null}
         <div className="space-y-2">
@@ -297,20 +317,23 @@ export function TargetsManager() {
         </div>
       </aside>
 
-      <section className="overflow-y-auto p-5 scrollbar-thin">
+      <section className="overflow-y-auto p-4 scrollbar-thin sm:p-5">
         <div className="mx-auto max-w-6xl space-y-4">
           <div className="rounded-xl border border-border bg-card p-4 shadow-card">
             <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
+              <div className="min-w-0">
                 <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Target management workspace</p>
-                <h1 className="mt-1 flex items-center gap-2 text-2xl font-extrabold"><Server className="size-6" /> {draft.name || draftId}</h1>
+                <h1 className="ui-title-row mt-1 text-2xl font-extrabold">
+                  <span className="ui-icon"><Server className="size-6" /></span>
+                  <span className="break-anywhere">{draft.name || draftId}</span>
+                </h1>
                 <p className="mt-1 max-w-3xl text-sm text-muted-foreground">Create, edit, validate, and launch authorised scans for local/internal AI targets from one operational cockpit.</p>
               </div>
-              <div className="flex flex-wrap gap-2">
-                <Button variant="secondary" onClick={() => void loadJobs()}><RefreshCw /> Refresh jobs</Button>
-                <Button variant="secondary" onClick={testConnectivity} disabled={testing || isDemo}>{testing ? <Loader2 className="animate-spin" /> : <Wifi />} Test connectivity</Button>
-                <Button variant="primary" onClick={saveTarget} disabled={saving || isDemo}>{saving ? <Loader2 className="animate-spin" /> : <Save />} Save</Button>
-                <Button variant="danger" onClick={deleteTarget} disabled={saving || isDemo}><Trash2 /> Delete</Button>
+              <div className="ui-action-row justify-start sm:justify-end">
+                <Button variant="secondary" onClick={() => void loadJobs()} className="w-full sm:w-auto"><RefreshCw /> <span>Refresh jobs</span></Button>
+                <Button variant="secondary" onClick={testConnectivity} disabled={testing || isDemo} className="w-full sm:w-auto">{testing ? <Loader2 className="animate-spin" /> : <Wifi />} <span>Test connectivity</span></Button>
+                <Button variant="primary" onClick={saveTarget} disabled={saving || isDemo} className="w-full sm:w-auto">{saving ? <Loader2 className="animate-spin" /> : <Save />} <span>Save</span></Button>
+                <Button variant="danger" onClick={deleteTarget} disabled={saving || isDemo} className="w-full sm:w-auto"><Trash2 /> <span>Delete</span></Button>
               </div>
             </div>
             {selected ? null : <p className="mt-2 text-xs text-muted-foreground">Creating a new runtime target.</p>}
@@ -319,7 +342,7 @@ export function TargetsManager() {
             {error ? <Warning title="Target error" body={error} danger /> : null}
           </div>
 
-          <div className="grid gap-4 xl:grid-cols-[1fr_360px]">
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(300px,360px)]">
             <div className="space-y-4">
               <div className="grid gap-4 lg:grid-cols-2">
                 <Field label="Target ID"><input value={draftId} onChange={(e) => setDraftId(e.target.value)} className="input" disabled={isDemo} /></Field>
@@ -352,12 +375,12 @@ export function TargetsManager() {
               </Panel>
               <Panel title="Launch scan" icon={<PlayCircle className="size-4" />}>
                 <select value={scanProfile} onChange={(e) => setScanProfile(e.target.value)} className="input text-sm">{SCAN_PROFILES.map((profile) => <option key={profile}>{profile}</option>)}</select>
-                <Button className="mt-3 w-full" variant="success" onClick={startScan} disabled={scanning || (!isDemo && draft.authorisation_required === false)}>{scanning ? <Loader2 className="animate-spin" /> : <PlayCircle />} Start authorised scan</Button>
+                <Button className="mt-3 w-full" variant="success" onClick={startScan} disabled={scanning || (!isDemo && draft.authorisation_required === false)}>{scanning ? <Loader2 className="animate-spin" /> : <PlayCircle />} <span>Start authorised scan</span></Button>
                 <p className="mt-2 text-xs text-muted-foreground">Live progress streams from the authenticated SSE endpoint. State: {streamState}.</p>
                 {liveEvents.length ? <div className="mt-3 space-y-2" aria-live="polite">
                   <div className="h-2 overflow-hidden rounded bg-muted"><div className="h-full bg-[var(--accent-sage)]" style={{ width: `${Math.max(...liveEvents.map((event) => event.progress?.percent || 0))}%` }} /></div>
-                  <p className="text-xs font-semibold">{liveEvents[liveEvents.length - 1]?.phase || liveEvents[liveEvents.length - 1]?.type} · findings {liveEvents.filter((event) => event.type === "finding_created").length}</p>
-                  <ol className="max-h-40 space-y-1 overflow-auto text-xs text-muted-foreground">{liveEvents.slice(-8).map((event, index) => <li key={`${event.event_id}-${index}`}>{event.type}: {event.message}</li>)}</ol>
+                  <p className="break-anywhere text-xs font-semibold">{liveEvents[liveEvents.length - 1]?.phase || liveEvents[liveEvents.length - 1]?.type} · findings {liveEvents.filter((event) => event.type === "finding_created").length}</p>
+                  <ol className="max-h-40 space-y-1 overflow-auto text-xs text-muted-foreground">{liveEvents.slice(-8).map((event, index) => <li className="break-anywhere" key={`${event.event_id}-${index}`}>{event.type}: {event.message}</li>)}</ol>
                 </div> : null}
               </Panel>
               <Panel title="Recent jobs" icon={<RefreshCw className="size-4" />}>
@@ -374,7 +397,16 @@ export function TargetsManager() {
 
 function TargetListItem({ target, active, onClick }: { target: TargetRecord; active: boolean; onClick: () => void }) {
   const health = targetHealth(target);
-  return <button onClick={onClick} className={cn("w-full rounded-lg border p-3 text-left transition-colors", active ? "border-primary bg-muted" : "border-border bg-canvas hover:bg-muted")}><div className="flex items-center justify-between gap-2"><span className="font-semibold">{target.config.name || target.id}</span><StatusPill status={health} /></div><p className="mt-1 truncate text-xs text-muted-foreground">{target.id} · {target.config.type} · {target.config.environment || "local"}</p><p className="mt-1 truncate font-mono text-[11px] text-muted-foreground">{endpointLabel(target.config)}</p></button>;
+  return (
+    <button onClick={onClick} className={cn("w-full rounded-lg border p-3 text-left transition-colors", active ? "border-primary bg-muted" : "border-border bg-canvas hover:bg-muted")}>
+      <div className="flex items-start justify-between gap-2">
+        <span className="break-anywhere font-semibold leading-snug">{target.config.name || target.id}</span>
+        <StatusPill status={health} />
+      </div>
+      <p className="mt-1 break-anywhere text-xs text-muted-foreground">{target.id} · {target.config.type} · {target.config.environment || "local"}</p>
+      <p className="mt-1 truncate font-mono text-[11px] text-muted-foreground" title={endpointLabel(target.config)}>{endpointLabel(target.config)}</p>
+    </button>
+  );
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
@@ -382,11 +414,17 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 function Toggle({ checked, onChange, title, body, icon }: { checked: boolean; onChange: (checked: boolean) => void; title: string; body: string; icon?: React.ReactNode }) {
-  return <button type="button" onClick={() => onChange(!checked)} className={cn("rounded-xl border p-3 text-left shadow-card", checked ? "border-primary bg-muted" : "border-border bg-card")}><span className="flex items-center gap-2 font-bold">{icon}{title}</span><span className="mt-1 block text-xs text-muted-foreground">{body}</span><span className="mt-3 inline-flex rounded px-2 py-1 text-xs font-bold" style={{ background: checked ? "var(--accent-sage)" : "var(--muted)" }}>{checked ? "Enabled" : "Disabled"}</span></button>;
+  return (
+    <button type="button" onClick={() => onChange(!checked)} className={cn("rounded-xl border p-3 text-left shadow-card", checked ? "border-primary bg-muted" : "border-border bg-card")}>
+      <span className="ui-title-row font-bold"><span className="ui-icon">{icon}</span><span className="break-anywhere">{title}</span></span>
+      <span className="mt-1 block text-xs text-muted-foreground">{body}</span>
+      <span className="mt-3 inline-flex rounded px-2 py-1 text-xs font-bold" style={{ background: checked ? "var(--accent-sage)" : "var(--muted)" }}>{checked ? "Enabled" : "Disabled"}</span>
+    </button>
+  );
 }
 
 function Warning({ title, body, danger = false }: { title: string; body: string; danger?: boolean }) {
-  return <div className={cn("mt-4 rounded-lg border p-3 text-sm", danger ? "border-[var(--sev-high)] bg-[var(--sev-high)]/10" : "border-[var(--sev-medium)] bg-[var(--sev-medium)]/10")}><p className="flex items-center gap-2 font-bold"><AlertTriangle className="size-4" /> {title}</p><p className="mt-1 text-muted-foreground">{body}</p></div>;
+  return <div className={cn("mt-4 rounded-lg border p-3 text-sm", danger ? "border-[var(--sev-high)] bg-[var(--sev-high)]/10" : "border-[var(--sev-medium)] bg-[var(--sev-medium)]/10")}><p className="ui-title-row font-bold"><AlertTriangle className="size-4 shrink-0" /> <span>{title}</span></p><p className="mt-1 break-anywhere text-muted-foreground">{body}</p></div>;
 }
 
 function Metric({ label, value }: { label: string; value: number }) {
@@ -394,18 +432,18 @@ function Metric({ label, value }: { label: string; value: number }) {
 }
 
 function Panel({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) {
-  return <div className="rounded-xl border border-border bg-card p-4 shadow-card"><h3 className="mb-3 flex items-center gap-2 font-bold">{icon}{title}</h3>{children}</div>;
+  return <div className="rounded-xl border border-border bg-card p-4 shadow-card"><h3 className="mb-3 ui-title-row font-bold"><span className="ui-icon">{icon}</span><span className="break-anywhere">{title}</span></h3>{children}</div>;
 }
 
 function ChecklistItem({ label, ok }: { label: string; ok: boolean }) {
-  return <div className="flex items-center justify-between rounded-lg border border-border bg-canvas px-3 py-2 text-sm"><span>{label}</span>{ok ? <CheckCircle2 className="size-4 text-[var(--sev-low)]" /> : <AlertTriangle className="size-4 text-[var(--sev-medium)]" />}</div>;
+  return <div className="flex items-center justify-between gap-2 rounded-lg border border-border bg-canvas px-3 py-2 text-sm"><span className="break-anywhere">{label}</span>{ok ? <CheckCircle2 className="size-4 shrink-0 text-[var(--sev-low)]" /> : <AlertTriangle className="size-4 shrink-0 text-[var(--sev-medium)]" />}</div>;
 }
 
 function StatusPill({ status }: { status: ReturnType<typeof targetHealth> }) {
   const labels = { ready: "ready", "needs-owner": "owner", "needs-auth": "auth", external: "external" };
-  return <span className={cn("rounded px-2 py-0.5 text-[10px] font-bold uppercase", status === "ready" ? "bg-[var(--accent-sage)] text-[#1b2110]" : "bg-muted text-muted-foreground")}>{labels[status]}</span>;
+  return <span className={cn("shrink-0 rounded px-2 py-0.5 text-[10px] font-bold uppercase", status === "ready" ? "bg-[var(--accent-sage)] text-[#1b2110]" : "bg-muted text-muted-foreground")}>{labels[status]}</span>;
 }
 
 function JobRow({ job }: { job: ScanJob }) {
-  return <div className="rounded-lg border border-border bg-canvas p-3 text-sm"><div className="flex items-center justify-between gap-2"><span className="font-mono text-xs">{job.id}</span><span className="rounded bg-muted px-2 py-0.5 text-[10px] font-bold uppercase text-muted-foreground">{job.status}</span></div><p className="mt-1 text-xs text-muted-foreground">{job.profile}{job.error ? ` · ${job.error}` : ""}</p></div>;
+  return <div className="rounded-lg border border-border bg-canvas p-3 text-sm"><div className="flex items-start justify-between gap-2"><span className="break-anywhere font-mono text-xs">{job.id}</span><span className="shrink-0 rounded bg-muted px-2 py-0.5 text-[10px] font-bold uppercase text-muted-foreground">{job.status}</span></div><p className="mt-1 break-anywhere text-xs text-muted-foreground">{job.profile}{job.error ? ` · ${job.error}` : ""}</p></div>;
 }

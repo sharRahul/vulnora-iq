@@ -33,12 +33,12 @@ export function AssetFindingCard({
         aria-expanded={expanded}
         className="flex w-full items-start gap-2.5 rounded-md p-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
-        <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-md border border-border bg-muted text-[var(--accent-slate)]">
+        <span className="ui-icon mt-0.5 size-7 rounded-md border border-border bg-muted text-[var(--accent-slate)]">
           <Icon className="size-4" />
         </span>
         <span className="min-w-0 flex-1">
-          <span className="flex items-center gap-1.5">
-            <span className="truncate text-sm font-bold text-foreground">
+          <span className="flex min-w-0 items-start gap-1.5">
+            <span className="break-anywhere text-sm font-bold leading-snug text-foreground">
               {asset.name}
             </span>
             <ChevronRight
@@ -48,7 +48,7 @@ export function AssetFindingCard({
               )}
             />
           </span>
-          <span className="mt-0.5 block truncate font-mono text-[11px] text-muted-foreground">
+          <span className="mt-0.5 block truncate font-mono text-[11px] text-muted-foreground" title={asset.locator}>
             {asset.locator}
           </span>
           <span className="mt-2 flex flex-wrap items-center gap-1.5">
@@ -58,9 +58,9 @@ export function AssetFindingCard({
               {asset.vulnerabilityCount} {asset.vulnerabilityCount === 1 ? "vuln" : "vulns"}
             </span>
           </span>
-          <span className="mt-1.5 flex items-center gap-1 text-[11px] text-muted-foreground">
-            <Clock className="size-3" />
-            {meta.label} · scanned {formatRelativeTime(asset.lastScanned)}
+          <span className="mt-1.5 flex min-w-0 items-center gap-1 text-[11px] text-muted-foreground">
+            <Clock className="size-3 shrink-0" />
+            <span className="truncate">{meta.label} · scanned {formatRelativeTime(asset.lastScanned)}</span>
           </span>
         </span>
       </button>
@@ -88,7 +88,7 @@ export function AssetFindingCard({
                     <span className="line-clamp-2 text-xs font-semibold leading-snug text-foreground">
                       {f.title}
                     </span>
-                    <span className="mt-0.5 block truncate font-mono text-[10px] text-muted-foreground">
+                    <span className="mt-0.5 block truncate font-mono text-[10px] text-muted-foreground" title={f.affectedPath}>
                       {f.affectedPath}
                     </span>
                   </span>

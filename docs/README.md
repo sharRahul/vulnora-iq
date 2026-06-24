@@ -13,7 +13,7 @@ This folder documents the current VulnoraIQ `0.2.0` codebase.
 | --- | --- |
 | Docker lab | Complete for the current local lab scope. `docker-compose.yml` starts `vulnoraiq-web`, `local-mock-agent`, and optional `test-runner` on a private Docker network with loopback-only WebUI publishing. |
 | Target support | Complete for current approved local/internal scope with HTTP JSON, chat-completions, Ollama generate, RAG query, webhook JSON, and dry-run tool-loop contracts. |
-| WebUI | Current supported UI is the React SecOps console in `webui/console/`, built to `webui/static/console/`. |
+| WebUI | Current supported UI is the React SecOps console in `webui/console/`, built to `webui/static/console/`. A clean start shows no dummy assets, findings, or dashboard data. |
 | WebUI backend | Target management, scan launch, SSE progress, finding actions/history, and assistant model controls are implemented. |
 | CLI | `vulnoraiq` supports `targets list`, `targets validate`, `scan`, `reports list`, `jobs list`, and `jobs show`. |
 | Security hardening | Auth, trusted proxy mode, CSRF, request limits, rate limiting, security headers, audit logs, metrics, artifact path protection, production startup validation, and loopback-only local Docker publishing. |
@@ -25,6 +25,7 @@ This folder documents the current VulnoraIQ `0.2.0` codebase.
 | Need | Document |
 | --- | --- |
 | Project overview and quick start | [`../README.md`](../README.md) |
+| End-to-end user guide | [`USER_GUIDE.md`](USER_GUIDE.md) |
 | Docker-first lab startup and troubleshooting | [`DOCKER_TESTING.md`](DOCKER_TESTING.md) |
 | Safety model and authorisation rules | [`SAFETY_MODEL.md`](SAFETY_MODEL.md) |
 | Target configuration and runtime target rules | [`TARGET_CONFIGURATION.md`](TARGET_CONFIGURATION.md) |
