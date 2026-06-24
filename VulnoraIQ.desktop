@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=VulnoraIQ WebUI
+Comment=Start the local VulnoraIQ Web UI launcher
+Exec=sh -c 'cd "$(dirname "$0")" && ./launch-vulnoraiq-webui.sh' %k
+Terminal=true
+Categories=Development;Security;
