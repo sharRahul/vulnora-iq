@@ -12,16 +12,10 @@ import { AnalysisWorkspace } from "@/components/workspace/AnalysisWorkspace";
 import { IntelligencePanel } from "@/components/intelligence/IntelligencePanel";
 import { TargetsManager } from "@/components/targets/TargetsManager";
 import { useTheme } from "@/hooks/useTheme";
-import {
-  assets as demoAssets,
-  dashboardMetrics,
-  findings as demoFindings,
-  severityDistribution,
-  trendData,
-} from "@/data/mock";
 import type {
   Asset,
   BackendFinding,
+  DashboardMetrics,
   Finding,
   FindingHistoryEntry,
   FindingMutationState,
@@ -29,6 +23,8 @@ import type {
   ScanEvent,
   ScanJob,
   Severity,
+  SeverityDistributionPoint,
+  VulnerabilityTrendPoint,
 } from "@/types";
 
 const SCAN_EVENT_TYPES = [
@@ -45,6 +41,9 @@ const SCAN_EVENT_TYPES = [
   "scan_failed",
   "heartbeat",
 ];
+
+const SEVERITIES: Severity[] = ["critical", "high", "medium", "low", "info"];
+const EMPTY_TREND: VulnerabilityTrendPoint[] = [];
 
 async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
   const response = await fetch(path, { credentials: "same-origin", ...options });
@@ -180,6 +179,50 @@ function scanAsset(scan: ScanJob, findings: Finding[]): Asset {
   };
 }
 
+function scanTime(scan: ScanJob): number {
+  return Date.parse(scan.completed_at || scan.started_at || scan.created_at || "") || 0;
+}
+
+function latestScan(scans: ScanJob[]): ScanJob | null {
+  return [...scans].sort((a, b) => scanTime(b) - scanTime(a))[0] || null;
+}
+
+function dashboardMetrics(findings: Finding[], activeScan: ScanJob | null): DashboardMetrics {
+  const counts = Object.fromEntries(SEVERITIES.map((severity) => [severity, 0])) as Record<Severity, number>;
+  findings.forEach((finding) => {
+    counts[finding.severity] += 1;
+  });
+  const fixed = findings.filter((finding) => finding.status === "fixed").length;
+  const pendingReviews = findings.filter((finding) =>
+    ["pending_review", "auto_fix_available", "triaged", "in_progress"].includes(finding.status),
+  ).length;
+
+  return {
+    totalScanned: activeScan ? 1 : 0,
+    critical: counts.critical,
+    high: counts.high,
+    medium: counts.medium,
+    low: counts.low,
+    autoRemediationRate: findings.length ? Math.round((fixed / findings.length) * 100) : 0,
+    pendingReviews,
+    meanTimeToRemediateHours: 0,
+    trend: {
+      critical: 0,
+      high: 0,
+      autoRemediationRate: 0,
+      pendingReviews: 0,
+    },
+  };
+}
+
+function severityDistribution(findings: Finding[]): SeverityDistributionPoint[] {
+  const counts = Object.fromEntries(SEVERITIES.map((severity) => [severity, 0])) as Record<Severity, number>;
+  findings.forEach((finding) => {
+    counts[finding.severity] += 1;
+  });
+  return SEVERITIES.map((severity) => ({ severity, count: counts[severity] })).filter((point) => point.count > 0);
+}
+
 function ConsoleInner() {
   const { theme, toggleTheme } = useTheme();
   const { notify } = useToast();
@@ -197,21 +240,27 @@ function ConsoleInner() {
   const [scanPhase, setScanPhase] = useState("Idle");
   const [liveFindingCount, setLiveFindingCount] = useState(0);
 
-  const displayFindings = runtimeFindings.length ? runtimeFindings : demoFindings;
-  const displayAssets = activeScan && runtimeFindings.length ? [scanAsset(activeScan, runtimeFindings)] : demoAssets;
+  const displayFindings = runtimeFindings;
+  const displayAssets = activeScan ? [scanAsset(activeScan, runtimeFindings)] : [];
+  const metrics = useMemo(() => dashboardMetrics(runtimeFindings, activeScan), [activeScan, runtimeFindings]);
+  const distribution = useMemo(() => severityDistribution(runtimeFindings), [runtimeFindings]);
 
   const findingsById = useMemo<Record<string, Finding>>(
     () => Object.fromEntries(displayFindings.map((f) => [f.id, f])),
     [displayFindings],
   );
 
-  useEffect(() => () => scanSourceRef.current?.close(), []);
-
   const selectedFinding = selectedFindingId ? findingsById[selectedFindingId] : null;
   const selectedAsset = selectedFinding
     ? displayAssets.find((a) => a.id === selectedFinding.assetId)
     : undefined;
   const selectedFindingHistory = selectedFindingId ? findingHistories[selectedFindingId] || [] : [];
+
+  useEffect(() => {
+    void loadExistingScanState();
+    return () => scanSourceRef.current?.close();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSelectFinding = (id: string) => {
     setSelectedFindingId(id);
@@ -238,6 +287,30 @@ function ConsoleInner() {
       setSelectedFindingId(nextSelected.id);
       setView("workspace");
       await refreshFindingHistory(scanId, nextSelected.id);
+    } else {
+      setSelectedFindingId(null);
+    }
+  }
+
+  async function loadExistingScanState(): Promise<void> {
+    setDashboardLoading(true);
+    try {
+      const data = await api<{ jobs: ScanJob[] }>("/api/scans");
+      const scan = latestScan(data.jobs || []);
+      if (scan) {
+        await refreshScanFindings(scan.id, scan);
+      } else {
+        setActiveScan(null);
+        setRuntimeFindings([]);
+        setSelectedFindingId(null);
+      }
+    } catch (exc) {
+      setActiveScan(null);
+      setRuntimeFindings([]);
+      setSelectedFindingId(null);
+      notify(exc instanceof Error ? `Unable to load saved scans: ${exc.message}` : "Unable to load saved scans", "error");
+    } finally {
+      setDashboardLoading(false);
     }
   }
 
@@ -291,6 +364,7 @@ function ConsoleInner() {
     setLiveFindingCount(0);
     setRuntimeFindings([]);
     setFindingHistories({});
+    setSelectedFindingId(null);
     try {
       const token = await csrfToken();
       const job = await api<ScanJob>("/api/scans", {
@@ -367,8 +441,8 @@ function ConsoleInner() {
   ) : (
     <EmptyState
       icon={MousePointerSquareDashed}
-      title="Select a finding to analyse"
-      description="Choose an asset in the navigator, then pick a finding to see the vulnerable code, the AI-remediated fix, and the full report."
+      title="No scan finding selected"
+      description="Run a scan or open a saved scan result. Clean workspaces show no sample findings or dummy assets."
     />
   );
 
@@ -378,7 +452,7 @@ function ConsoleInner() {
     <EmptyState
       icon={ScanSearch}
       title="No finding selected"
-      description="Vulnerability intelligence and the Ask VulnorAIQ assistant appear here once a finding is selected."
+      description="Vulnerability intelligence and the Ask VulnorAIQ assistant appear here after a real backend finding is selected."
     />
   );
 
@@ -400,11 +474,29 @@ function ConsoleInner() {
         <div className="h-full overflow-y-auto scrollbar-thin p-4 sm:p-6">
           <div className="mx-auto max-w-[1400px]">
             <DashboardOverview
-              metrics={dashboardMetrics}
-              trend={trendData}
-              distribution={severityDistribution}
+              metrics={metrics}
+              trend={EMPTY_TREND}
+              distribution={distribution}
               loading={dashboardLoading}
             />
+            {!dashboardLoading && !activeScan ? (
+              <section className="mt-4 rounded-xl border border-border bg-card p-6 text-sm text-muted-foreground shadow-card">
+                <p className="text-xs font-bold uppercase tracking-wide">Clean workspace</p>
+                <h2 className="mt-1 text-lg font-extrabold text-foreground">No scans yet</h2>
+                <p className="mt-2 max-w-3xl">
+                  VulnoraIQ does not show sample assets, mock findings, or dummy dashboard data. Run a scan from the header or configure an authorised target to populate this dashboard with your own evidence.
+                </p>
+              </section>
+            ) : null}
+            {activeScan && !runtimeFindings.length && !dashboardLoading ? (
+              <section className="mt-4 rounded-xl border border-border bg-card p-6 text-sm text-muted-foreground shadow-card">
+                <p className="text-xs font-bold uppercase tracking-wide">Latest scan</p>
+                <h2 className="mt-1 text-lg font-extrabold text-foreground">No findings returned</h2>
+                <p className="mt-2 max-w-3xl">
+                  The latest saved scan is loaded, but it did not return findings. Reports and artifacts remain available through the backend output directory.
+                </p>
+              </section>
+            ) : null}
             {liveScanEvents.length ? (
               <section className="mt-4 rounded-xl border border-border bg-card p-4 shadow-card" aria-live="polite">
                 <div className="flex flex-wrap items-center justify-between gap-3">
