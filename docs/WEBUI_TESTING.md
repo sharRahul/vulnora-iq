@@ -1,6 +1,6 @@
 # WebUI Testing
 
-The WebUI test layer adds browser-level smoke and hosted scan-flow coverage on top of the existing Python CI gates.
+The WebUI test layer adds browser-level smoke and hosted scan-start coverage on top of the existing Python CI gates.
 
 ## Local commands
 
@@ -14,7 +14,7 @@ npm run test:webui:hosted
 
 `npm run test:webui` loads `webui/static/index.html` directly as a static file. This keeps the first browser gate stable and fast.
 
-`npm run test:webui:hosted` starts the hosted WebUI with authentication disabled, selects a demo target/profile, starts a scan from the UI, waits for the completed dashboard, and confirms report artifacts are available.
+`npm run test:webui:hosted` starts the hosted WebUI with authentication disabled, selects a demo target/profile, starts a scan from the UI, and confirms the server creates the scan job. It intentionally avoids waiting for full scan completion so CI remains bounded and does not depend on assessment duration.
 
 ## CI behavior
 
@@ -25,12 +25,13 @@ Browser tests run only on the Python 3.12 CI matrix leg to avoid multiplying bro
 - Loads the static console shell.
 - Verifies the primary VulnoraIQ and scan-selection headings render.
 - Starts the hosted WebUI server.
-- Runs a demo scan through the WebUI.
-- Verifies the completed dashboard and artifact links.
+- Starts a demo scan through the WebUI.
+- Verifies a scan job is created through the hosted API.
 
 ## Future coverage
 
 - Login/token flow when auth is enabled.
+- Completed-dashboard and artifact assertions in a longer-running browser flow.
 - Catalog, history, and findings filtering assertions beyond static DOM behavior.
 - Accessibility checks with axe once the layout stabilizes.
 - Advisory visual snapshots before turning visual regression into a required gate.
