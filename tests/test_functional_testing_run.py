@@ -12,17 +12,16 @@ def test_functional_acceptance_runner_generates_outputs(tmp_path: Path) -> None:
     summary = run_functional_test(output_dir=output_dir)
 
     assert summary.status == "pass"
-    assert summary.target == "demo"
-    assert summary.profile == "baseline"
+    assert summary.target == ""
+    assert summary.profile == ""
     assert not summary.errors
 
     summary_path = output_dir / "functional-test-summary.json"
     assert summary_path.exists()
     summary_data = json.loads(summary_path.read_text(encoding="utf-8"))
     assert summary_data["status"] == "pass"
-    assert summary_data["checks"]["demo_baseline_scope"] == "pass"
-    assert summary_data["checks"]["owasp_category_count"] == "pass"
-    assert summary_data["checks"]["production_validation_marker"] == "pass"
+    assert summary_data["checks"]["targets_config_loaded"] == "pass"
+    assert summary_data["checks"]["unknown_target_rejection"] == "pass"
 
     for generated_file in summary.generated_files:
         assert Path(generated_file).exists()
