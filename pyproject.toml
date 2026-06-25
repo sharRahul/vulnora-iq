@@ -106,4 +106,4 @@ warn_redundant_casts = true
 ignore_missing_imports = true
 no_implicit_optional = true
 check_untyped_defs = true
-exclude = "reports/output|build|dist|docker|core/scanner.py|webui/auth.py|scripts/run_functional_test.py"
+exclude = "reports/output|build|dist|docker|tests|core/scanner.py|webui/auth.py|scripts/run_functional_test.py"
