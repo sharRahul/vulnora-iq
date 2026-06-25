@@ -136,12 +136,13 @@ This package is for local/self-hosted authorised AI security assessment only.
 
 Double-click quick start
 ------------------------
-1. Install Python 3.10 or newer.
-2. Extract this package to a normal writable folder.
-3. Double-click: {launcher}
+1. Install Docker Desktop or Docker Engine with Docker Compose v2.
+2. Install Python 3.10 or newer.
+3. Extract this package to a normal writable folder.
+4. Double-click: {launcher}
 
-First run creates a local .venv folder, installs VulnoraIQ dependencies into that
-folder, starts the local Web UI, and opens the browser. Later runs reuse .venv.
+First run uses Docker Compose to build/start the local Web UI and opens the browser.
+Later runs reuse Docker image/cache state unless you explicitly clean it.
 
 Terminal alternative
 --------------------
@@ -239,34 +240,31 @@ def build_platform_package(
         raise ValueError(f"Unsupported platform {platform!r}; expected one of: {supported}")
     output_root = Path(output_dir)
     output_root.mkdir(parents=True, exist_ok=True)
-    extension = package_extension(platform)
-    output = output_root / f"vulnoraiq-{version}-{platform}.{extension}"
-    prefix = f"vulnoraiq-{version}-{platform}"
     release_files = _iter_release_files()
-    if not release_files:
-        raise RuntimeError("No release files selected")
-    if output.exists():
-        output.unlink()
+    prefix = f"vulnoraiq-{version}-{platform}"
+    extension = package_extension(platform)
+    output = output_root / f"{prefix}.{extension}"
+    stage_dir = output_root / prefix
+    _prepare_stage_dir(stage_dir, release_files, platform, version)
     if platform == "windows":
         _build_zip(output, prefix, release_files, platform, version)
+    elif platform == "linux":
+        _build_tar_gz(output, stage_dir, prefix)
     else:
-        stage_dir = output_root / "staging" / prefix
-        _prepare_stage_dir(stage_dir, release_files, platform, version)
-        if platform == "linux":
-            _build_tar_gz(output, stage_dir, prefix)
-        elif platform == "macos":
-            _build_dmg(output, stage_dir, prefix)
-    return ReleasePackage(platform=platform, version=version, output=output, file_count=len(release_files) + 1)
+        _build_dmg(output, stage_dir, prefix)
+    return ReleasePackage(platform, version, output, len(release_files) + 1)
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Build VulnoraIQ platform release package archives.")
-    parser.add_argument("--platform", choices=sorted(PLATFORMS), required=True)
+    parser = argparse.ArgumentParser(description="Build VulnoraIQ platform release packages.")
+    parser.add_argument("--platform", choices=sorted(PLATFORMS), action="append", required=True)
     parser.add_argument("--version", default=os.getenv("VULNORAIQ_RELEASE_VERSION", DEFAULT_VERSION))
     parser.add_argument("--output-dir", default=str(DEFAULT_OUTPUT_DIR))
     args = parser.parse_args()
-    package = build_platform_package(args.platform, args.version, args.output_dir)
-    print(f"Built {package.output} with {package.file_count} files")
+
+    for platform in args.platform:
+        package = build_platform_package(platform, args.version, args.output_dir)
+        print(f"Built {package.output} ({package.file_count} files)")
 
 
 if __name__ == "__main__":
