@@ -81,6 +81,7 @@ include = ["core*", "integrations*", "modules*", "rag_testing*", "agent_testing*
 webui = [
     "static/console/*",
     "static/console/assets/*",
+    "static/agent-lab/*",
 ]
 
 [tool.pytest.ini_options]

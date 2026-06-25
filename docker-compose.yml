@@ -20,13 +20,19 @@ services:
       VULNORAIQ_EVIDENCE_DIR: /data/evidence
       VULNORAIQ_AUDIT_DIR: /data/audit
       VULNORAIQ_AUTH_ENABLED: "false"
+      VULNORAIQ_AGENT_LAB_ROOT: /data/agent_lab
+      VULNORAIQ_AGENT_LAB_PROJECTS_ROOT: /data/agent_lab/projects
+      VULNORAIQ_AGENT_LAB_ALLOWED_GIT_HOSTS: github.com,gitlab.com,bitbucket.org
+      VULNORAIQ_MAX_REQUEST_BODY: "52428800"
     volumes:
       - vulnoraiq_data:/data
       - ./config:/app/config:ro
       - /var/run/docker.sock:/var/run/docker.sock
       - ./projects:/app/projects:ro
     group_add:
-      - "999"  # docker group id; allows docker CLI to use the socket
+      - "999"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - vulnoraiq-lab
     healthcheck:

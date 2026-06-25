@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <title>VulnoraIQ Agent Lab</title>
+    <link rel="stylesheet" href="/static/agent-lab/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">Experimental Agent Lab</p>
+          <h1>Import, configure, run, register, and test real AI agents</h1>
+          <p class="lede">Use Git import, ZIP upload, or mapped project folders. Configure Ollama, LM Studio, OpenRouter, or custom OpenAI-compatible providers, then run the agent in Docker with optional GPU access and auto-create VulnoraIQ scan targets.</p>
+        </div>
+        <div class="hero-actions">
+          <a href="/" class="button secondary">Main Console</a>
+          <button id="refresh" class="button">Refresh</button>
+        </div>
+      </header>
+
+      <section id="status" class="status hidden"></section>
+
+      <section class="grid two">
+        <article class="card">
+          <h2>1. Import Agent</h2>
+          <p class="muted">Import real source code. No mock/demo projects are created by this interface.</p>
+          <div class="tabs" role="tablist">
+            <button class="tab active" data-tab="git">Git URL</button>
+            <button class="tab" data-tab="zip">ZIP upload</button>
+            <button class="tab" data-tab="mounted">Mapped folder</button>
+          </div>
+
+          <form id="git-form" class="tab-panel active">
+            <label>Git repository URL<input id="git-url" placeholder="https://github.com/org/agent-repo.git" /></label>
+            <label>Project ID <span class="optional">optional</span><input id="git-project-id" placeholder="agent-name" /></label>
+            <label>Branch <span class="optional">optional</span><input id="git-branch" placeholder="main" /></label>
+            <button class="button" type="submit">Import from Git</button>
+          </form>
+
+          <form id="zip-form" class="tab-panel">
+            <label>Project ID<input id="zip-project-id" placeholder="agent-name" required /></label>
+            <label>ZIP archive<input id="zip-file" type="file" accept=".zip,application/zip" required /></label>
+            <button class="button" type="submit">Upload ZIP</button>
+          </form>
+
+          <div id="mounted-panel" class="tab-panel">
+            <p class="muted">Place a real project directory in <code>./projects/</code> on the host. It is mounted read-only in Docker and appears below after refresh. If it has no Dockerfile, import it into the managed Agent Lab first or add a Dockerfile.</p>
+            <button id="refresh-mounted" class="button secondary" type="button">Refresh Projects</button>
+          </div>
+        </article>
+
+        <article class="card">
+          <h2>2. Select Project</h2>
+          <input id="project-filter" placeholder="Filter imported/mounted projects…" />
+          <div id="project-list" class="list"></div>
+        </article>
+      </section>
+
+      <section class="grid two">
+        <article class="card">
+          <h2>3. Configure LLM / API Keys</h2>
+          <label>Provider<select id="provider"></select></label>
+          <label>Base URL<input id="provider-base-url" placeholder="http://host.docker.internal:11434/v1" /></label>
+          <label>Model<input id="provider-model" placeholder="llama3.1, qwen2.5, openrouter model, etc." /></label>
+          <label>API Key <span class="optional">not persisted by VulnoraIQ; passed to Docker runtime</span><input id="provider-api-key" type="password" autocomplete="off" /></label>
+          <div id="env-vars" class="env-grid"></div>
+          <button id="add-env" class="button secondary" type="button">Add Custom Env Var</button>
+        </article>
+
+        <article class="card">
+          <h2>4. Select CPU/GPU and Target</h2>
+          <div class="grid two compact">
+            <label>Runtime<select id="gpu-mode"><option value="cpu">CPU only</option><option value="all">All NVIDIA GPUs</option><option value="device">Specific GPU device IDs</option></select></label>
+            <label>GPU device IDs<input id="gpu-devices" placeholder="0 or 0,1" /></label>
+          </div>
+          <div class="grid two compact">
+            <label>Container port<input id="port" type="number" min="1" max="65535" value="8000" /></label>
+            <label>Memory limit <span class="optional">optional</span><input id="memory" placeholder="8g" /></label>
+          </div>
+          <div class="grid two compact">
+            <label>CPU limit <span class="optional">optional</span><input id="cpus" placeholder="4" /></label>
+            <label>Publish localhost port<select id="publish-ports"><option value="true">Yes</option><option value="false">No, Docker network only</option></select></label>
+          </div>
+          <div class="grid two compact">
+            <label>Target type<select id="target-type"><option value="http_json">HTTP JSON</option><option value="chat_completions">OpenAI Chat Completions</option></select></label>
+            <label>Endpoint path<input id="endpoint-path" value="/" /></label>
+          </div>
+          <label>HTTP method<select id="http-method"><option>POST</option><option>GET</option><option>PUT</option><option>PATCH</option></select></label>
+          <button id="deploy" class="button success" type="button" disabled>Build / Run / Auto-create Target</button>
+        </article>
+      </section>
+
+      <section class="grid two">
+        <article class="card">
+          <h2>Project Analysis</h2>
+          <pre id="analysis" class="output">Select a project to analyze it.</pre>
+        </article>
+        <article class="card">
+          <h2>5. Test with VulnoraIQ</h2>
+          <label>Auto-created target<select id="target-select"></select></label>
+          <label>Scan profile<select id="scan-profile"></select></label>
+          <button id="start-scan" class="button danger" type="button" disabled>Start Authorised Scan</button>
+          <pre id="deployments" class="output">No deployment selected yet.</pre>
+        </article>
+      </section>
+    </main>
+    <script src="/static/agent-lab/app.js" defer></script>
+  </body>
+</html>

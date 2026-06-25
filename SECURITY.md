@@ -8,13 +8,16 @@ VulnoraIQ is a self-hosted defensive AI security assessment application for auth
 
 `0.2.0` has passed the controlled internal production-readiness gate for the current laptop, workstation, lab-machine, and internal-server deployment model. Findings are framework evidence for authorised human review. They are not certified VAPT-grade assurance, a substitute for independent testing, or permission to test systems without explicit approval.
 
+The experimental Agent Lab adds local Docker build/run orchestration for real AI-agent projects. Treat it as a local-lab capability until its hardening backlog is complete.
+
 ## Supported deployment boundary
 
 | Deployment model | Status | Notes |
 | --- | --- | --- |
 | Local laptop/workstation Docker lab | Complete | Default WebUI publish is loopback-only at `127.0.0.1:8787`. |
+| Experimental Agent Lab | Experimental | Imports real agent projects, configures LLM providers, runs Docker containers, optionally uses GPU flags, and auto-registers runtime targets. Requires Docker socket access in the current Compose lab. |
 | Standalone local WebUI launcher | Complete | Loopback-only convenience path with startup checks and local stop control. |
-| Self-hosted internal server | Complete for current scope | Requires production mode, auth, real secrets, reverse proxy/TLS for remote access, audit retention, and backup controls. |
+| Self-hosted internal server | Complete for current scope | Requires production mode, auth, real secrets, reverse proxy/TLS for remote access, audit retention, and backup controls. Do not expose Agent Lab on shared systems without an explicit risk decision. |
 | Trusted reverse-proxy identity | Supported | Use only when the proxy authenticates users and strips spoofed identity headers. |
 | Direct OIDC/JWT | Future maturity item | Planned in `docs/future-plans/OIDC_JWT_AUTH_PLAN.md`; not required for current local single-user usage. |
 | Certified VAPT-grade assurance | Not claimed | External independent review is still required for stronger assurance claims. |
@@ -76,7 +79,7 @@ Only enable trusted-proxy identity when the proxy performs authentication and re
 
 ## Container, CI, and supply-chain controls
 
-The default Docker Compose lab keeps the WebUI bound to host loopback. The containers run with dropped capabilities and no privileged mode or Docker socket mount.
+The default Docker Compose lab keeps the WebUI bound to host loopback. Containers run with dropped capabilities and no privileged mode. The experimental Agent Lab uses the Docker socket so the WebUI container can build and run imported agent projects; this is intentionally documented as a higher-trust local-lab control surface rather than a hardened multi-tenant boundary.
 
 The current CI/release posture includes Ruff, mypy, pytest, `pip check`, `pip-audit`, package metadata validation, OWASP/ATLAS validation, GenAI readiness validation, production readiness validation, hosted WebUI browser flow, functional acceptance, Docker smoke testing, release package builds, SBOM generation, Trivy filesystem/image reports, SARIF upload, GHCR publishing path, and Cosign keyless image-signing path.
 
@@ -87,6 +90,7 @@ The following are accepted for the current self-hosted local/internal model and 
 - direct OIDC/JWT is not implemented yet;
 - trusted-proxy identity is the current enterprise identity bridge;
 - local Docker and launcher modes are for loopback-only local use;
+- Agent Lab requires Docker socket access for local build/run operations and remains experimental;
 - CSRF and rate-limit stores are in-memory and single-instance;
 - SQLite is single-node and not high availability;
 - SIEM-specific rule packs are not packaged yet;

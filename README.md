@@ -10,6 +10,7 @@ VulnoraIQ is a **self-hosted internal application**. The same scope covers an **
 | --- | --- |
 | Version | `0.2.0` beta |
 | GUI/WebUI | Yes. Browser-based React console served by `vulnoraiq-web` / `webui/hosted_server.py`. |
+| Experimental Agent Lab | Yes. `/agent-lab` imports real AI-agent projects, configures LLM provider settings, selects CPU/GPU Docker runtime options, builds/runs the agent, auto-creates a target, and launches an authorised scan. See [`docs/AGENT_LAB.md`](docs/AGENT_LAB.md). |
 | Default posture | Local laptop/workstation Docker Compose lab with loopback-only WebUI publishing. |
 | Persistence | SQLite job store with WAL mode, foreign keys, busy timeout, and schema versioning. |
 | Future identity | Direct OIDC/JWT is deferred; see `docs/future-plans/OIDC_JWT_AUTH_PLAN.md`. |
@@ -21,6 +22,7 @@ Choose the path you want to run.
 | Run path | Required before starting |
 | --- | --- |
 | Recommended Docker GUI lab | Docker Engine or Docker Desktop with Docker Compose v2, internet access for the first image/dependency build, and a modern browser such as Chrome, Edge, Firefox, or Safari. |
+| Experimental Agent Lab | Docker lab prerequisites plus local Docker build/run access. GPU mode requires host GPU container support. Local Ollama/LM Studio providers should listen on the host and are reached through `host.docker.internal`. |
 | Double-click launchers | Python 3.10 or newer on `PATH`, internet access for first-time `.venv` dependency installation, and a modern browser. Use `launch-vulnoraiq-webui.bat`, `launch-vulnoraiq-webui.command`, or `launch-vulnoraiq-webui.sh`. |
 | Source/package install | Python 3.10 or newer, `pip`, `venv`, Git for source checkouts, and a modern browser. |
 | Local wheel build | Python 3.10 or newer plus the release extra: `pip install -e .[release]`. |
@@ -42,6 +44,8 @@ Open the GUI/WebUI in your browser: <http://localhost:8787>.
 
 The WebUI is published on host loopback only: `127.0.0.1:8787:8787`.
 
+To use the experimental Agent Lab, open <http://localhost:8787/agent-lab> after the Docker lab is running.
+
 Useful Docker commands:
 
 ```bash
@@ -56,7 +60,7 @@ Cleanly close the Docker lab:
 docker compose down
 ```
 
-Only use this when you intentionally want to delete local jobs, reports, evidence, audit data, and Docker volumes:
+Only use this when you intentionally want to delete local jobs, reports, evidence, audit data, Agent Lab imports, and Docker volumes:
 
 ```bash
 docker compose down -v
@@ -98,7 +102,7 @@ vulnoraiq-web --host 127.0.0.1 --port 8787
 
 ## WebUI and CLI
 
-The supported GUI is the built React console under `webui/static/console/`; the source app lives in `webui/console/`. It is a browser GUI, not a native desktop window.
+The supported GUI is the built React console under `webui/static/console/`; the source app lives in `webui/console/`. It is a browser GUI, not a native desktop window. The experimental Agent Lab static assets live under `webui/static/agent-lab/`.
 
 The existing double-click launchers are part of the supported GUI flow for source checkouts and release packages:
 
@@ -121,6 +125,8 @@ Close launcher mode with the WebUI **Stop local server** control when available,
 ## Deployment and security boundary
 
 Local Docker and launcher paths are for single-user controlled use. Shared/internal-server deployment requires production configuration validation, real secrets, TLS at a trusted reverse proxy, audit retention, backups, and authorised target governance.
+
+Agent Lab is experimental because it can build and run imported code through local Docker. Keep it loopback-only unless production auth, reverse proxy/TLS, audit, and an explicit risk decision are in place.
 
 ```bash
 export VULNORAIQ_ENV=production
@@ -163,6 +169,7 @@ npm run test:webui:hosted
 | Need | Document |
 | --- | --- |
 | User guide | [`docs/USER_GUIDE.md`](docs/USER_GUIDE.md) |
+| Experimental Agent Lab | [`docs/AGENT_LAB.md`](docs/AGENT_LAB.md), [`docs/AGENT_LAB_PLAN.md`](docs/AGENT_LAB_PLAN.md) |
 | Documentation index and status | [`docs/README.md`](docs/README.md), [`docs/IMPLEMENTATION_STATUS.md`](docs/IMPLEMENTATION_STATUS.md) |
 | Docker lab | [`docs/DOCKER_TESTING.md`](docs/DOCKER_TESTING.md) |
 | Deployment and operations | [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md), [`docs/RUNBOOK.md`](docs/RUNBOOK.md), [`docs/INCIDENT_RESPONSE.md`](docs/INCIDENT_RESPONSE.md) |

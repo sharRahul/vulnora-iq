@@ -15,6 +15,12 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- Experimental Agent Lab WebUI flow for importing real AI-agent projects, configuring LLM provider settings, choosing CPU/GPU Docker runtime options, building/running agents, auto-creating runtime targets, and launching authorised scans.
+- Agent Lab backend APIs under `/api/agent-lab/*` for project import, analysis, Dockerfile generation, deployment, deployment inventory, and cleanup.
+- Agent Lab static page served at `/agent-lab` and embedded in the React Project Importer workspace.
+- Agent Lab documentation in `docs/AGENT_LAB.md` and implementation plan in `docs/AGENT_LAB_PLAN.md`.
+- Package-data inclusion for `webui/static/agent-lab/*`.
+- Agent Lab smoke tests for project ID policy and provider environment mapping.
 - OWASP AI Testing Guide foundation suite and single-test Web UI profiles covering GenAI red teaming methodology, CSA agentic AI red teaming, OWASP AI Exchange controls, AI Security and Privacy design, AI VSS scoring review, and NIST AI 100-2 adversarial ML taxonomy alignment.
 - Safe `payloads/ai_testing_guide.yaml` methodology payload library for authorised local/internal AI assessment runs.
 - Local OWASP lab AI agent target templates for HTTP JSON, chat-completions-compatible, Ollama generate, and webhook JSON contracts.
@@ -43,6 +49,9 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- Security policy and safety model now explicitly describe Agent Lab as an experimental local-lab capability that requires local Docker build/run access.
+- Dockerfile and Compose configuration now prepare Agent Lab import roots and host gateway connectivity for local LLM providers.
+- WebUI Project Importer now opens the Agent Lab workflow.
 - Web UI styling now honours the user's system light/dark appearance preference through `prefers-color-scheme`.
 - Project license changed from MIT to Apache License 2.0.
 - Package metadata now declares `Apache-2.0`, includes license files, PyPI classifiers, project URLs, keywords, and a release extra for package builds.
@@ -61,6 +70,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- Browser ZIP upload is wired to the Agent Lab archive import endpoint.
 - Web UI catalog toolbar overflow where the `Showing ... options` badge could clip into the neighbouring panel in narrow columns.
 - `scripts/run_scan.py` jobs-show typing issue that could fail `mypy` by reusing a loop variable for an optional job lookup.
 - Stale documentation index entries that pointed readers toward superseded planning notes.
@@ -74,6 +84,7 @@ All notable changes to this project will be documented in this file.
 ### Notes
 
 - VulnoraIQ findings remain framework evidence requiring human review.
+- Experimental Agent Lab imports and runs real operator-provided code. Review imported source and generated evidence before treating results as confirmed.
 - This release does not claim certified VAPT-grade assurance or independently validated real-environment GenAI detection coverage.
 - Launcher and default Docker Compose modes are intended for local laptop/workstation use only; exposed or shared deployments must use production mode with auth enabled and production configuration validation.
 - Platform release artifacts use native formats where practical: Windows `.zip`, Linux `.tar.gz`, and macOS `.dmg`.
