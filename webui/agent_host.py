@@ -13,10 +13,11 @@ CONFIG_ROOT = Path(os.getenv("VULNORAIQ_CONFIG_DIR", "config"))
 TEMPLATES_PATH = CONFIG_ROOT / "agent_templates.yaml"
 AGENT_LABEL = "vulnoraiq.agent"
 AGENT_NETWORK = "vulnoraiq_vulnoraiq-lab"
+DOCKER_TIMEOUT = int(os.getenv("VULNORAIQ_DOCKER_COMMAND_TIMEOUT", "600"))
 
 
 def _run_docker(args: list[str]) -> tuple[str, str]:
-    result = subprocess.run(["docker"] + args, capture_output=True, text=True, timeout=30)
+    result = subprocess.run(["docker"] + args, capture_output=True, text=True, timeout=DOCKER_TIMEOUT)
     if result.returncode != 0:
         raise RuntimeError(result.stderr.strip() or f"docker {' '.join(args)} failed")
     return result.stdout.strip(), result.stderr.strip()
