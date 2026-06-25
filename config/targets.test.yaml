@@ -1,0 +1,26 @@
+# Test-only target configuration.
+# Normal runtime uses config/targets.yaml, which remains empty until a user adds real targets.
+# This file is enabled only when tests or CI set VULNORAIQ_TARGET_CONFIG=targets.test.yaml
+# and VULNORAIQ_ALLOW_TEST_FIXTURE_TARGETS=true.
+
+targets:
+  demo:
+    name: Deterministic Test Fixture Target
+    type: test_fixture
+    environment: test_fixture
+    authorisation_required: false
+    safety_profile: local_lab_safe
+    owner:
+      name: VulnoraIQ Test Suite
+      contact: test@example.invalid
+
+  custom_http_agent:
+    name: Placeholder Custom HTTP Agent
+    type: custom_http_agent
+    endpoint: https://example.invalid/ai-agent
+    environment: test_fixture
+    authorisation_required: true
+    safety_profile: local_lab_safe
+    owner:
+      name: VulnoraIQ Test Suite
+      contact: test@example.invalid
