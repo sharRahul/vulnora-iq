@@ -1,15 +1,15 @@
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-LAUNCHERS = [
-    ROOT / "launch-vulnoraiq-webui.bat",
-    ROOT / "launch-vulnoraiq-webui.command",
-    ROOT / "launch-vulnoraiq-webui.sh",
+DOCKER_LAB_LAUNCHERS = [
+    ROOT / "launch-vulnoraiq-docker-lab.bat",
+    ROOT / "launch-vulnoraiq-docker-lab.command",
+    ROOT / "launch-vulnoraiq-docker-lab.sh",
 ]
 
 
-def test_launchers_run_docker_compose_directly() -> None:
-    for launcher in LAUNCHERS:
+def test_docker_lab_launchers_run_docker_compose_directly() -> None:
+    for launcher in DOCKER_LAB_LAUNCHERS:
         content = launcher.read_text(encoding="utf-8")
         assert "docker compose build" in content
         assert "docker compose up -d" in content
