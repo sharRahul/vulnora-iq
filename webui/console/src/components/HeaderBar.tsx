@@ -45,7 +45,7 @@ export function HeaderBar({
     : "Idle";
 
   return (
-    <header className="flex min-h-14 shrink-0 flex-wrap items-center gap-2 border-b border-border bg-card px-3 py-2 sm:gap-3 sm:px-4">
+    <header className="relative flex min-h-14 shrink-0 flex-wrap items-center gap-2 border-b border-border bg-card px-3 py-2 sm:gap-3 sm:px-4">
       <div className="ui-title-row min-w-[150px] shrink-0">
         <span className="ui-icon size-8 rounded-md bg-primary text-primary-foreground">
           <ShieldHalf className="size-5" />
@@ -125,6 +125,14 @@ export function HeaderBar({
           {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
         </Button>
       </div>
+      {scanning && (
+        <div className="absolute bottom-0 left-0 right-0 h-[2px] overflow-hidden bg-border">
+          <div
+            className="h-full bg-[var(--accent-sage)] transition-[width] duration-500 ease-out"
+            style={{ width: `${Math.max(scanProgressPercent, 3)}%` }}
+          />
+        </div>
+      )}
     </header>
   );
 }

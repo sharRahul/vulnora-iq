@@ -47,6 +47,11 @@ export function RemediatedCodeBlock({
         <span className="text-xs font-bold uppercase tracking-wide text-[var(--accent-sage)]">
           AI-Remediated Secure Code
         </span>
+        {remediation.secureCode.language && (
+          <span className="rounded border border-border bg-card/80 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
+            {remediation.secureCode.language}
+          </span>
+        )}
         <span
           className={cn("ml-auto inline-flex items-center gap-1 text-[11px] font-bold", confidenceTone)}
           title="Remediation confidence"

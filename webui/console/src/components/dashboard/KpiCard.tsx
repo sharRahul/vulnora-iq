@@ -34,7 +34,7 @@ export function KpiCard({
           {label}
         </span>
         <span
-          className="ui-icon size-8 rounded-md border border-border"
+          className="ui-icon size-8 rounded-md border border-border transition-transform duration-200 group-hover:scale-110"
           style={{ color: accent, background: `color-mix(in srgb, ${accent} 12%, transparent)` }}
         >
           <Icon className="size-4" />

@@ -98,15 +98,15 @@ function PaneFooter({
   onClick: () => void;
 }) {
   return (
-    <div className="shrink-0 border-t border-border p-2">
+    <div className="shrink-0 border-t border-border bg-canvas/40 p-1.5">
       <Button
         variant="ghost"
         size="sm"
-        className="w-full justify-start text-muted-foreground"
+        className="w-full justify-start gap-2 text-xs text-muted-foreground hover:text-foreground"
         onClick={onClick}
       >
         {icon}
-        {label}
+        <span>{label}</span>
       </Button>
     </div>
   );

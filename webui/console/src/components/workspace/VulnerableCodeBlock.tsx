@@ -10,6 +10,11 @@ export function VulnerableCodeBlock({ block }: { block: CodeBlock }) {
         <span className="text-xs font-bold uppercase tracking-wide text-severity-high">
           Vulnerable Code
         </span>
+        {block.language && (
+          <span className="rounded border border-border bg-card/80 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
+            {block.language}
+          </span>
+        )}
         <span className="ml-auto truncate font-mono text-[11px] text-muted-foreground">
           {block.filename}
         </span>

@@ -20,7 +20,7 @@ export function ChatMessage({ message }: { message: ChatMessageType }) {
         className={cn(
           "max-w-[82%] rounded-lg border px-3 py-2 text-sm leading-relaxed",
           isUser
-            ? "border-border bg-muted text-foreground"
+            ? "border-transparent bg-primary text-primary-foreground"
             : "border-border bg-card text-foreground",
         )}
       >

@@ -76,12 +76,17 @@ export function AssetFindingCard({
                   onClick={() => onSelectFinding(f.id)}
                   aria-current={selected}
                   className={cn(
-                    "group flex w-full items-center gap-2 rounded px-2 py-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                    selected ? "bg-muted" : "hover:bg-muted/60",
+                    "group flex w-full items-center gap-2 rounded px-2 py-2.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                    selected
+                      ? "bg-muted shadow-[inset_2px_0_0_0_var(--ring)]"
+                      : "hover:bg-muted/60",
                   )}
                 >
                   <span
-                    className="h-8 w-1 shrink-0 rounded-full"
+                    className={cn(
+                      "shrink-0 self-stretch rounded-full transition-all duration-200",
+                      selected ? "w-[3px]" : "w-1 opacity-50 group-hover:opacity-90",
+                    )}
                     style={{ background: style.cssVar }}
                   />
                   <span className="min-w-0 flex-1">

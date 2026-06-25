@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
-import { Layers, Search } from "lucide-react";
+import { Layers, Search, X } from "lucide-react";
 import type { Asset, Finding } from "@/types";
 import { SEVERITY_ORDER } from "@/lib/severity";
+import { cn } from "@/lib/utils";
 import { EmptyState } from "@/components/EmptyState";
 import { AssetFindingCard } from "./AssetFindingCard";
 
@@ -73,8 +74,20 @@ export function AssetNavigationPane({
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Filter assets…"
             aria-label="Filter assets"
-            className="h-8 w-full rounded-md border border-border bg-canvas pl-8 pr-2 text-xs text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className={cn(
+              "h-8 w-full rounded-md border border-border bg-canvas pl-8 text-xs text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              query ? "pr-7" : "pr-2",
+            )}
           />
+          {query && (
+            <button
+              onClick={() => setQuery("")}
+              aria-label="Clear filter"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <X className="size-3.5" />
+            </button>
+          )}
         </div>
         <div className="flex items-center gap-1.5">
           <span className="text-[11px] font-medium text-muted-foreground">Sort</span>
@@ -84,11 +97,12 @@ export function AssetNavigationPane({
                 key={key}
                 onClick={() => setSort(key)}
                 aria-pressed={sort === key}
-                className={
+                className={cn(
+                  "rounded-sm border px-2 py-1 text-[11px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                   sort === key
-                    ? "rounded-sm border border-primary bg-primary px-2 py-1 text-[11px] font-semibold text-primary-foreground"
-                    : "rounded-sm border border-border bg-card px-2 py-1 text-[11px] font-medium text-muted-foreground hover:bg-muted"
-                }
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground",
+                )}
               >
                 {sortLabels[key]}
               </button>
