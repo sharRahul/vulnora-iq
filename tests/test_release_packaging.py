@@ -6,10 +6,18 @@ from pathlib import Path
 from scripts.build_platform_release_package import build_platform_package
 
 
-def test_double_click_launchers_use_bootstrap() -> None:
-    assert "scripts\\bootstrap_launch.py" in Path("launch-vulnoraiq-webui.bat").read_text(encoding="utf-8")
-    assert "scripts/bootstrap_launch.py" in Path("launch-vulnoraiq-webui.command").read_text(encoding="utf-8")
-    assert "scripts/bootstrap_launch.py" in Path("launch-vulnoraiq-webui.sh").read_text(encoding="utf-8")
+def test_double_click_launchers_use_docker_directly() -> None:
+    for launcher in [
+        Path("launch-vulnoraiq-webui.bat"),
+        Path("launch-vulnoraiq-webui.command"),
+        Path("launch-vulnoraiq-webui.sh"),
+    ]:
+        text = launcher.read_text(encoding="utf-8")
+        assert "docker compose build" in text
+        assert "docker compose up -d" in text
+        assert "docker compose ps" in text
+        assert "bootstrap_launch.py" not in text
+
     bootstrap = Path("scripts/bootstrap_launch.py").read_text(encoding="utf-8")
     assert "docker" in bootstrap
     assert "compose" in bootstrap
@@ -18,7 +26,7 @@ def test_double_click_launchers_use_bootstrap() -> None:
     assert "webbrowser.open" in bootstrap
 
 
-def test_windows_release_package_contains_bootstrap_and_start_here(tmp_path: Path) -> None:
+def test_windows_release_package_contains_docker_only_launcher_and_start_here(tmp_path: Path) -> None:
     package = build_platform_package("windows", version="9.9.9-test", output_dir=tmp_path)
     assert package.output.exists()
     with zipfile.ZipFile(package.output) as archive:
@@ -33,7 +41,9 @@ def test_windows_release_package_contains_bootstrap_and_start_here(tmp_path: Pat
     assert "Double-click quick start" in start_here
     assert "Docker" in start_here
     assert "SHA256SUMS.txt" in start_here
-    assert "scripts\\bootstrap_launch.py" in launcher
+    assert "docker compose build" in launcher
+    assert "docker compose up -d" in launcher
+    assert "bootstrap_launch.py" not in launcher
 
 
 def test_release_workflow_produces_signed_attested_bundle() -> None:
