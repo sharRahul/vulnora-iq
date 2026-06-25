@@ -7,12 +7,17 @@ import pytest
 from webui.hosted_server import validate_scan_request
 
 
-def test_validate_scan_request_accepts_demo_defaults() -> None:
-    target, profile, authorised = validate_scan_request({})
+def test_validate_scan_request_requires_explicit_target() -> None:
+    with pytest.raises(ValueError, match="target is required"):
+        validate_scan_request({})
+
+
+def test_validate_scan_request_accepts_explicit_test_fixture_target() -> None:
+    target, profile, authorised = validate_scan_request({"target": "demo", "profile": "baseline", "authorised": True})
 
     assert target == "demo"
     assert profile == "baseline"
-    assert authorised is False
+    assert authorised is True
 
 
 def test_validate_scan_request_rejects_unknown_target() -> None:
@@ -24,12 +29,11 @@ def test_run_scan_job_generates_webui_outputs(tmp_path, monkeypatch) -> None:
     from webui.hosted_server import run_scan_job
 
     monkeypatch.setattr("webui.hosted_server.OUTPUT_ROOT", Path(tmp_path))
-    # Use a fresh in-process JSON store for testing
     from webui.persistent_jobs import PersistentJobStore
 
     store = PersistentJobStore(tmp_path / "jobs.json")
     monkeypatch.setattr("webui.hosted_server.JOB_STORE", store)
-    job = store.create("demo", "baseline", False)
+    job = store.create("demo", "baseline", True)
 
     run_scan_job(job.id)
 
