@@ -48,7 +48,7 @@ export function RemediatedCodeBlock({
           AI-Remediated Secure Code
         </span>
         {remediation.secureCode.language && (
-          <span className="rounded border border-border bg-card/80 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
+          <span className="rounded border border-border bg-card px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
             {remediation.secureCode.language}
           </span>
         )}
@@ -84,7 +84,7 @@ export function RemediatedCodeBlock({
           </Button>
         </div>
 
-        <div className="rounded-md border border-border bg-muted/60 p-3">
+        <div className="rounded-md border border-border bg-muted p-3">
           <p className="text-xs font-bold text-foreground">Why this fix works</p>
           <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
             {remediation.rationale}

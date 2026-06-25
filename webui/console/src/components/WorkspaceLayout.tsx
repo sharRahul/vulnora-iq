@@ -98,7 +98,7 @@ function PaneFooter({
   onClick: () => void;
 }) {
   return (
-    <div className="shrink-0 border-t border-border bg-canvas/40 p-1.5">
+    <div className="shrink-0 border-t border-border bg-muted p-1.5">
       <Button
         variant="ghost"
         size="sm"

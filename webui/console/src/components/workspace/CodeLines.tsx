@@ -40,7 +40,7 @@ export function CodeLines({ block, accent }: CodeLinesProps) {
                     ),
                 )}
               >
-                <span className="w-8 shrink-0 select-none text-right text-muted-foreground/70">
+                <span className="w-8 shrink-0 select-none text-right text-muted-foreground opacity-70">
                   {lineNo}
                 </span>
                 <span className="code-wrap flex-1 text-foreground">

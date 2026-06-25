@@ -167,7 +167,7 @@ export function AgentHost() {
             {loading ? <p className="text-sm text-muted-foreground">Loading agents…</p> : null}
             {!loading && agents.length === 0 ? (
               <div className="rounded-xl border border-border bg-card p-8 text-center shadow-card">
-                <Server className="mx-auto mb-3 size-10 text-muted-foreground/50" />
+                <Server className="mx-auto mb-3 size-10 text-muted-foreground opacity-50" />
                 <p className="text-sm text-muted-foreground">No agents deployed. Use the panel on the right to deploy from a template or custom image.</p>
               </div>
             ) : null}

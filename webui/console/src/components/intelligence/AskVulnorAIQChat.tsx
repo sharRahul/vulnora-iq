@@ -147,7 +147,7 @@ export function AskVulnorAIQChat({ finding }: { finding: Finding }) {
           <span className="text-muted-foreground">{controls.model} · {controls.temperature.toFixed(1)}</span>
         </button>
         {showControls ? (
-          <div className="mt-3 space-y-2 rounded-md border border-border bg-muted/50 p-3 text-xs">
+          <div className="mt-3 space-y-2 rounded-md border border-border bg-muted p-3 text-xs">
             <label className="block font-semibold">Model
               <select value={controls.model} onChange={(e) => setControls({ ...controls, model: e.target.value })} className="input mt-1 text-xs">
                 {allowedModels.map((model) => <option key={model}>{model}</option>)}

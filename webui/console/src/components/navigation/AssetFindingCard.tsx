@@ -79,7 +79,7 @@ export function AssetFindingCard({
                     "group flex w-full items-center gap-2 rounded px-2 py-2.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                     selected
                       ? "bg-muted shadow-[inset_2px_0_0_0_var(--ring)]"
-                      : "hover:bg-muted/60",
+                      : "hover:bg-muted",
                   )}
                 >
                   <span

@@ -11,7 +11,7 @@ export function VulnerableCodeBlock({ block }: { block: CodeBlock }) {
           Vulnerable Code
         </span>
         {block.language && (
-          <span className="rounded border border-border bg-card/80 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
+          <span className="rounded border border-border bg-card px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
             {block.language}
           </span>
         )}

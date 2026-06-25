@@ -49,7 +49,7 @@ export function AnalysisWorkspace({
 
   return (
     <div className="flex h-full flex-col">
-      <header className="border-b border-border bg-card/60 p-4">
+      <header className="border-b border-border bg-card p-4">
         <div className="flex flex-wrap items-center gap-2">
           <SeverityBadge severity={finding.severity} withIcon />
           <RiskScoreBadge score={finding.riskScore} size="md" />
@@ -135,7 +135,7 @@ export function AnalysisWorkspace({
               {history.slice(-6).map((entry, index) => {
                 const state = parseState(entry.new_state);
                 return (
-                  <li key={`${entry.id || index}-${entry.timestamp}`} className="rounded-md border border-border bg-muted/60 p-2">
+                  <li key={`${entry.id || index}-${entry.timestamp}`} className="rounded-md border border-border bg-muted p-2">
                     <p className="font-semibold text-foreground">
                       {String(state.status || "updated")} by {entry.actor || "unknown"}
                     </p>

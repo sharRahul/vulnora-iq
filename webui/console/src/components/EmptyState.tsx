@@ -23,7 +23,7 @@ export function EmptyState({
         className,
       )}
     >
-      <div className="flex size-14 items-center justify-center rounded-2xl border border-border bg-muted/60 text-muted-foreground shadow-card">
+      <div className="flex size-14 items-center justify-center rounded-2xl border border-border bg-muted text-muted-foreground shadow-card">
         <Icon className="size-6" />
       </div>
       <div className="space-y-1.5">
