@@ -96,6 +96,9 @@ exclude = ["reports/output", "build", "dist"]
 select = ["E", "F", "I", "UP", "B"]
 ignore = ["E501"]
 
+[tool.ruff.lint.per-file-ignores]
+"scripts/validate_production_testing_readiness.py" = ["E402"]
+
 [tool.mypy]
 python_version = "3.10"
 warn_unused_ignores = true
