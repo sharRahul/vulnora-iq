@@ -49,7 +49,6 @@ _INTERNAL_ADMIN_TOKEN = "vulnoraiq-internal-admin-token"
 
 _MIN_TOKEN_LENGTH = 20
 
-# Proxy identity header names
 _PROXY_HEADER_USER = "X-Authenticated-User"
 _PROXY_HEADER_EMAIL = "X-Authenticated-Email"
 _PROXY_HEADER_GROUPS = "X-Authenticated-Groups"
@@ -63,29 +62,7 @@ _DEFAULT_ROLE_MAPPING: dict[str, str] = {
 
 
 class WebAuthManager:
-    """Role-aware auth manager driven by environment variables.
-
-    Auth is enabled by default (VULNORAIQ_AUTH_ENABLED=true).
-    Set VULNORAIQ_AUTH_ENABLED=false to disable (not recommended for production).
-
-    Auth modes (VULNORAIQ_AUTH_MODE):
-      token (default) - env var token matching with constant-time comparison
-      trusted_proxy  - identity headers from trusted reverse proxy
-
-    Token env vars (mutually exclusive with file config):
-      VULNORAIQ_ADMIN_TOKEN  - full access
-      VULNORAIQ_ANALYST_TOKEN - view access
-      VULNORAIQ_VIEWER_TOKEN  - view-only access
-
-    Falls back to config/web_users.yaml if no token env vars are set.
-    The file-based fallback is NOT allowed in production mode.
-
-    Production mode (VULNORAIQ_ENV=production):
-      - Auth must be enabled
-      - At least VULNORAIQ_ADMIN_TOKEN must be set and meet minimum length
-      - File-based users are rejected
-      - Internal admin token is disabled
-    """
+    """Role-aware auth manager driven by environment variables."""
 
     def __init__(self, path: str | Path = "config/web_users.yaml") -> None:
         self.path = Path(path)
@@ -191,8 +168,8 @@ class WebAuthManager:
                 return AuthPrincipal(str(user.get("username", "user")), role, _DEFAULT_PERMISSIONS.get(role, set()), True)
         return None
 
-    def authenticate_proxy_headers(self, headers: dict[str, str]) -> AuthPrincipal | None:
-        if self.auth_mode() != "trusted_proxy":
+    def authenticate_proxy_identity(self, headers: dict[str, str], trusted: bool) -> AuthPrincipal | None:
+        if not trusted:
             return None
         username = (headers.get(_PROXY_HEADER_USER) or headers.get(_PROXY_HEADER_EMAIL) or "").strip()
         if not username:
@@ -207,7 +184,20 @@ class WebAuthManager:
             else:
                 raw_role = "viewer"
         role = _DEFAULT_ROLE_MAPPING.get(raw_role, "viewer")
-        return AuthPrincipal(username, role, _DEFAULT_PERMISSIONS.get(role, _DEFAULT_PERMISSIONS["viewer"]), True)
+        return AuthPrincipal(f"proxy:{username}", role, _DEFAULT_PERMISSIONS.get(role, _DEFAULT_PERMISSIONS["viewer"]), True)
+
+    def authenticate_proxy_headers(self, headers: dict[str, str]) -> AuthPrincipal | None:
+        if self.auth_mode() != "trusted_proxy":
+            return None
+        principal = self.authenticate_proxy_identity(headers, trusted=True)
+        if principal is None:
+            return None
+        return AuthPrincipal(
+            principal.username.removeprefix("proxy:"),
+            principal.role,
+            principal.permissions,
+            principal.authenticated,
+        )
 
     def permissions_for_role(self, role: str) -> set[str]:
         return set(_DEFAULT_PERMISSIONS.get(role, set()))
