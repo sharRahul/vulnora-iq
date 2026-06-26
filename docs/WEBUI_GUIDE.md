@@ -19,7 +19,7 @@ Open <http://localhost:8787>.
 | --- | --- |
 | Dashboard / overview | Shows high-level security and assessment status using React console data models and live backend scan progress. |
 | Target management | Loads configured/runtime targets, supports search and environment filters, shows readiness metrics and status pills, validates targets, saves/deletes runtime targets, launches authorised scans, and refreshes recent jobs. |
-| Project Importer / Agent Lab | Embeds the experimental `/agent-lab` workflow for importing real agent projects, configuring providers, building/running containers, creating targets, and launching authorised scans. |
+| Project Importer / Agent Lab | Embeds the experimental `/agent-lab` workflow for importing real agent projects by local folder upload, ZIP upload, Git import, or mapped folder refresh; configuring providers; building/running containers; creating targets; and launching authorised scans. |
 | Findings and intelligence | Provides analyst-facing panels for findings, triage context, persisted remediation/status actions, finding history, and assistant-backed analysis. |
 | Assessment options | Uses configured profiles and single-test options from `config/attack_profiles.yaml`. |
 
@@ -28,6 +28,8 @@ Open <http://localhost:8787>.
 The WebUI is wired to target management, scan launch/progress, finding actions/history, assistant chat/config, and experimental Agent Lab endpoints.
 
 Agent Lab write actions require authentication, `manage_runtime`, and CSRF protection. The scan launch path keeps the non-demo authorisation guard. Target validation uses the same target adapter/connectivity logic as the CLI. Assistant requests require authentication and CSRF protection and pass model controls from the React panel to the backend orchestrator.
+
+Local folder upload is intentionally browser-mediated: the user selects a folder, the browser packages the selected files, and Agent Lab imports them through the archive import API. The backend does not receive arbitrary local filesystem paths.
 
 See [`AGENT_LAB.md`](AGENT_LAB.md) for the Agent Lab API and operator workflow.
 
@@ -47,15 +49,16 @@ Current future maturity work is focused on enterprise identity, SIEM/SOAR integr
 
 ## Operator flow
 
-1. Start Docker Compose and open the WebUI.
+1. Start Desktop Mode or Docker Lab Mode and open the WebUI.
 2. Go to the target workspace for existing targets, or Project Importer / Agent Lab for imported real agents.
-3. Search or filter for the target or project.
-4. Validate target connectivity, or build/run an Agent Lab project to generate a target.
-5. Review the readiness checklist.
-6. Select an assessment profile or focused single-test option.
-7. Confirm authorisation for non-demo targets.
-8. Launch the scan.
-9. Review recent jobs, findings, live progress, assistant guidance, and report artifacts.
+3. Import the agent through local folder upload, ZIP upload, Git import, or mapped folder refresh.
+4. Search or filter for the target or project.
+5. Validate target connectivity, or build/run an Agent Lab project to generate a target.
+6. Review the readiness checklist.
+7. Select an assessment profile or focused single-test option.
+8. Confirm authorisation for non-demo targets.
+9. Launch the scan.
+10. Review recent jobs, findings, live progress, assistant guidance, and report artifacts.
 
 ## Development flow
 
