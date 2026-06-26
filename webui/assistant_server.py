@@ -224,6 +224,11 @@ def main() -> None:
     parser.add_argument("--production", action="store_true", help="Enable production mode validation")
     parser.add_argument("--skip-production-checks", action="store_true", help="Skip production config validation")
     args = parser.parse_args()
+    try:
+        base.AUTH_MANAGER.validate_runtime_auth(args.host)
+    except RuntimeError as exc:
+        LOGGER.error("auth_mode_validation_failed: %s", exc)
+        raise SystemExit(1) from exc
     if args.production or base.AUTH_MANAGER.is_production():
         try:
             base.AUTH_MANAGER._validate_production()
