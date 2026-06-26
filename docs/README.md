@@ -28,6 +28,8 @@ This folder documents the current VulnoraIQ `0.2.0` codebase.
 | --- | --- |
 | Project overview and quick start | [`../README.md`](../README.md) |
 | End-to-end user guide | [`USER_GUIDE.md`](USER_GUIDE.md) |
+| Manual QA regression test plan | [`MANUAL_TEST_PLAN.md`](MANUAL_TEST_PLAN.md) |
+| Prompt for Codex/Claude Code/manual LLM testers | [`LLM_MANUAL_TESTING_PROMPT.md`](LLM_MANUAL_TESTING_PROMPT.md) |
 | Desktop vs Docker Lab run modes | [`RUN_MODES_DESKTOP_AND_DOCKER_LAB.md`](RUN_MODES_DESKTOP_AND_DOCKER_LAB.md) |
 | Experimental Agent Lab workflow | [`AGENT_LAB.md`](AGENT_LAB.md) |
 | Experimental Agent Lab implementation plan | [`AGENT_LAB_PLAN.md`](AGENT_LAB_PLAN.md) |
@@ -83,16 +85,19 @@ When code changes alter deployment posture, target support, WebUI behaviour, rel
 
 1. `README.md`
 2. `docs/README.md`
-3. `docs/IMPLEMENTATION_STATUS.md`
-4. `docs/DOCKER_TESTING.md`
-5. `docs/WEBUI_GUIDE.md`
-6. `docs/CLI_GUIDE.md`
-7. `docs/SAFETY_MODEL.md`
-8. `docs/TARGET_CONFIGURATION.md`
-9. `docs/PRODUCTION_READINESS_SCORECARD.md`
-10. `docs/PRODUCTION_HARDENING_BACKLOG.md`
-11. `docs/ASSESSMENT_ASSURANCE.md`
-12. `SECURITY.md`
-13. `CHANGELOG.md`
+3. `docs/USER_GUIDE.md`
+4. `docs/MANUAL_TEST_PLAN.md`
+5. `docs/LLM_MANUAL_TESTING_PROMPT.md`
+6. `docs/IMPLEMENTATION_STATUS.md`
+7. `docs/DOCKER_TESTING.md`
+8. `docs/WEBUI_GUIDE.md`
+9. `docs/CLI_GUIDE.md`
+10. `docs/SAFETY_MODEL.md`
+11. `docs/TARGET_CONFIGURATION.md`
+12. `docs/PRODUCTION_READINESS_SCORECARD.md`
+13. `docs/PRODUCTION_HARDENING_BACKLOG.md`
+14. `docs/ASSESSMENT_ASSURANCE.md`
+15. `SECURITY.md`
+16. `CHANGELOG.md`
 
 If a capability is complete only for the current local/internal scope, mark that scope clearly. Do not convert framework coverage, synthetic harness coverage, or successful local scans into certified assurance claims.
