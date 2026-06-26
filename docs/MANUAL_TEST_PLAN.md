@@ -12,7 +12,9 @@ Manual testing must cover:
 - Advanced Docker Lab Mode: full Docker Compose lab with the WebUI inside `vulnoraiq-web`.
 - WebUI auth boundaries: `VULNORAIQ_AUTH_MODE=local_admin` for local single-user/admin operation, and `VULNORAIQ_AUTH_MODE=token` for production/shared internal use.
 - WebUI pages: dashboard, targets, scans, agents, projects, and Agent Lab.
-- Agent Lab import/build/deploy/remove flow with a safe local test agent.
+- Agent Lab import paths: Local folder upload, ZIP upload, Git import, and mapped `./projects/<agent-name>/` refresh.
+- Agent Lab build/deploy/remove flow with a safe local test agent.
+- Managed-vs-mapped project behaviour, including Dockerfile generation only for writable managed imports.
 - Scan execution against a safe local/mock target.
 - Reports, evidence, audit logs, and persistence.
 - Release/package smoke checks.
@@ -21,12 +23,13 @@ Manual testing must cover:
 ## Test rules
 
 - Start from a clean working tree.
-- Record OS, Python, Docker, Docker Compose, Node/npm, branch, and commit SHA.
+- Record OS, browser, Python, Docker, Docker Compose, Node/npm, branch, and commit SHA.
 - Do not mark a test as passed unless it was actually executed.
 - Do not hide failures or convert them into documentation-only notes.
 - Do not change product code until the failure is reproduced and root cause is understood.
 - Capture command output, server logs, browser console errors, screenshots, and report paths.
 - Do not test third-party targets.
+- Use only safe local test agents and local/mock targets.
 
 ## Environment capture
 
@@ -45,12 +48,52 @@ node --version || true
 npm --version || true
 ```
 
+Also record:
+
+- Browser name/version used for WebUI testing.
+- Whether browser folder selection is available for Local folder upload.
+- Docker Desktop/Engine status.
+- Host OS path where the repository was checked out.
+
 Expected result:
 
 - Git working tree is clean before manual testing.
 - Python is 3.10 or newer.
 - Docker Engine or Docker Desktop is running.
 - Docker Compose v2 is available.
+- A modern browser is available for WebUI and Agent Lab tests.
+
+## Safe local test agent fixture
+
+Use this fixture for Agent Lab import/build/deploy tests. Create it outside the repo root or under a temporary ignored workspace such as `.manual-test-work/`.
+
+```bash
+mkdir -p .manual-test-work/safe-echo-agent
+cat > .manual-test-work/safe-echo-agent/app.py <<'PY'
+from fastapi import FastAPI
+from pydantic import BaseModel
+
+app = FastAPI()
+
+class Prompt(BaseModel):
+    prompt: str = ""
+
+@app.get("/healthz")
+def healthz():
+    return {"status": "ok"}
+
+@app.post("/")
+def echo(body: Prompt):
+    return {"response": "echo:" + body.prompt[:80]}
+PY
+cat > .manual-test-work/safe-echo-agent/requirements.txt <<'REQ'
+fastapi
+uvicorn
+pydantic
+REQ
+```
+
+The fixture must not call third-party APIs. It is safe for CPU-only local Docker execution.
 
 ## Test matrix
 
@@ -59,8 +102,8 @@ Expected result:
 | MT-001 | Install | Editable install and dependency check | Install succeeds and `pip check` is clean. |
 | MT-002 | Static validation | Lint, type check, tests | `ruff`, `mypy`, and `pytest` pass, or failures are documented. |
 | MT-003 | Project validators | Metadata, mappings, readiness | Validators pass or expected production-env failures are documented. |
-| MT-010 | Documentation | README and docs consistency | Docs agree on run modes, auth mode, output paths, and assurance boundary. |
-| MT-020 | Desktop Mode | Start native launcher | WebUI runs on host loopback and no `vulnoraiq-web` container is created. |
+| MT-010 | Documentation | README and docs consistency | Docs agree on run modes, auth mode, output paths, Agent Lab import paths, and assurance boundary. |
+| MT-020 | Desktop Mode | Start native launcher | WebUI runs on host loopback, expected folders are created, and no `vulnoraiq-web` container is created. |
 | MT-021 | Desktop Mode | Health/session endpoints | `/healthz` is healthy and `/api/session` resolves `local-admin` admin. |
 | MT-022 | Desktop Mode | WebUI pages | Dashboard, targets, scans, agents, projects, and Agent Lab load without unexpected auth errors. |
 | MT-030 | Docker Lab | Compose startup | `vulnoraiq-web` is healthy and host port is loopback-published only. |
@@ -71,10 +114,14 @@ Expected result:
 | MT-043 | Auth boundary | Production token mode | Missing token fails; valid token authenticates admin. |
 | MT-050 | WebUI | Clean state and page navigation | No fake data, raw JSON auth errors, broken icons, or major layout defects. |
 | MT-060 | Scan workflow | Safe local baseline scan | Scan starts, emits events, completes/fails clearly, and produces expected artifacts. |
-| MT-070 | Agent Lab | Import/deploy/remove safe agent | Project imports, container deploys, target is created, and cleanup works. |
+| MT-070 | Agent Lab | Import panel and project analysis | Agent Lab exposes Git URL, ZIP upload, Local folder upload, and Mapped folder tabs; project analysis works. |
+| MT-071 | Agent Lab | Local folder upload | Browser folder picker imports a selected safe agent folder into managed Agent Lab storage. |
+| MT-072 | Agent Lab | Mapped `./projects/` discovery | Desktop/Docker Lab mapped project folders appear after refresh and are marked mapped/read-only. |
+| MT-073 | Agent Lab | Build/deploy/remove safe managed agent | Managed import builds/deploys, auto-creates target, and cleanup works. |
+| MT-074 | Agent Lab | Mapped project without Dockerfile | Read-only mapped project without Dockerfile fails with a clear actionable message. |
 | MT-080 | Reports | Evidence and assurance wording | Reports are readable, parseable, redacted where applicable, and do not overclaim assurance. |
-| MT-090 | Persistence | Desktop and Docker Lab persistence | Jobs/reports persist across restart and are removed only by explicit reset. |
-| MT-100 | Negative tests | CSRF, bad target, wrong token, rate limit | Server fails closed with clear errors and no traceback. |
+| MT-090 | Persistence | Desktop and Docker Lab persistence | Jobs/reports/Agent Lab data persist across restart and are removed only by explicit reset. |
+| MT-100 | Negative tests | CSRF, bad target, wrong token, invalid import, rate limit | Server fails closed with clear errors and no traceback. |
 | MT-110 | Release | Release package smoke test | Launchers, docs, config examples, and static assets are present; secrets/local artifacts are absent. |
 
 ## Detailed procedures
@@ -129,8 +176,13 @@ Review:
 - `README.md`
 - `docs/README.md`
 - `docs/USER_GUIDE.md`
+- `docs/WEBUI_GUIDE.md`
+- `docs/AGENT_LAB.md`
+- `docs/RUN_MODES_DESKTOP_AND_DOCKER_LAB.md`
 - `docs/WEBUI_SINGLE_USER_MODE.md`
 - `docs/ASSESSMENT_ASSURANCE.md`
+- `docs/MANUAL_TEST_PLAN.md`
+- `docs/LLM_MANUAL_TESTING_PROMPT.md`
 - `config/web_users.yaml`
 - `.env.docker.example`
 - `docker-compose.yml`
@@ -139,6 +191,9 @@ Pass criteria:
 
 - Desktop Mode is documented as native-host WebUI plus Docker-sandboxed agents.
 - Docker Lab Mode is documented as full Docker Compose.
+- Desktop Mode folder contract includes `scan-reports/`, `agent-lab/projects/`, and optional mapped `projects/`.
+- Agent Lab Local folder upload is documented as the preferred desktop flow for selecting local source folders through the browser.
+- Agent Lab mapped folders are documented as read-only refresh/discovery folders.
 - Direct local WebUI examples use `VULNORAIQ_AUTH_MODE=local_admin`.
 - Production examples use `VULNORAIQ_ENV=production`, `VULNORAIQ_AUTH_MODE=token`, and `VULNORAIQ_ADMIN_TOKEN`.
 - `VULNORAIQ_AUTH_ENABLED=false` is described only as a backward-compatible alias.
@@ -160,7 +215,8 @@ docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Status}}"
 Pass criteria:
 
 - WebUI listens on `127.0.0.1:8787`.
-- `scan-reports/` and `agent-lab/` are created.
+- `scan-reports/`, `agent-lab/`, `agent-lab/projects/`, and `projects/` are created.
+- Launcher output prints the managed Agent Lab import folder and mapped project folder.
 - No `vulnoraiq-web` container is created by Desktop Mode.
 - Docker containers are created only when sandboxed agents/runtimes are deployed.
 
@@ -209,6 +265,7 @@ Pass criteria:
 - `vulnoraiq-web` is running and healthy.
 - Host port is published as `127.0.0.1:8787:8787`.
 - Container startup accepts `VULNORAIQ_AUTH_MODE=local_admin` with Docker Lab bind acknowledgement.
+- `./projects:/app/projects:ro` exists in the Docker Lab mapping.
 - Logs have no startup traceback.
 
 ### MT-031: Docker Lab session and CLI
@@ -331,30 +388,127 @@ Pass criteria:
 - Artifacts are written to the documented location.
 - Failure, if any, is actionable and not a traceback.
 
-### MT-070: Agent Lab safe agent workflow
+### MT-070: Agent Lab import panel and project analysis
 
-Create or import a minimal safe local agent project. It must expose a deterministic local HTTP endpoint and must not call third-party APIs unless explicitly configured for that test.
-
-Test steps:
-
-1. Open `/agent-lab`.
-2. Import the test project by supported import path.
-3. Review analysis output.
-4. Configure CPU runtime and provider/env values.
-5. Build/deploy the agent.
-6. Confirm the container is running.
-7. Confirm a VulnoraIQ target is auto-created.
-8. Run a safe scan against that target.
-9. Remove deployment and delete project if supported.
+Open `/agent-lab`.
 
 Pass criteria:
 
-- Import succeeds.
-- Build/deploy succeeds or fails with clear actionable error.
+- Import panel exposes these tabs/options: Git URL, ZIP upload, Local folder upload, and Mapped folder.
+- Local folder upload has a browser folder picker and clear managed-storage wording.
+- Mapped folder panel explains `./projects/<agent-name>/` and read-only behaviour.
+- Empty project state explains local folder upload, ZIP/Git import, and mapped folder refresh.
+- Selecting an existing project populates Project Analysis without JavaScript errors.
+
+### MT-071: Agent Lab Local folder upload
+
+Use the safe local test agent fixture.
+
+1. Start Desktop Mode.
+2. Open `/agent-lab`.
+3. Select **Local folder upload**.
+4. Choose `.manual-test-work/safe-echo-agent` in the browser folder picker.
+5. Set Project ID to `safe-echo-agent-local`.
+6. Click **Upload Selected Folder**.
+7. Confirm the project appears in the project list and is selected.
+8. Inspect Project Analysis.
+9. Confirm the project exists under managed storage:
+
+```bash
+find agent-lab/projects/safe-echo-agent-local -maxdepth 2 -type f
+```
+
+Docker Lab equivalent, if tested there:
+
+```bash
+docker compose exec vulnoraiq-web find /data/agent_lab/projects/safe-echo-agent-local -maxdepth 2 -type f
+```
+
+Pass criteria:
+
+- Upload succeeds without requiring manual copy into `./projects/`.
+- The backend does not request or store a raw local filesystem path; it receives selected files via browser upload/archive import.
+- Project source is managed/writable, not mapped/read-only.
+- Analysis detects Python/FastAPI or at least a Python project with port `8000` fallback.
+- Existing duplicate Project ID fails cleanly with a clear message.
+
+### MT-072: Agent Lab mapped `./projects/` discovery
+
+Desktop Mode:
+
+```bash
+mkdir -p projects
+rm -rf projects/safe-echo-agent-mapped
+cp -R .manual-test-work/safe-echo-agent projects/safe-echo-agent-mapped
+```
+
+Then:
+
+1. Open `/agent-lab`.
+2. Select **Mapped folder**.
+3. Click **Refresh Projects**.
+4. Select `safe-echo-agent-mapped`.
+5. Inspect Project Analysis.
+
+Docker Lab equivalent:
+
+```bash
+mkdir -p projects
+rm -rf projects/safe-echo-agent-mapped
+cp -R .manual-test-work/safe-echo-agent projects/safe-echo-agent-mapped
+docker compose up -d
+```
+
+Pass criteria:
+
+- Desktop Mode launcher creates `projects/` even before this test copies anything into it.
+- Mapped project appears after refresh.
+- Project source is shown as mapped/mounted and not managed.
+- Mapped project is treated as read-only by Agent Lab.
+
+### MT-073: Agent Lab build/deploy/remove safe managed agent
+
+Use the `safe-echo-agent-local` project imported by MT-071.
+
+1. Select `safe-echo-agent-local`.
+2. Configure provider as Custom environment only or a local provider that does not require third-party API access.
+3. Select CPU-only runtime.
+4. Keep container port `8000` unless analysis detected a different safe port.
+5. Build/deploy the agent.
+6. Confirm the container is running.
+7. Confirm a VulnoraIQ target is auto-created.
+8. Run a safe scan against that target if environment permits.
+9. Remove deployment and delete project if supported by the UI/API.
+
+Useful checks:
+
+```bash
+docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}" | grep vulnoraiq-agent-lab || true
+curl -s http://127.0.0.1:8000/healthz || true
+```
+
+Pass criteria:
+
+- Managed import can generate or use a Dockerfile for the supported Python/FastAPI fixture.
+- Build/deploy succeeds or fails with a clear actionable error.
 - Target URL is correct for mode:
   - Desktop Mode: published localhost endpoint.
   - Docker Lab Mode: Docker network/container DNS endpoint.
 - Cleanup removes container/deployment metadata.
+
+### MT-074: mapped project without Dockerfile
+
+Use the mapped `safe-echo-agent-mapped` project from MT-072. Ensure it has no Dockerfile.
+
+1. Select `safe-echo-agent-mapped`.
+2. Try to build/deploy it.
+3. Record the error message.
+
+Pass criteria:
+
+- Agent Lab does not silently write a Dockerfile into the mapped/read-only project.
+- Deployment fails with a clear message explaining that mapped projects without Dockerfiles must either add a Dockerfile to the mapped folder or be uploaded/imported into managed Agent Lab storage.
+- No partial container or stale target remains after the failed deployment.
 
 ### MT-080: reports and evidence
 
@@ -373,21 +527,25 @@ Pass criteria:
 Desktop Mode:
 
 1. Run a scan or create a runtime target.
-2. Stop the WebUI.
-3. Restart Desktop Mode.
-4. Confirm prior data is still visible.
+2. Import `safe-echo-agent-local` through Local folder upload.
+3. Stop the WebUI.
+4. Restart Desktop Mode.
+5. Confirm prior scan/report/target data is still visible.
+6. Confirm `agent-lab/projects/safe-echo-agent-local` still exists.
 
 Docker Lab Mode:
 
 1. Run a scan or create a runtime target.
-2. Run `docker compose down`.
-3. Run `docker compose up -d`.
-4. Confirm prior data is still visible.
-5. Run `docker compose down -v` only for full reset.
+2. Import `safe-echo-agent-local` through Local folder upload or ZIP upload.
+3. Run `docker compose down`.
+4. Run `docker compose up -d`.
+5. Confirm prior data is still visible.
+6. Run `docker compose down -v` only for full reset.
 
 Pass criteria:
 
 - Data persists across normal restart.
+- Managed Agent Lab imports persist across normal restart.
 - Data is removed only by explicit volume/data reset.
 
 ### MT-100: negative tests
@@ -397,6 +555,9 @@ Run at least these negative checks:
 - Save invalid target config.
 - Send mutating request without CSRF token.
 - Use wrong production token.
+- Upload a ZIP with an unsafe path such as `../evil.txt` if you have a controlled way to create it.
+- Upload a duplicate Local folder project ID.
+- Use an invalid Project ID such as `demo-agent`, `mock-agent`, or `../../bad`.
 - Send oversized request body to a suitable endpoint.
 - Exceed rate limit in a controlled way.
 
@@ -404,6 +565,7 @@ Pass criteria:
 
 - Server rejects unsafe/invalid actions.
 - No mutation occurs after failed CSRF/auth checks.
+- Invalid imports are rejected without writing unsafe files.
 - No traceback is shown to the user.
 - Logs contain useful diagnostics without leaking secrets.
 
@@ -419,16 +581,16 @@ Pass criteria:
 
 - Release package builds.
 - Desktop and Docker Lab launchers are present.
-- README/User Guide/docs are present.
+- README/User Guide/docs/manual test plan/LLM manual testing prompt are present.
 - WebUI static assets are present.
-- Secrets, `.venv`, `node_modules`, local reports, and temporary test artifacts are absent.
+- Secrets, `.venv`, `node_modules`, local reports, managed Agent Lab imports, mapped `projects/`, and temporary test artifacts are absent unless intentionally packaged as examples.
 
 ## Defect severity
 
 | Severity | Meaning |
 | --- | --- |
-| Critical | Unsafe exposure, production auth bypass, destructive data loss, or unusable product start path. |
-| High | Core Desktop/Docker Lab/WebUI/scan path broken. |
+| Critical | Unsafe exposure, production auth bypass, destructive data loss, arbitrary local filesystem access, or unusable product start path. |
+| High | Core Desktop/Docker Lab/WebUI/scan/Agent Lab import path broken. |
 | Medium | Important workflow broken with workaround available. |
 | Low | Documentation, layout, cosmetic, or minor usability issue. |
 
@@ -440,6 +602,7 @@ Pass criteria:
 ## Environment
 
 - OS:
+- Browser:
 - Python:
 - Docker:
 - Docker Compose:
@@ -459,7 +622,8 @@ Pass criteria:
 | Auth/security boundaries | PASS/FAIL/SKIPPED | |
 | WebUI pages | PASS/FAIL/SKIPPED | |
 | Scan workflow | PASS/FAIL/SKIPPED | |
-| Agent Lab | PASS/FAIL/SKIPPED | |
+| Agent Lab import paths | PASS/FAIL/SKIPPED | |
+| Agent Lab build/deploy | PASS/FAIL/SKIPPED | |
 | UI/dark mode | PASS/FAIL/SKIPPED | |
 | Persistence | PASS/FAIL/SKIPPED | |
 | Release package | PASS/FAIL/SKIPPED | |
