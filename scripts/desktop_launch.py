@@ -38,7 +38,7 @@ def _prepare_desktop_environment() -> dict[str, str]:
 
     env = os.environ.copy()
     _set_default_env(env, "VULNORAIQ_RUN_MODE", "desktop")
-    _set_default_env(env, "VULNORAIQ_AUTH_ENABLED", "false")
+    _set_default_env(env, "VULNORAIQ_AUTH_MODE", "local_admin")
     _set_default_env(env, "VULNORAIQ_HOST", "127.0.0.1")
     _set_default_env(env, "VULNORAIQ_PORT", "8787")
     _set_default_env(env, "VULNORAIQ_JOB_STORE_PATH", scan_root / "jobs.db")
