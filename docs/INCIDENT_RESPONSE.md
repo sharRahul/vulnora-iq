@@ -1,6 +1,6 @@
 # VulnoraIQ incident response plan
 
-This plan covers VulnoraIQ `0.2.0` self-hosted Docker lab and internal-server deployments.
+This plan covers VulnoraIQ `0.3.0` self-hosted Docker lab and internal-server deployments.
 
 > **Scope:** local or internal-server deployment using Docker Compose or production-mode hosted server, token auth or trusted reverse-proxy identity, SQLite persistence, reports/evidence paths, structured audit logs, and documented target authorisation controls.
 

@@ -7,7 +7,7 @@ VulnoraIQ can be distributed as a Python package in addition to platform release
 | Field | Current value |
 | --- | --- |
 | Package | `vulnoraiq` |
-| Version | `0.2.0` |
+| Version | `0.3.0` |
 | Python | `>=3.10` |
 | License | Apache-2.0 |
 | Runtime dependencies | `PyYAML`, `requests`, `rich` |

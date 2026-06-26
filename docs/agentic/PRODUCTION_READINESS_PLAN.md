@@ -45,7 +45,7 @@ The current Agentic Applications readiness scope is complete when:
 5. release language avoids certified-assurance or independent-validation claims,
 6. repository readiness gates validate the self-hosted internal deployment boundary.
 
-Those criteria are complete for `0.2.0`.
+Those criteria are complete for `0.3.0`.
 
 ## Future maturity ladder
 

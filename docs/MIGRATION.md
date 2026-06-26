@@ -1,10 +1,10 @@
-# Migration guide: VulnoraIQ 0.2.0
+# Migration guide: VulnoraIQ 0.3.0
 
-This guide covers migration from legacy `0.0.1.x` style deployments to the current `0.2.0` codebase.
+This guide covers migration from legacy `0.0.1.x` style deployments to the current `0.3.0` codebase.
 
 ## Current migration summary
 
-| Area | Legacy state | Current `0.2.0` state |
+| Area | Legacy state | Current `0.3.0` state |
 | --- | --- | --- |
 | Deployment default | Host-native demo/server | Docker-first safe lab for real local AI-agent testing. |
 | WebUI | Legacy/static console path | React 18 + TypeScript console built to `webui/static/console/` and served by `webui/hosted_server.py`. |

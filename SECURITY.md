@@ -6,7 +6,7 @@ This document defines VulnoraIQ's supported security boundary, responsible-use r
 
 VulnoraIQ is a self-hosted defensive AI security assessment application for authorised testing of LLM applications, RAG pipelines, AI agents, tool-using systems, GenAI data-security surfaces, and orchestration layers.
 
-`0.2.0` has passed the controlled internal production-readiness gate for the current laptop, workstation, lab-machine, and internal-server deployment model. Findings are framework evidence for authorised human review. They are not certified VAPT-grade assurance, a substitute for independent testing, or permission to test systems without explicit approval.
+`0.3.0` has passed the controlled internal production-readiness gate for the current laptop, workstation, lab-machine, and internal-server deployment model. Findings are framework evidence for authorised human review. They are not certified VAPT-grade assurance, a substitute for independent testing, or permission to test systems without explicit approval.
 
 The experimental Agent Lab adds local Docker build/run orchestration for real AI-agent projects. Treat it as a local-lab capability until its hardening backlog is complete.
 

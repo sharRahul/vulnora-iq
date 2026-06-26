@@ -9,7 +9,7 @@ import zipfile
 from dataclasses import dataclass
 from pathlib import Path
 
-DEFAULT_VERSION = "0.2.0"
+DEFAULT_VERSION = "0.3.0"
 DEFAULT_OUTPUT_DIR = Path("dist/release")
 
 ROOT_FILES = [

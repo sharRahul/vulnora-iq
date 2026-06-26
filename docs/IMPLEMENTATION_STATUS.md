@@ -2,7 +2,7 @@
 
 This document separates current implemented capability from future assurance and maturity work.
 
-> **Current maturity:** VulnoraIQ `0.2.0` is a Docker-first, self-hosted AI security testing lab with controlled internal production-readiness gates. It supports authorised local/internal testing of LLM, RAG, tool-using, agentic, and GenAI data-security scenarios through a Python scanner, target adapters, a hosted React WebUI, WebUI assistant backend/model controls, expanded target templates, CLI, SQLite job persistence, reports, evidence, on-demand signed release packages, supply-chain workflow evidence, loopback-only local Docker publishing, and CI validation. This is complete for self-hosted laptop/server use within the current authorised local/internal scope.
+> **Current maturity:** VulnoraIQ `0.3.0` is a Docker-first, self-hosted AI security testing lab with controlled internal production-readiness gates. It supports authorised local/internal testing of LLM, RAG, tool-using, agentic, and GenAI data-security scenarios through a Python scanner, target adapters, a hosted React WebUI, WebUI assistant backend/model controls, expanded target templates, CLI, SQLite job persistence, reports, evidence, on-demand signed release packages, supply-chain workflow evidence, loopback-only local Docker publishing, and CI validation. This is complete for self-hosted laptop/server use within the current authorised local/internal scope.
 
 > **Assurance limitation:** OWASP, GenAI, Agentic, and MITRE mappings are framework evidence and planning/validation controls. They are not independently validated VAPT-grade assurance. See [`ASSESSMENT_ASSURANCE.md`](ASSESSMENT_ASSURANCE.md) for the full assurance boundary.
 
@@ -10,7 +10,7 @@ This document separates current implemented capability from future assurance and
 
 | Area | Status | Evidence |
 | --- | --- | --- |
-| Version/package | Complete for `0.2.0` beta | `pyproject.toml`, package entry points, metadata validation. |
+| Version/package | Complete for `0.3.0` beta | `pyproject.toml`, package entry points, metadata validation. |
 | Docker-first safe lab | Complete for current local scope | `docker-compose.yml`, loopback-only `127.0.0.1:8787:8787` WebUI publishing, Dockerfile, Docker smoke tests. |
 | Real authorised target testing | Complete for current local/internal scope | Target adapters, target validation, scanner wiring, runtime target APIs, mock-agent targets. |
 | React WebUI | Complete as supported WebUI | `webui/console/` source and `webui/static/console/` built assets. Legacy static console has been removed. |

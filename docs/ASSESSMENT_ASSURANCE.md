@@ -2,7 +2,7 @@
 
 This document separates VulnoraIQ application readiness from scanner/evaluator assurance.
 
-VulnoraIQ `0.2.0` is a self-hosted AI security testing lab with Docker-first local target testing, a React WebUI, CLI, target adapters, reports, and readiness gates. Its findings are still **framework evidence requiring human review**, not certified VAPT-grade assurance.
+VulnoraIQ `0.3.0` is a self-hosted AI security testing lab with Docker-first local target testing, a React WebUI, CLI, target adapters, reports, and readiness gates. Its findings are still **framework evidence requiring human review**, not certified VAPT-grade assurance.
 
 ## What findings mean today
 

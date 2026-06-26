@@ -413,7 +413,7 @@ def run_scan_job(job_id: str) -> None:
 
 
 class HostedWebUiHandler(BaseHTTPRequestHandler):
-    server_version = "VulnoraIQWebUI/0.2.0"
+    server_version = "VulnoraIQWebUI/0.3.0"
 
     def _client_ip(self) -> str:
         return _resolve_client_ip(self)

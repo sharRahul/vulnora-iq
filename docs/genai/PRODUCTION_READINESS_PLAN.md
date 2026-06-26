@@ -1,6 +1,6 @@
 # GenAI Security production readiness plan
 
-Plan status: Completed for `0.2.0` self-hosted internal deployment.
+Plan status: Completed for `0.3.0` self-hosted internal deployment.
 
 This is the controlled internal enterprise deployment gate for the Docker-first laptop/server application model.
 

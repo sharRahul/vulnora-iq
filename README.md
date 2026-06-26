@@ -33,7 +33,7 @@ User clicks launcher
 
 | Area | Status |
 | --- | --- |
-| Version | `0.2.0` beta |
+| Version | `0.3.0` beta |
 | WebUI | React browser console served by `webui.assistant_server` / `vulnoraiq-web`. |
 | Desktop Mode | Primary launchers start VulnoraIQ on the host, create local `scan-reports/`, `agent-lab/`, and optional mapped `projects/` folders, and open a guarded local single-user/admin WebUI session. |
 | Advanced Docker Lab Mode | Full Docker Compose lab remains available through explicit Docker Lab launchers and manual Compose commands. |

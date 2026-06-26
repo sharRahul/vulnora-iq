@@ -1,8 +1,8 @@
 # Agentic Applications production readiness plan
 
-**Plan status:** Completed for the current `0.2.0` self-hosted internal deployment scope.  
+**Plan status:** Completed for the current `0.3.0` self-hosted internal deployment scope.  
 **Current deployment model:** Docker-first local AI-agent testing lab plus production-mode hosted server for internal self-hosted use.  
-**Version target:** `0.2.0`.
+**Version target:** `0.3.0`.
 
 ## Production boundary
 

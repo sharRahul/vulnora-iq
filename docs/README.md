@@ -1,6 +1,6 @@
 # VulnoraIQ Documentation
 
-This folder documents the current VulnoraIQ `0.2.0` codebase.
+This folder documents the current VulnoraIQ `0.3.0` codebase.
 
 > **Current posture:** self-hosted AI security testing application with Desktop Mode for laptop/workstation use and Docker Lab Mode for server, VM, CI, and dev-lab use.  
 > **Current WebUI:** React 18 + TypeScript + Vite console served by `webui/hosted_server.py`.  

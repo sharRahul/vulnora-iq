@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+## [0.3.0] - 2026-06-26
+
 ### Removed
 
 - All demo, mock, and fixture targets from default runtime. No default scan target; `--target` is now required. Backend rejects target IDs containing `demo`, `mock`, `fake`, or `fixture` unless `VULNORAIQ_ALLOW_TEST_FIXTURE_TARGETS=true` is set.

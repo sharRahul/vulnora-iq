@@ -1,7 +1,7 @@
 # Production readiness scorecard
 
 **Assessment date:** 2026-06-24  
-**Scope:** VulnoraIQ `0.2.0` Docker-first/self-hosted laptop-server deployment for authorised LLM, RAG, tool-using, AI-agent, and GenAI data-security assessments.  
+**Scope:** VulnoraIQ `0.3.0` Docker-first/self-hosted laptop-server deployment for authorised LLM, RAG, tool-using, AI-agent, and GenAI data-security assessments.  
 **Rating scale:** 0-10, where 10 means fully hardened for the stated scope.
 
 ## Verdict

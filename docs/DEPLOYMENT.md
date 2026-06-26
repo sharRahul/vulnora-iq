@@ -1,6 +1,6 @@
 # Deployment guide
 
-This guide describes the supported VulnoraIQ `0.2.0` deployment posture.
+This guide describes the supported VulnoraIQ `0.3.0` deployment posture.
 
 > **Supported posture:** self-hosted laptop/workstation/internal-server AI security testing lab for approved assessments.  
 > **Safe default:** Docker Compose lab with loopback-only WebUI publishing.  

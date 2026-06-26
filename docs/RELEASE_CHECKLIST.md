@@ -1,12 +1,12 @@
 # VulnoraIQ release checklist
 
-> **Current target:** `0.2.0` / `0.2.0-rc1`  
+> **Current target:** `0.3.0` / `0.3.0-rc1`  
 > **Scope:** Docker-first/self-hosted laptop-server production-readiness release  
-> **Last updated:** 2026-06-24
+> **Last updated:** 2026-06-26
 
 ## Release boundary
 
-`0.2.0` may be described as:
+`0.3.0` may be described as:
 
 > Self-hosted laptop/server AI security testing application with controlled internal production-readiness gate passed.
 
@@ -14,7 +14,7 @@ It may also be described as:
 
 > Docker-first local AI-agent testing lab with a React SecOps console, backend target-management APIs, deterministic mock-agent targets, and explicit authorisation gates.
 
-Do **not** describe `0.2.0` as certified VAPT-grade, independently validated real-world GenAI detection assurance, or authorised for assessment of systems without written permission.
+Do **not** describe `0.3.0` as certified VAPT-grade, independently validated real-world GenAI detection assurance, or authorised for assessment of systems without written permission.
 
 ## Required pre-release checks
 

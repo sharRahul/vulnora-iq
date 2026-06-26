@@ -51,7 +51,7 @@ This gives a double-click startup path while keeping the runtime isolated inside
 ```bash
 python scripts/build_platform_release_package.py \
   --platform linux \
-  --version 0.2.0 \
+  --version 0.3.0 \
   --output-dir dist/release
 ```
 

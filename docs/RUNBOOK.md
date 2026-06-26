@@ -1,6 +1,6 @@
 # VulnoraIQ operations runbook
 
-This runbook covers VulnoraIQ `0.2.0` as a self-hosted Docker-first AI security testing lab and internal-server application.
+This runbook covers VulnoraIQ `0.3.0` as a self-hosted Docker-first AI security testing lab and internal-server application.
 
 ## 1. Normal startup
 
