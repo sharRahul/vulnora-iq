@@ -15,7 +15,7 @@ VulnoraIQ has two explicit run modes.
 | **Desktop Mode** | Normal desktop/laptop users | Host machine | Docker containers | `./scan-reports/` |
 | **Advanced Docker Lab Mode** | Servers, VMs, CI, dev/test labs | Docker Compose container | Docker containers | Docker `/data` volume or mapped folders |
 
-Desktop Mode and Docker Lab Mode use a **local single-user/admin WebUI session** by default. Production or shared internal-server deployments must explicitly enable auth and provide an admin token.
+Desktop Mode and Docker Lab Mode use a **local single-user/admin WebUI session** by default. Production or shared internal-server deployments must explicitly enable token auth and provide an admin token.
 
 ```text
 User clicks launcher
@@ -35,11 +35,11 @@ User clicks launcher
 | --- | --- |
 | Version | `0.2.0` beta |
 | WebUI | React browser console served by `webui.assistant_server` / `vulnoraiq-web`. |
-| Desktop Mode | Primary launchers start VulnoraIQ on the host, create local `scan-reports/` and `agent-lab/` folders, and open a local single-user/admin WebUI session. |
+| Desktop Mode | Primary launchers start VulnoraIQ on the host, create local `scan-reports/` and `agent-lab/` folders, and open a guarded local single-user/admin WebUI session. |
 | Advanced Docker Lab Mode | Full Docker Compose lab remains available through explicit Docker Lab launchers and manual Compose commands. |
 | Agent Lab | Experimental workflow at `/agent-lab` for importing real AI-agent projects, configuring provider/runtime settings, building/running agents in Docker, auto-creating targets, and launching scans. |
 | Persistence | SQLite job store, reports, evidence, audit logs, and Agent Lab metadata. |
-| Identity | Local single-user/admin mode for desktop/lab scope; production token auth and reverse-proxy identity are available for hardened internal deployments. Direct OIDC/JWT is future work. |
+| Identity | `local_admin` mode for desktop/lab scope; production token auth and reverse-proxy identity are available for hardened internal deployments. Direct OIDC/JWT is future work. |
 
 ## Prerequisites
 
@@ -64,7 +64,7 @@ Use this for normal laptop/workstation use.
 Desktop Mode performs the following steps:
 
 1. starts VulnoraIQ natively on the host;
-2. opens a local single-user/admin WebUI session on `127.0.0.1`;
+2. opens a guarded local single-user/admin WebUI session on `127.0.0.1` using `VULNORAIQ_AUTH_MODE=local_admin`;
 3. checks Docker is available for sandboxed Agent Lab runtimes;
 4. creates local output folders;
 5. starts the WebUI on `127.0.0.1:8787`;
@@ -187,11 +187,13 @@ Run Docker Lab backend directly:
 python scripts/bootstrap_launch.py
 ```
 
-Run only the WebUI server in local single-user/admin mode:
+Run only the WebUI server in guarded local single-user/admin mode:
 
 ```bash
-VULNORAIQ_AUTH_ENABLED=false vulnoraiq-web --host 127.0.0.1 --port 8787
+VULNORAIQ_AUTH_MODE=local_admin vulnoraiq-web --host 127.0.0.1 --port 8787
 ```
+
+`VULNORAIQ_AUTH_ENABLED=false` remains only as a backward-compatible alias for older launchers and Compose files. New code should use `VULNORAIQ_AUTH_MODE=local_admin`.
 
 ## Security boundary
 
@@ -207,7 +209,7 @@ Production/internal-server mode requires explicit hardening. For a shared intern
 
 ```bash
 export VULNORAIQ_ENV=production
-export VULNORAIQ_AUTH_ENABLED=true
+export VULNORAIQ_AUTH_MODE=token
 export VULNORAIQ_ADMIN_TOKEN=<strong-admin-token>
 export VULNORAIQ_JOB_STORE_BACKEND=sqlite
 export VULNORAIQ_JOB_STORE_PATH=/data/jobs.db
