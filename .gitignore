@@ -19,3 +19,5 @@ reports/output/webui/
 config/local*.yaml
 config/web_users.local.yaml
 config/*_secret*.yaml
+projects/Raiker-main.zip
+reports/docker-lab/runtime_targets.yaml
