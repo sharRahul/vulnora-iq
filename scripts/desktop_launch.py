@@ -25,6 +25,7 @@ def _set_default_env(env: dict[str, str], key: str, value: Path | str) -> None:
 def _prepare_desktop_environment() -> dict[str, str]:
     scan_root = ROOT / "scan-reports"
     agent_root = ROOT / "agent-lab"
+    mounted_projects_root = ROOT / "projects"
     for path in [
         scan_root,
         scan_root / "reports",
@@ -33,6 +34,7 @@ def _prepare_desktop_environment() -> dict[str, str]:
         scan_root / "exports",
         agent_root,
         agent_root / "projects",
+        mounted_projects_root,
     ]:
         path.mkdir(parents=True, exist_ok=True)
 
@@ -48,7 +50,7 @@ def _prepare_desktop_environment() -> dict[str, str]:
     _set_default_env(env, "VULNORAIQ_AGENT_LAB_ROOT", agent_root)
     _set_default_env(env, "VULNORAIQ_AGENT_LAB_PROJECTS_ROOT", agent_root / "projects")
     _set_default_env(env, "VULNORAIQ_AGENT_LAB_DEPLOYMENTS", agent_root / "deployments.yaml")
-    _set_default_env(env, "VULNORAIQ_PROJECTS_ROOT", ROOT / "projects")
+    _set_default_env(env, "VULNORAIQ_PROJECTS_ROOT", mounted_projects_root)
     _set_default_env(env, "VULNORAIQ_AGENT_NETWORK", DESKTOP_AGENT_NETWORK)
     return env
 
@@ -99,7 +101,9 @@ def main() -> None:
     print("Docker will be used only for sandboxed imported agents and local LLM/test runtimes.")
     print("No VulnoraIQ Docker container is created in Desktop Mode.")
     print(f"Reports folder: {ROOT / 'scan-reports'}")
-    print(f"Agent Lab folder: {ROOT / 'agent-lab'}")
+    print(f"Agent Lab managed imports: {ROOT / 'agent-lab' / 'projects'}")
+    print(f"Agent Lab mapped project folder: {ROOT / 'projects'}")
+    print("Place an AI agent folder under ./projects/<agent-name>/ and click Agent Lab > Mapped folder > Refresh Projects.")
     print("")
 
     _check_docker()
