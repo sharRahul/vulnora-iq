@@ -26,6 +26,15 @@ def test_platform_launchers_start_desktop_mode() -> None:
         assert "bootstrap_launch.py" not in text
 
 
+def test_desktop_launcher_prepares_agent_lab_project_folders() -> None:
+    launcher = (ROOT / "scripts" / "desktop_launch.py").read_text(encoding="utf-8")
+
+    assert "agent_root / \"projects\"" in launcher
+    assert "mounted_projects_root = ROOT / \"projects\"" in launcher
+    assert "VULNORAIQ_PROJECTS_ROOT" in launcher
+    assert "Agent Lab mapped project folder" in launcher
+
+
 def test_docker_lab_launchers_keep_full_compose_flow() -> None:
     for launcher in DOCKER_LAB_LAUNCHERS:
         text = launcher.read_text(encoding="utf-8")
