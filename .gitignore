@@ -32,6 +32,7 @@ config/*_secret*.yaml
 projects/Raiker-main.zip
 reports/docker-lab/runtime_targets.yaml
 # Training artifacts (but not the scripts)
+model/
 model/train_dataset.jsonl
 model/*.gguf
 model/*-assistant/
