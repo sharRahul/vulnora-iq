@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+### Fixed
+
+- Agent Lab project analysis no longer returns HTTP 500 for Flask projects that use a bare `@app.route("/")` without `methods=` (an optional regex group returned `None`, causing `AttributeError` in endpoint detection).
+- Agent Lab deployment removal (`POST /api/agent-lab/deployments/<id>/remove`) now resolves the identifier against the deployment registry (accepting `deployment_id`, `project_id`, or `container_name`) and reports `removed: true` only when a matching container actually existed. Previously a stale/wrong identifier could report success while leaving a container running, because `docker rm -f` exits `0` for a missing container.
+- WebUI console no longer loads fonts from the Google Fonts CDN. The stylesheet `@import` and `preconnect` hints were removed so the console renders with bundled/system fonts, works offline, and no longer triggers a Content-Security-Policy console error.
+
+### Changed
+
+- `pytest` no longer pins `basetemp`/`cache_dir` inside the working tree (`.pytest_tmp`). It uses the OS temp dir and the default `.pytest_cache`, avoiding locked/ACL-corrupted leftover directories that made later runs fail with `PermissionError` on Windows.
+- The example release package now bundles `docker-compose.yml`, `Dockerfile`, and `.env.docker.example` so the included Docker Lab launchers can start the lab from the package alone.
+
 ## [0.3.0] - 2026-06-26
 
 ### Removed

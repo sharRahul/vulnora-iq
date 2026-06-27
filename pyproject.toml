@@ -86,7 +86,11 @@ webui = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# basetemp is intentionally left to pytest's default (under the OS temp dir).
+# Pinning it inside the working tree left locked/ACL-corrupted dirs on Windows
+# that made later runs fail with PermissionError as if the product were broken.
 addopts = "-q --ignore=tests/test_scanner_authorisation.py"
+cache_dir = ".pytest_cache"
 
 [tool.ruff]
 target-version = "py310"
@@ -108,4 +112,4 @@ ignore_missing_imports = true
 ignore_errors = true
 no_implicit_optional = true
 check_untyped_defs = true
-exclude = "reports/output|build|dist|docker|tests|core/scanner.py|webui/auth.py|scripts/run_functional_test.py"
+exclude = "reports/output|build|dist|docker|tests|projects|agent-lab/projects|scan-reports|\\.manual-test-work|\\.pytest_tmp|core/scanner.py|webui/auth.py|scripts/run_functional_test.py"

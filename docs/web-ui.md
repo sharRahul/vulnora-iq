@@ -22,13 +22,18 @@ http://127.0.0.1:8787
 
 ## Signing in
 
-Authentication is **enabled by default**. The page loads without a token, but all
-assessment data and actions require one. When auth is enabled the top bar shows a
-**Sign in required** prompt: paste an access token and select **Connect**. The console
-then sends the token (default header `X-VulnoraIQ-Token`) on every request and attaches
-a CSRF token to scan submissions automatically.
+VulnoraIQ supports two primary WebUI auth modes:
 
-Tokens map to roles and permissions:
+- `VULNORAIQ_AUTH_MODE=local_admin` for single-user local/Desktop Mode on loopback only.
+- `VULNORAIQ_AUTH_MODE=token` for shared/internal or production use with explicit tokens.
+
+In `local_admin` mode, the local operator is resolved as `local-admin` with the `admin`
+role and the UI does not require a sign-in token. In `token` mode, the page can load
+without a token, but API data and mutating actions require one. The console sends the
+token (default header `X-VulnoraIQ-Token`) on every request and attaches a CSRF token
+to mutating submissions automatically.
+
+Token mode maps tokens to roles and permissions:
 
 | Token source | Role | Capabilities |
 | --- | --- | --- |
@@ -36,10 +41,13 @@ Tokens map to roles and permissions:
 | `VULNORAIQ_ANALYST_TOKEN` | analyst | view, download |
 | `VULNORAIQ_VIEWER_TOKEN` | viewer | view and download only |
 
-For local development (non-production) you can sign in with the built-in
-`vulnoraiq-internal-admin-token`, or disable auth entirely with
-`VULNORAIQ_AUTH_ENABLED=false` (open-access mode, not for shared deployments).
-Use **Sign out** in the top bar to clear the session token.
+`VULNORAIQ_AUTH_ENABLED=false` remains a backward-compatible alias for local
+single-user admin behavior in non-production environments, but the preferred explicit
+setting is `VULNORAIQ_AUTH_MODE=local_admin`. Production/shared deployments should use
+`VULNORAIQ_ENV=production`, `VULNORAIQ_AUTH_MODE=token`, and
+`VULNORAIQ_ADMIN_TOKEN`.
+
+Use **Sign out** in the top bar to clear a token-mode session.
 
 ## User workflow
 
@@ -62,11 +70,11 @@ The hosted server uses:
 - `webui/persistent_jobs.py` for JSON-backed scan job storage.
 - `reports/output/webui/jobs.json` as the default persistent job history file.
 
-Authentication is enabled by default; static UI assets are served publicly so the
-sign-in prompt can load, while every `/api/*` data endpoint stays behind token auth.
-Set `VULNORAIQ_AUTH_ENABLED=false` only for isolated local development. Role and token
-configuration lives in `config/web_users.yaml` (file-based fallback) or the
-`VULNORAIQ_*_TOKEN` environment variables (preferred for hosted deployments).
+Static UI assets are served publicly so the console can load, while `/api/*` data
+endpoints follow the configured auth mode. Use `local_admin` only for isolated local
+loopback operation. Role and token configuration lives in `config/web_users.yaml`
+(file-based fallback) or the `VULNORAIQ_*_TOKEN` environment variables (preferred for
+token-mode deployments).
 
 ## Dashboard sections
 

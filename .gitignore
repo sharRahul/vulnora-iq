@@ -1,11 +1,20 @@
 __pycache__/
 *.py[cod]
 .pytest_cache/
+.pytest_tmp/
 .venv/
 venv/
 build/
 dist/
 *.egg-info/
+node_modules/
+playwright-report/
+test-results/
+.manual-test-work/
+agent-lab/
+scan-reports/
+projects/*
+!projects/.gitkeep
 reports/output/*.md
 reports/output/*.json
 reports/output/webui/
@@ -13,6 +22,7 @@ reports/output/webui/
 .env
 .env.*
 !.env.production.example
+!.env.docker.example
 *.key
 *.pem
 *.db
@@ -21,3 +31,4 @@ config/web_users.local.yaml
 config/*_secret*.yaml
 projects/Raiker-main.zip
 reports/docker-lab/runtime_targets.yaml
+.claude/

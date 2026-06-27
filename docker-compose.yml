@@ -18,6 +18,7 @@ services:
       VULNORAIQ_TARGET_CONFIG: targets.docker.yaml
       VULNORAIQ_JOB_STORE_PATH: /data/jobs.db
       VULNORAIQ_WEB_OUTPUT_ROOT: /data/reports
+      VULNORAIQ_RUNTIME_TARGETS_PATH: /data/reports/runtime_targets.yaml
       VULNORAIQ_EVIDENCE_DIR: /data/evidence
       VULNORAIQ_AUDIT_DIR: /data/audit
       VULNORAIQ_AUTH_MODE: local_admin
@@ -32,7 +33,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./projects:/app/projects:ro
     group_add:
-      - "999"
+      - "0"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:

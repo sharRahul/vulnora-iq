@@ -17,10 +17,19 @@ DOCKER_TIMEOUT = int(os.getenv("VULNORAIQ_DOCKER_COMMAND_TIMEOUT", "600"))
 
 
 def _run_docker(args: list[str]) -> tuple[str, str]:
-    result = subprocess.run(["docker"] + args, capture_output=True, text=True, timeout=DOCKER_TIMEOUT)
+    result = subprocess.run(
+        ["docker"] + args,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        timeout=DOCKER_TIMEOUT,
+    )
+    stdout = (result.stdout or "").strip()
+    stderr = (result.stderr or "").strip()
     if result.returncode != 0:
-        raise RuntimeError(result.stderr.strip() or f"docker {' '.join(args)} failed")
-    return result.stdout.strip(), result.stderr.strip()
+        raise RuntimeError(stderr or stdout or f"docker {' '.join(args)} failed")
+    return stdout, stderr
 
 
 def _container_name(agent_id: str) -> str:

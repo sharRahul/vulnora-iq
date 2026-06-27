@@ -48,13 +48,13 @@ def build_parser() -> argparse.ArgumentParser:
     show = jsub.add_parser("show")
     show.add_argument("--job-id", required=True)
     scan = sub.add_parser("scan", help="Run a scan against a configured target (--target required, no default). Must pass --authorised.")
-    add_scan_args(scan)
-    add_scan_args(parser)
+    add_scan_args(scan, required=True)
+    add_scan_args(parser, required=False)
     return parser
 
 
-def add_scan_args(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument("--target", required=True, help="Target name from your config/targets.yaml (required). No default target is provided.")
+def add_scan_args(parser: argparse.ArgumentParser, *, required: bool) -> None:
+    parser.add_argument("--target", required=required, help="Target name from your config/targets.yaml (required). No default target is provided.")
     parser.add_argument("--profile", default="baseline", help="Assessment profile from config/attack_profiles.yaml. Default: baseline")
     outroot = os.getenv("VULNORAIQ_WEB_OUTPUT_ROOT", "reports/output")
     parser.add_argument("--output", default=str(Path(outroot) / "scan-report.md"), help="Markdown report output path.")
@@ -108,6 +108,8 @@ def main() -> None:
             found = store.get(args.job_id)
             print(json.dumps(found.to_dict() if found else {"error": "not found"}, indent=2, default=str))
             return
+    if args.command is None and not args.target:
+        raise SystemExit("--target is required when running a scan directly. Use `vulnoraiq scan --target <name> --authorised`.")
     run_scan(args)
 
 

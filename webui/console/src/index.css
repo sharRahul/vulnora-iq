@@ -1,4 +1,9 @@
-@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap");
+/*
+ * Fonts are intentionally not loaded from a third-party CDN. The Content
+ * Security Policy restricts styles to 'self', and VulnoraIQ avoids external
+ * network calls so it works offline. The font stacks below fall back to the
+ * platform UI fonts (system-ui / ui-monospace).
+ */
 
 @tailwind base;
 @tailwind components;

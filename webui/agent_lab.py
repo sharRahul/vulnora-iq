@@ -98,7 +98,12 @@ def _ensure_roots() -> None:
 
 
 def normalise_project_id(value: str) -> str:
-    candidate = value.strip().replace(" ", "-")
+    raw = value.strip()
+    if not raw:
+        raise ValueError("project id cannot be empty")
+    if any(sep in raw for sep in ("/", "\\")) or ".." in raw:
+        raise ValueError("project id must not contain path separators or traversal segments")
+    candidate = raw.replace(" ", "-")
     candidate = re.sub(r"[^a-zA-Z0-9_.-]+", "-", candidate).strip(".-_")
     candidate = candidate[:80]
     if not candidate or not PROJECT_ID_RE.match(candidate):
@@ -361,7 +366,7 @@ def _detect_endpoints(text: str) -> list[dict[str, Any]]:
                 path = groups[1]
             else:
                 path = groups[0]
-                methods = groups[1] if len(groups) > 1 else ""
+                methods = (groups[1] or "") if len(groups) > 1 else ""
                 method = "POST" if "POST" in methods.upper() else "GET"
             if not path.startswith("/") or not ENDPOINT_RE.match(path):
                 continue
@@ -706,13 +711,63 @@ def _save_deployment(result: DeploymentResult) -> None:
     DEPLOYMENTS_PATH.write_text(yaml.safe_dump(data, sort_keys=True), encoding="utf-8")
 
 
-def remove_deployment(project_id: str) -> dict[str, Any]:
-    pid = normalise_project_id(project_id)
-    container_name = f"vulnoraiq-agent-lab-{pid}".lower().replace("_", "-")
-    removed = False
+def _container_exists(container_name: str) -> bool:
+    if not container_name:
+        return False
     try:
-        _run_docker(["rm", "-f", container_name])
-        removed = True
+        out, _ = _run_docker(["ps", "-aq", "--filter", f"name=^{container_name}$"])
     except RuntimeError:
-        removed = False
-    return {"project_id": pid, "container_name": container_name, "removed": removed}
+        return False
+    return bool(out.strip())
+
+
+def _drop_deployment_records(container_name: str) -> int:
+    deployments = list_deployments()
+    remaining = [d for d in deployments if d.get("container_name") != container_name]
+    dropped = len(deployments) - len(remaining)
+    if dropped:
+        _ensure_roots()
+        DEPLOYMENTS_PATH.write_text(yaml.safe_dump({"deployments": remaining}, sort_keys=True), encoding="utf-8")
+    return dropped
+
+
+def remove_deployment(identifier: str) -> dict[str, Any]:
+    ident = str(identifier or "").strip()
+    if not ident:
+        raise ValueError("deployment identifier is required")
+    # The identifier may be a deployment_id, a project_id, or a container_name.
+    # Resolve it against the stored deployment registry to find the real
+    # container name rather than assuming the identifier is a project id.
+    record = next(
+        (
+            d
+            for d in list_deployments()
+            if ident in (d.get("deployment_id"), d.get("project_id"), d.get("container_name"))
+        ),
+        None,
+    )
+    if record is not None:
+        container_name = str(record.get("container_name") or "")
+        project_id = str(record.get("project_id") or "")
+        deployment_id = str(record.get("deployment_id") or "")
+    else:
+        # No registry record (legacy/manual deployment): best-effort fall back
+        # to deriving the container name from a project id.
+        project_id = normalise_project_id(ident)
+        container_name = f"vulnoraiq-agent-lab-{project_id}".lower().replace("_", "-")
+        deployment_id = ""
+
+    # Only report success when a matching container actually existed and was
+    # removed. ``docker rm -f`` exits 0 for a missing container, so we must not
+    # infer removal from its exit code alone.
+    existed = _container_exists(container_name)
+    if existed:
+        _run_docker(["rm", "-f", container_name])
+    records_dropped = _drop_deployment_records(container_name) if container_name else 0
+    return {
+        "deployment_id": deployment_id,
+        "project_id": project_id,
+        "container_name": container_name,
+        "removed": existed,
+        "records_removed": records_dropped,
+    }

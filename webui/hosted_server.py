@@ -24,7 +24,7 @@ import yaml
 from core.scanner import Scanner
 from dashboards.generate_dashboard import DashboardGenerator
 from dashboards.html_dashboard import HtmlDashboardGenerator
-from integrations.target_adapters import connectivity_check
+from integrations.target_adapters import connectivity_check, validate_target_definition
 from reports.json_report_generator import JsonReportGenerator
 from reports.report_generator import MarkdownReportGenerator
 from reports.sarif_report_generator import SarifReportGenerator
@@ -50,6 +50,7 @@ STATIC_DIR = Path(__file__).parent / "static"
 CONFIG_ROOT = Path(os.getenv("VULNORAIQ_CONFIG_DIR", "config"))
 OUTPUT_ROOT = Path(os.getenv("VULNORAIQ_WEB_OUTPUT_ROOT", "reports/output/webui"))
 TERMINAL_STATES = {"completed", "failed"}
+RUNTIME_TARGET_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]{1,80}$")
 AUTH_MANAGER = WebAuthManager(os.getenv("VULNORAIQ_WEB_USERS_PATH", str(CONFIG_ROOT / "web_users.yaml")))
 JOB_STORE: JobStore = create_job_store()
 STARTED_AT = datetime.now(timezone.utc)
@@ -249,16 +250,17 @@ def _load_runtime_targets() -> dict[str, Any]:
 
 
 def _save_runtime_target(target_id: str, target: dict[str, Any]) -> dict[str, Any]:
-    safe_id = target_id.strip().replace(" ", "_")
-    if not safe_id or not safe_id.replace("_", "").replace("-", "").isalnum():
-        raise ValueError("target id must contain only letters, numbers, hyphens, or underscores")
+    safe_id = target_id.strip()
+    if not safe_id or not RUNTIME_TARGET_ID_RE.fullmatch(safe_id):
+        raise ValueError("target id must be 2-81 chars and contain only letters, numbers, hyphens, or underscores")
+    validated_target = validate_target_definition(safe_id, target)
     runtime = _load_runtime_targets()
     targets = runtime.setdefault("targets", {})
-    targets[safe_id] = target
+    targets[safe_id] = validated_target
     path = _runtime_targets_path()
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(yaml.safe_dump(runtime, sort_keys=True), encoding="utf-8")
-    return {"target_id": safe_id, "target": target}
+    return {"target_id": safe_id, "target": validated_target}
 
 
 def _delete_runtime_target(target_id: str) -> bool:

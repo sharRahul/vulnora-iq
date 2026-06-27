@@ -168,23 +168,35 @@ class AssistantHostedWebUiHandler(base.HostedWebUiHandler):
             return
         payload = self._read_json()
         if clean_path == "/api/agent-lab/import/git":
-            result = import_git_project(
-                str(payload.get("url") or ""),
-                project_id=str(payload.get("project_id") or "") or None,
-                branch=str(payload.get("branch") or "") or None,
-            )
+            try:
+                result = import_git_project(
+                    str(payload.get("url") or ""),
+                    project_id=str(payload.get("project_id") or "") or None,
+                    branch=str(payload.get("branch") or "") or None,
+                )
+            except RuntimeError as exc:
+                self._send_error_response(HTTPStatus.BAD_GATEWAY, str(exc))
+                return
             base._audit_structured("agent_lab_import_git", principal, request_id, client_ip, "POST", clean_path, 200, result.project_id)
             self._send_json({"imported": True, **result.__dict__})
             return
         if clean_path == "/api/agent-lab/import/archive":
-            result = import_archive_project(str(payload.get("archive_base64") or ""), str(payload.get("project_id") or ""))
+            try:
+                result = import_archive_project(str(payload.get("archive_base64") or ""), str(payload.get("project_id") or ""))
+            except RuntimeError as exc:
+                self._send_error_response(HTTPStatus.BAD_GATEWAY, str(exc))
+                return
             base._audit_structured("agent_lab_import_archive", principal, request_id, client_ip, "POST", clean_path, 200, result.project_id)
             self._send_json({"imported": True, **result.__dict__})
             return
         if clean_path.startswith("/api/agent-lab/projects/") and clean_path.endswith("/deploy"):
             parts = [unquote(item) for item in clean_path.split("/") if item]
             project_id = parts[3]
-            result = deploy_agent_project(project_id, payload, self._agent_lab_save_target_fn(payload))
+            try:
+                result = deploy_agent_project(project_id, payload, self._agent_lab_save_target_fn(payload))
+            except RuntimeError as exc:
+                self._send_error_response(HTTPStatus.BAD_GATEWAY, str(exc))
+                return
             base._audit_structured("agent_lab_deploy", principal, request_id, client_ip, "POST", clean_path, 200, result.project_id)
             self._send_json({"deployed": True, **result.__dict__})
             return

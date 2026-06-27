@@ -6,7 +6,13 @@
 .venv
 __pycache__
 *.pyc
+.manual-test-work
+.pytest_tmp
+scan-reports
+agent-lab
+projects
 reports/output
+reports/docker-lab
 build
 dist
 *.egg-info

@@ -213,7 +213,10 @@ class Scanner:
     @staticmethod
     def _merge_runtime_targets(targets: dict[str, Any]) -> None:
         runtime_targets_path = Path(
-            os.getenv("VULNORAIQ_RUNTIME_TARGETS_PATH", "reports/output/webui/runtime_targets.yaml")
+            os.getenv(
+                "VULNORAIQ_RUNTIME_TARGETS_PATH",
+                str(Path(os.getenv("VULNORAIQ_WEB_OUTPUT_ROOT", "reports/output/webui")) / "runtime_targets.yaml"),
+            )
         )
         if not runtime_targets_path.exists():
             return

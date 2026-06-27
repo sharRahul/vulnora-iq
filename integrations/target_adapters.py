@@ -111,6 +111,31 @@ def normalize_target_config(name: str, raw: dict[str, Any]) -> dict[str, Any]:
     return cfg
 
 
+def validate_target_definition(name: str, raw: dict[str, Any]) -> dict[str, Any]:
+    cfg = normalize_target_config(name, raw)
+    target_type = str(cfg.get("type") or "").strip()
+    if target_type not in {"http_json", "chat_completions", "ollama_generate", "webhook_json", "rag_query", "agent_tool_loop"}:
+        raise ValueError(f"unsupported target type: {target_type or '<missing>'}")
+    if not str(cfg.get("name") or "").strip():
+        raise ValueError("target name is required")
+    if not str(cfg.get("base_url") or "").strip():
+        raise ValueError("base_url or endpoint is required")
+    endpoint_path = str(cfg.get("endpoint_path") or "/").strip()
+    if not endpoint_path.startswith("/"):
+        raise ValueError("endpoint_path must start with '/'")
+    cfg["endpoint_path"] = endpoint_path
+    if target_type in {"chat_completions", "ollama_generate"} and not str(cfg.get("model") or "").strip():
+        raise ValueError(f"model is required for target type {target_type}")
+    body_template = cfg.get("request_body_template")
+    if body_template is not None and not isinstance(body_template, (dict, list)):
+        raise ValueError("request_body_template must be a JSON object or array")
+    headers = cfg.get("headers") or {}
+    if not isinstance(headers, dict):
+        raise ValueError("headers must be a JSON object")
+    validate_url(cfg)
+    return cfg
+
+
 def _load_safety_profile(name: str) -> dict[str, Any]:
     path = os.getenv("VULNORAIQ_SAFETY_PROFILE_PATH") or str(os.getenv("VULNORAIQ_CONFIG_DIR", "config") + "/safety_profiles.yaml")
     try:

@@ -45,6 +45,7 @@ def _prepare_desktop_environment() -> dict[str, str]:
     _set_default_env(env, "VULNORAIQ_PORT", "8787")
     _set_default_env(env, "VULNORAIQ_JOB_STORE_PATH", scan_root / "jobs.db")
     _set_default_env(env, "VULNORAIQ_WEB_OUTPUT_ROOT", scan_root / "reports")
+    _set_default_env(env, "VULNORAIQ_RUNTIME_TARGETS_PATH", scan_root / "reports" / "runtime_targets.yaml")
     _set_default_env(env, "VULNORAIQ_EVIDENCE_DIR", scan_root / "evidence")
     _set_default_env(env, "VULNORAIQ_AUDIT_DIR", scan_root / "audit")
     _set_default_env(env, "VULNORAIQ_AGENT_LAB_ROOT", agent_root)

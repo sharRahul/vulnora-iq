@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from webui.hosted_server import validate_scan_request
+from webui.hosted_server import _save_runtime_target, validate_scan_request
 
 
 def test_validate_scan_request_requires_explicit_target() -> None:
@@ -44,3 +44,24 @@ def test_run_scan_job_generates_webui_outputs(tmp_path, monkeypatch) -> None:
     assert completed.summary["finding_count"] >= 1
     assert set(completed.outputs) == {"markdown", "json", "sarif", "dashboard_markdown", "dashboard_html"}
     assert all(Path(path).exists() for path in completed.outputs.values())
+
+
+def test_save_runtime_target_rejects_invalid_id(monkeypatch, tmp_path) -> None:
+    monkeypatch.setenv("VULNORAIQ_RUNTIME_TARGETS_PATH", str(tmp_path / "runtime_targets.yaml"))
+
+    with pytest.raises(ValueError, match="target id"):
+        _save_runtime_target("../bad", {"name": "Bad", "type": "http_json", "base_url": "http://127.0.0.1:8080"})
+
+
+def test_save_runtime_target_rejects_invalid_target_config(monkeypatch, tmp_path) -> None:
+    monkeypatch.setenv("VULNORAIQ_RUNTIME_TARGETS_PATH", str(tmp_path / "runtime_targets.yaml"))
+
+    with pytest.raises(ValueError, match="model is required"):
+        _save_runtime_target(
+            "local_agent",
+            {
+                "name": "Local Agent",
+                "type": "chat_completions",
+                "base_url": "http://127.0.0.1:8080",
+            },
+        )

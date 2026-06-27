@@ -2,13 +2,29 @@ name: vulnoraiq-example-package
 version: 1
 output_path: dist/vulnoraiq-example-package.zip
 include_paths:
+  - ACCEPTABLE_USE.md
   - README.md
+  - SECURITY.md
   - THIRD_PARTY_NOTICES.md
+  - launch-vulnoraiq-webui.py
+  - launch-vulnoraiq-webui.bat
+  - launch-vulnoraiq-webui.command
+  - launch-vulnoraiq-webui.sh
+  - launch-vulnoraiq-docker-lab.bat
+  - launch-vulnoraiq-docker-lab.command
+  - launch-vulnoraiq-docker-lab.sh
+  - docker-compose.yml
+  - Dockerfile
+  - .env.docker.example
+  - VulnoraIQ.desktop
+  - docs/README.md
   - docs/IMPLEMENTATION_STATUS.md
-  - docs/module-authoring.md
-  - docs/web-ui.md
+  - docs/USER_GUIDE.md
+  - docs/AGENT_LAB.md
+  - docs/MANUAL_TEST_PLAN.md
+  - docs/LLM_MANUAL_TESTING_PROMPT.md
+  - docs/WEBUI_GUIDE.md
   - docs/MITRE_ATLAS_AI_MATRIX.md
-  - docs/assets/vulnoraiq-webui-home.png
   - docs/owasp/
   - config/default.yaml
   - config/targets.yaml
@@ -39,10 +55,10 @@ include_paths:
   - payloads/safe_baseline.yaml
   - payloads/rag_readiness.yaml
   - payloads/agent_readiness.yaml
-  - reports/output/
+  - webui/static/console/
+  - webui/static/agent-lab/
 rules:
-  - Include only local demo outputs and non-sensitive configuration files.
+  - Include launcher assets, current operator docs, static WebUI assets, and non-sensitive configuration files.
   - Include third-party notices whenever generated ATLAS-derived documentation is included.
-  - Include the dashboard example image whenever README references it.
-  - Exclude private operational material and real client evidence.
+  - Exclude private operational material, local runtime state, and real client evidence.
   - Review generated reports before publishing a release package.

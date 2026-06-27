@@ -9,6 +9,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     VULNORAIQ_CONFIG_DIR=/app/config \
     VULNORAIQ_DATA_DIR=/data \
     VULNORAIQ_WEB_OUTPUT_ROOT=/data/reports \
+    VULNORAIQ_RUNTIME_TARGETS_PATH=/data/reports/runtime_targets.yaml \
     VULNORAIQ_JOB_STORE_PATH=/data/jobs.db \
     VULNORAIQ_EVIDENCE_DIR=/data/evidence \
     VULNORAIQ_AUDIT_DIR=/data/audit \
@@ -19,11 +20,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 RUN groupadd --system vulnoraiq && useradd --system --gid vulnoraiq --home-dir /app --shell /usr/sbin/nologin vulnoraiq
 RUN apt-get update && apt-get install -y --no-install-recommends docker.io docker-cli git ca-certificates && rm -rf /var/lib/apt/lists/*
-COPY requirements.txt pyproject.toml README.md ./
-# Pre-create package directories so editable install discovers them
-RUN for pkg in core integrations modules rag_testing agent_testing reports dashboards scripts benchmarks examples webui; do mkdir -p "$pkg" && touch "$pkg/__init__.py"; done
-RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir -e .[dev]
 COPY . .
+RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir -e .[dev]
 RUN mkdir -p /data/reports /data/evidence /data/audit /data/agent_lab/projects && chown -R vulnoraiq:vulnoraiq /data /app
 USER vulnoraiq
 VOLUME ["/data"]

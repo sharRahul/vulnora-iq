@@ -188,6 +188,10 @@ Supported generated target types:
 10. Launch an authorised VulnoraIQ scan.
 11. Review findings, evidence, and reports in the main WebUI.
 
+## Cleanup
+
+`POST /api/agent-lab/deployments/<id>/remove` tears down a deployed agent container and prunes its deployment record. The `<id>` may be the `deployment_id`, the `project_id`, or the `container_name`; it is resolved against the deployment registry to find the real container. The response reports `removed: true` only when a matching container actually existed and was removed, and `removed: false` (with `records_removed` for any stale metadata) otherwise, so a wrong or stale identifier cannot report a false success while leaving a container running.
+
 ## Security boundary
 
 The Agent Lab requires Docker build/run access. In Desktop Mode this is through the host Docker CLI/API. In Docker Lab Mode this is provided through the Docker socket mount in the `vulnoraiq-web` container. Both are powerful and should be treated as experimental local-lab capabilities.
