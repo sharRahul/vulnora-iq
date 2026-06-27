@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { MousePointerSquareDashed, ScanSearch } from "lucide-react";
+import { MousePointerSquareDashed, Play, ScanSearch, Server } from "lucide-react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ToastProvider, useToast } from "@/components/ui/toast";
 import { AppShell } from "@/components/AppShell";
@@ -19,6 +19,15 @@ import type { Asset, BackendFinding, Finding, FindingHistoryEntry, FindingMutati
 
 const SCAN_EVENT_TYPES = ["scan_queued", "scan_started", "target_validated", "phase_started", "check_started", "check_completed", "finding_created", "evidence_saved", "report_written", "scan_completed", "scan_failed", "heartbeat"];
 const SEVERITIES: Severity[] = ["critical", "high", "medium", "low", "info"];
+const CONSOLE_VIEWS: ConsoleView[] = ["overview", "workspace", "targets", "agents", "projects"];
+
+// Sync the active view with the URL hash (#/targets) so views are linkable and a
+// refresh lands back on the same tab. Hash routing avoids any server-side route
+// config and works regardless of the mount path.
+function viewFromHash(): ConsoleView | null {
+  const raw = window.location.hash.replace(/^#\/?/, "");
+  return (CONSOLE_VIEWS as string[]).includes(raw) ? (raw as ConsoleView) : null;
+}
 
 async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
   const response = await fetch(path, { credentials: "same-origin", ...options });
@@ -138,7 +147,7 @@ function ConsoleInner() {
   const { theme, toggleTheme } = useTheme();
   const { notify } = useToast();
   const scanSourceRef = useRef<EventSource | null>(null);
-  const [view, setView] = useState<ConsoleView>("overview");
+  const [view, setView] = useState<ConsoleView>(() => viewFromHash() ?? "overview");
   const [selectedFindingId, setSelectedFindingId] = useState<string | null>(null);
   const [scanning, setScanning] = useState(false);
   const [dashboardLoading, setDashboardLoading] = useState(false);
@@ -167,6 +176,17 @@ function ConsoleInner() {
     return () => { scanSourceRef.current?.close(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Keep view <-> URL hash in sync for deep-linking and refresh stability.
+  useEffect(() => {
+    const onHash = () => { const next = viewFromHash(); if (next) setView(next); };
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, []);
+  useEffect(() => {
+    const target = `#/${view}`;
+    if (window.location.hash !== target) window.history.replaceState(null, "", target);
+  }, [view]);
 
   async function loadTargets() {
     try {
@@ -303,7 +323,7 @@ function ConsoleInner() {
         <div className="h-full overflow-y-auto scrollbar-thin p-4 sm:p-6">
           <div className="mx-auto max-w-[1400px]">
             <DashboardOverview metrics={metrics} trend={emptyTrendData} distribution={runtimeFindings.length ? distribution : emptySeverityDistribution} loading={dashboardLoading} />
-            {!dashboardLoading && !activeScan ? <section className="mt-4 rounded-xl border border-border bg-card p-6 text-sm text-muted-foreground shadow-card"><p className="text-xs font-bold uppercase tracking-wide">Clean workspace</p><h2 className="mt-1 text-lg font-extrabold text-foreground">No scans yet</h2><p className="mt-2 max-w-3xl">VulnoraIQ does not show sample assets, mock findings, or dummy dashboard data. Run a scan from the header or configure an authorised target to populate this dashboard with your own evidence.</p></section> : null}
+            {!dashboardLoading && !activeScan ? <section className="mt-4 rounded-xl border border-border bg-card p-6 text-sm text-muted-foreground shadow-card"><p className="text-xs font-bold uppercase tracking-wide">Clean workspace</p><h2 className="mt-1 text-lg font-extrabold text-foreground">No scans yet</h2><p className="mt-2 max-w-3xl">VulnoraIQ does not show sample assets, mock findings, or dummy dashboard data. Run a scan from the header or configure an authorised target to populate this dashboard with your own evidence.</p><div className="ui-action-row mt-4"><button type="button" onClick={() => setView("targets")} className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-xs font-bold text-primary-foreground shadow-card transition-colors hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><Server className="size-4" />Configure a target</button>{configuredTargetIds.length > 0 ? <button type="button" onClick={handleToggleScan} disabled={scanning} className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-canvas px-3 py-2 text-xs font-bold text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><Play className="size-4" />Run a scan</button> : null}</div></section> : null}
             {activeScan && !runtimeFindings.length && !dashboardLoading ? <section className="mt-4 rounded-xl border border-border bg-card p-6 text-sm text-muted-foreground shadow-card"><p className="text-xs font-bold uppercase tracking-wide">Latest scan</p><h2 className="mt-1 text-lg font-extrabold text-foreground">No findings returned</h2><p className="mt-2 max-w-3xl">The latest saved scan is loaded, but it did not return findings. Reports and artifacts remain available through the backend output directory.</p></section> : null}
             {liveScanEvents.length ? <section className="mt-4 rounded-xl border border-border bg-card p-4 shadow-card" aria-live="polite"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Live backend scan</p><h2 className="mt-1 text-lg font-extrabold">{scanPhase}</h2></div><p className="text-sm font-semibold text-muted-foreground">{Math.round(scanProgressPercent)}% · {liveFindingCount} findings</p></div><div className="mt-3 h-2 overflow-hidden rounded bg-muted"><div className="h-full bg-[var(--accent-sage)]" style={{ width: `${scanProgressPercent}%` }} /></div><ol className="mt-3 max-h-48 space-y-1 overflow-auto text-xs text-muted-foreground">{liveScanEvents.slice(-10).map((event, index) => <li key={`${event.event_id}-${index}`}>{event.type}: {event.message}</li>)}</ol></section> : null}
           </div>

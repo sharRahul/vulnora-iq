@@ -10,14 +10,14 @@ dist/
 node_modules/
 playwright-report/
 test-results/
+.playwright-mcp/
 .manual-test-work/
 agent-lab/
 scan-reports/
 projects/*
 !projects/.gitkeep
-reports/output/*.md
-reports/output/*.json
-reports/output/webui/
+# Generated report output — all of it stays out of GitHub
+reports/output/*
 !reports/output/.gitkeep
 .env
 .env.*
@@ -31,12 +31,8 @@ config/web_users.local.yaml
 config/*_secret*.yaml
 projects/Raiker-main.zip
 reports/docker-lab/runtime_targets.yaml
-# Training artifacts (but not the scripts)
+# Local model training pipeline — kept off GitHub entirely (scripts, data, knowledge, weights)
 model/
-model/train_dataset.jsonl
-model/*.gguf
-model/*-assistant/
-model/assistant-output/
 .claude/
 docs/ASSISTANT_MODEL.md
 # Raw OWASP source PDFs (large, binary). Extracted text under model/knowledge/ is tracked instead.

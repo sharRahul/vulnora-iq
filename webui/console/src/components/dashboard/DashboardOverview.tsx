@@ -10,6 +10,26 @@ import { KpiGrid } from "./KpiGrid";
 import { SeverityDonutChart } from "./SeverityDonutChart";
 import { SkeletonDashboard } from "./SkeletonDashboard";
 
+function ChartEmpty({
+  icon: Icon,
+  message,
+  hint,
+}: {
+  icon: typeof PieChart;
+  message: string;
+  hint: string;
+}) {
+  return (
+    <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
+      <span className="ui-icon size-10 rounded-lg bg-muted text-muted-foreground">
+        <Icon className="size-5" />
+      </span>
+      <p className="text-sm font-semibold text-foreground">{message}</p>
+      <p className="max-w-[15rem] text-xs text-muted-foreground">{hint}</p>
+    </div>
+  );
+}
+
 interface DashboardOverviewProps {
   metrics: DashboardMetrics;
   trend: VulnerabilityTrendPoint[];
@@ -49,7 +69,15 @@ export function DashboardOverview({
           </CardHeader>
           <CardContent>
             <div className="h-[220px] w-full">
-              <BurnDownChart data={trend} />
+              {trend.length ? (
+                <BurnDownChart data={trend} />
+              ) : (
+                <ChartEmpty
+                  icon={TrendingDown}
+                  message="No trend data yet"
+                  hint="Run scans over time to chart how findings are burned down."
+                />
+              )}
             </div>
           </CardContent>
         </Card>
@@ -62,7 +90,15 @@ export function DashboardOverview({
             </CardTitle>
           </CardHeader>
           <CardContent className="h-[220px]">
-            <SeverityDonutChart data={distribution} />
+            {distribution.length ? (
+              <SeverityDonutChart data={distribution} />
+            ) : (
+              <ChartEmpty
+                icon={PieChart}
+                message="No findings to distribute"
+                hint="Severity breakdown appears once a scan returns findings."
+              />
+            )}
           </CardContent>
         </Card>
       </div>
