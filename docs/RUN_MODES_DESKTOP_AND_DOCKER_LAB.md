@@ -1,10 +1,10 @@
 # VulnoraIQ run modes: desktop default and Docker lab advanced
 
-This document defines the product direction for VulnoraIQ launch and runtime modes.
+This document defines the current VulnoraIQ launch and runtime modes.
 
 ## Product decision
 
-VulnoraIQ will support two explicit launch modes:
+VulnoraIQ supports two explicit launch modes:
 
 | Mode | Intended users | Where VulnoraIQ runs | Where imported agents run | Report location |
 | --- | --- | --- | --- | --- |
@@ -54,11 +54,11 @@ User starts Docker Lab launcher or manual Docker Compose
   -> Jobs, reports, evidence, and audit are stored under /data
 ```
 
-Docker Lab Mode keeps the current reproducible containerised lab model.
+Docker Lab Mode keeps the reproducible containerised lab model.
 
 ## Folder contract
 
-Desktop Mode must create and use these folders in the checkout/release root:
+Desktop Mode creates and uses these folders in the checkout/release root:
 
 ```text
 scan-reports/
@@ -80,10 +80,9 @@ Normal desktop users should prefer **Local folder upload** from the WebUI. That 
 
 The `projects/` folder is still useful when an operator wants persistent host-visible projects that appear after Agent Lab refresh. Mapped projects are treated as read-only by Agent Lab.
 
-Docker Lab Mode may keep using `/data`, but should optionally support host-visible bind mounts later:
+Docker Lab Mode uses `/data` by default and maps operator-visible folders when configured:
 
 ```text
-./scan-reports:/data/reports-visible or equivalent mapped output
 ./agent-lab:/data/agent_lab
 ./projects:/app/projects:ro
 ```
@@ -102,31 +101,13 @@ Docker Lab Mode may keep using `/data`, but should optionally support host-visib
 | Reports | Host folder | `/data` volume or mapped folder |
 | Best default | End users | Advanced/dev/server/CI |
 
-## Implementation phases
+## Implementation status
 
-### Phase 1: repo/source mode foundation
-
-- Add a native desktop launcher script that runs VulnoraIQ on the host.
-- Set Desktop Mode environment variables for `scan-reports/`, `agent-lab/`, and optional mapped `projects/`.
-- Support WebUI local folder upload into managed Agent Lab storage.
-- Keep Docker Lab launchers available as explicit advanced launchers.
-- Make Agent Lab create/use a desktop Docker network when running from host.
-- Make Agent Lab auto-created targets use `127.0.0.1:<port>` in Desktop Mode and container DNS in Docker Lab Mode.
-- Update tests and docs for both modes.
-
-### Phase 2: packaged desktop application
-
-- Build platform bundles that include a Python runtime or frozen executable.
-- Make the primary double-click launcher start Desktop Mode without requiring host Python.
-- Keep Docker Desktop as the only external prerequisite for normal users.
-- Store all reports and Agent Lab data in user-visible folders.
-
-### Phase 3: UX polish
-
-- Add WebUI run-mode indicator.
-- Add a reports folder opener/exporter.
-- Add backup/export before reset.
-- Add a mode selector/help page that explains Desktop Mode vs Docker Lab Mode.
+| Phase | Status | Notes |
+| --- | --- | --- |
+| Phase 1: repo/source mode foundation | Implemented | Native desktop launchers, Desktop Mode folders, WebUI local folder upload, explicit Docker Lab launchers, desktop Agent Lab Docker network, mode-aware targets, tests, and docs are in place. |
+| Phase 2: packaged desktop application | Future maturity | Build packages that bundle Python/frozen runtime so Docker Desktop is the only external prerequisite for normal users. |
+| Phase 3: UX polish | In progress/future maturity | Run-mode indicators, reports-folder openers/exporters, backup/export before reset, and mode-selector help remain polish work. |
 
 ## Security notes
 
