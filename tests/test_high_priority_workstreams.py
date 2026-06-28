@@ -87,7 +87,7 @@ def test_assistant_backend_and_react_panel_are_live_wired() -> None:
         },
         actor="tester",
     )
-    panel = Path("webui/console/src/components/intelligence/AskVulnorAIQChat.tsx").read_text(encoding="utf-8")
+    panel = Path("webui/console/src/components/intelligence/AskVulnoraIQChat.tsx").read_text(encoding="utf-8")
     assert response["role"] == "assistant"
     assert response["model"] == "nora-assistant"
     assert "Validation approach" in str(response["content"])
