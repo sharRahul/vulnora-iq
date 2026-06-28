@@ -25,11 +25,11 @@ Configuration (all optional, via environment):
 """
 from __future__ import annotations
 
+import importlib.util
 import os
 import shutil
 import threading
 import urllib.request
-import importlib.util
 from pathlib import Path
 
 DEFAULT_MODEL_REPO = os.getenv("VULNORAIQ_ASSISTANT_MODEL_REPO", "Qwen/Qwen2.5-0.5B-Instruct-GGUF")
